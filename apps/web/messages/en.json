@@ -1,0 +1,137 @@
+{
+  "common": {
+    "appName": "Aurora Scholar",
+    "tagline": "Decentralized Scientific Publishing",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Try again",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "close": "Close"
+  },
+  "nav": {
+    "home": "Home",
+    "editor": "Editor",
+    "journal": "Journal",
+    "profile": "Profile",
+    "connectWallet": "Connect Wallet",
+    "disconnect": "Disconnect"
+  },
+  "home": {
+    "hero": {
+      "title": "Your Authorship, Permanent and Verifiable",
+      "subtitle": "Write academic articles with ethical AI guidance and register them on the Solana blockchain",
+      "cta": "Create Article",
+      "viewJournal": "View Journal"
+    },
+    "features": {
+      "title": "Why Aurora Scholar?",
+      "ai": {
+        "title": "Ethical AI Assistant",
+        "description": "AI that guides, explains and suggests - but never writes for you"
+      },
+      "blockchain": {
+        "title": "On-Chain Registration",
+        "description": "Immutable proof of authorship with SHA-256 hash on Solana"
+      },
+      "storage": {
+        "title": "Permanent Storage",
+        "description": "Your articles stored forever on Arweave"
+      },
+      "privacy": {
+        "title": "Access Control",
+        "description": "Publish publicly or share privately with expiration"
+      }
+    }
+  },
+  "editor": {
+    "title": "Article Editor",
+    "placeholder": "Start writing your article...",
+    "titlePlaceholder": "Article Title",
+    "abstractPlaceholder": "Abstract (optional)",
+    "addSource": "Add Source",
+    "sources": "Sources",
+    "noSources": "No sources added",
+    "publish": "Publish",
+    "publishPublic": "Publish Public",
+    "publishPrivate": "Publish Private",
+    "saveDraft": "Save Draft",
+    "preview": "Preview",
+    "ai": {
+      "title": "AI Assistant",
+      "status": {
+        "connected": "Connected",
+        "disconnected": "Disconnected",
+        "analyzing": "Analyzing..."
+      },
+      "suggestions": "Suggestions",
+      "noSuggestions": "No suggestions yet",
+      "askGuidance": "Ask AI Guidance",
+      "chatPlaceholder": "Ask a question about your article..."
+    }
+  },
+  "publish": {
+    "title": "Publish Article",
+    "type": "Publication Type",
+    "public": "Public",
+    "publicDesc": "Visible in On-Chain Journal",
+    "private": "Private",
+    "privateDesc": "Accessible via link only",
+    "expiration": "Link Expiration",
+    "24h": "24 hours",
+    "7d": "7 days",
+    "30d": "30 days",
+    "unlimited": "Unlimited",
+    "processing": "Processing...",
+    "uploadingArweave": "Uploading to Arweave...",
+    "registeringSolana": "Registering on Solana...",
+    "success": "Article published successfully!",
+    "viewExplorer": "View on Solana Explorer",
+    "viewArweave": "View on Arweave",
+    "copyLink": "Copy Link"
+  },
+  "journal": {
+    "title": "On-Chain Journal",
+    "subtitle": "Public articles registered on Solana blockchain",
+    "search": "Search articles...",
+    "filters": {
+      "all": "All",
+      "date": "Date",
+      "author": "Author"
+    },
+    "noArticles": "No articles found",
+    "viewArticle": "View Article",
+    "verifyHash": "Verify Hash",
+    "verified": "Verified",
+    "author": "Author",
+    "publishedAt": "Published"
+  },
+  "article": {
+    "by": "by",
+    "publishedOn": "Published on",
+    "hash": "Content Hash",
+    "verifyAuthenticity": "Verify Authenticity",
+    "authentic": "This article is authentic",
+    "tampered": "Warning: Content may have been altered",
+    "backToJournal": "Back to Journal"
+  },
+  "wallet": {
+    "connect": "Connect Wallet",
+    "connecting": "Connecting...",
+    "connected": "Connected",
+    "disconnect": "Disconnect",
+    "selectWallet": "Select Wallet",
+    "noWallet": "No wallet found",
+    "installPhantom": "Install Phantom"
+  },
+  "errors": {
+    "walletRequired": "Please connect your wallet to continue",
+    "publishFailed": "Failed to publish article",
+    "networkError": "Network error. Please try again",
+    "invalidContent": "Please add content to your article"
+  }
+}

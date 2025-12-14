@@ -1,0 +1,137 @@
+{
+  "common": {
+    "appName": "Aurora Scholar",
+    "tagline": "Publicação Científica Descentralizada",
+    "loading": "Carregando...",
+    "error": "Ocorreu um erro",
+    "retry": "Tentar novamente",
+    "cancel": "Cancelar",
+    "save": "Salvar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "copy": "Copiar",
+    "copied": "Copiado!",
+    "close": "Fechar"
+  },
+  "nav": {
+    "home": "Início",
+    "editor": "Editor",
+    "journal": "Revista",
+    "profile": "Perfil",
+    "connectWallet": "Conectar Carteira",
+    "disconnect": "Desconectar"
+  },
+  "home": {
+    "hero": {
+      "title": "Sua Autoria, Permanente e Verificável",
+      "subtitle": "Escreva artigos acadêmicos com orientação ética de IA e registre-os na blockchain Solana",
+      "cta": "Criar Artigo",
+      "viewJournal": "Ver Revista"
+    },
+    "features": {
+      "title": "Por que Aurora Scholar?",
+      "ai": {
+        "title": "Assistente de IA Ético",
+        "description": "IA que orienta, explica e sugere - mas nunca escreve por você"
+      },
+      "blockchain": {
+        "title": "Registro On-Chain",
+        "description": "Prova imutável de autoria com hash SHA-256 na Solana"
+      },
+      "storage": {
+        "title": "Armazenamento Permanente",
+        "description": "Seus artigos armazenados para sempre no Arweave"
+      },
+      "privacy": {
+        "title": "Controle de Acesso",
+        "description": "Publique publicamente ou compartilhe privadamente com expiração"
+      }
+    }
+  },
+  "editor": {
+    "title": "Editor de Artigos",
+    "placeholder": "Comece a escrever seu artigo...",
+    "titlePlaceholder": "Título do Artigo",
+    "abstractPlaceholder": "Resumo (opcional)",
+    "addSource": "Adicionar Fonte",
+    "sources": "Fontes",
+    "noSources": "Nenhuma fonte adicionada",
+    "publish": "Publicar",
+    "publishPublic": "Publicar Público",
+    "publishPrivate": "Publicar Privado",
+    "saveDraft": "Salvar Rascunho",
+    "preview": "Visualizar",
+    "ai": {
+      "title": "Assistente de IA",
+      "status": {
+        "connected": "Conectado",
+        "disconnected": "Desconectado",
+        "analyzing": "Analisando..."
+      },
+      "suggestions": "Sugestões",
+      "noSuggestions": "Nenhuma sugestão ainda",
+      "askGuidance": "Pedir Orientação",
+      "chatPlaceholder": "Faça uma pergunta sobre seu artigo..."
+    }
+  },
+  "publish": {
+    "title": "Publicar Artigo",
+    "type": "Tipo de Publicação",
+    "public": "Público",
+    "publicDesc": "Visível na Revista On-Chain",
+    "private": "Privado",
+    "privateDesc": "Acessível apenas via link",
+    "expiration": "Expiração do Link",
+    "24h": "24 horas",
+    "7d": "7 dias",
+    "30d": "30 dias",
+    "unlimited": "Ilimitado",
+    "processing": "Processando...",
+    "uploadingArweave": "Enviando para Arweave...",
+    "registeringSolana": "Registrando na Solana...",
+    "success": "Artigo publicado com sucesso!",
+    "viewExplorer": "Ver no Solana Explorer",
+    "viewArweave": "Ver no Arweave",
+    "copyLink": "Copiar Link"
+  },
+  "journal": {
+    "title": "Revista On-Chain",
+    "subtitle": "Artigos públicos registrados na blockchain Solana",
+    "search": "Buscar artigos...",
+    "filters": {
+      "all": "Todos",
+      "date": "Data",
+      "author": "Autor"
+    },
+    "noArticles": "Nenhum artigo encontrado",
+    "viewArticle": "Ver Artigo",
+    "verifyHash": "Verificar Hash",
+    "verified": "Verificado",
+    "author": "Autor",
+    "publishedAt": "Publicado"
+  },
+  "article": {
+    "by": "por",
+    "publishedOn": "Publicado em",
+    "hash": "Hash do Conteúdo",
+    "verifyAuthenticity": "Verificar Autenticidade",
+    "authentic": "Este artigo é autêntico",
+    "tampered": "Aviso: O conteúdo pode ter sido alterado",
+    "backToJournal": "Voltar para Revista"
+  },
+  "wallet": {
+    "connect": "Conectar Carteira",
+    "connecting": "Conectando...",
+    "connected": "Conectado",
+    "disconnect": "Desconectar",
+    "selectWallet": "Selecionar Carteira",
+    "noWallet": "Nenhuma carteira encontrada",
+    "installPhantom": "Instalar Phantom"
+  },
+  "errors": {
+    "walletRequired": "Por favor conecte sua carteira para continuar",
+    "publishFailed": "Falha ao publicar artigo",
+    "networkError": "Erro de rede. Por favor tente novamente",
+    "invalidContent": "Por favor adicione conteúdo ao seu artigo"
+  }
+}
