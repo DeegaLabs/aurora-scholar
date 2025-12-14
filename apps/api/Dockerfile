@@ -19,6 +19,9 @@ COPY apps/api ./apps/api
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
+# Generate Prisma Client (required before building)
+RUN pnpm --filter api db:generate
+
 # Build SDK first
 RUN pnpm --filter @aurora-scholar/sdk build
 
@@ -33,6 +36,7 @@ WORKDIR /app
 # Copy built files
 COPY --from=base /app/apps/api/dist ./dist
 COPY --from=base /app/apps/api/package.json ./
+COPY --from=base /app/apps/api/prisma ./prisma
 COPY --from=base /app/node_modules ./node_modules
 COPY --from=base /app/packages/sdk/dist ./packages/sdk/dist
 
