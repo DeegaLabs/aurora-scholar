@@ -1,0 +1,154 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===========================================
+// Article Models
+// ===========================================
+
+model Article {
+  id           String    @id @default(uuid())
+  title        String
+  abstract     String?
+  content      String
+  contentHash  String
+  authorWallet String
+  arweaveId    String?   @unique
+  solanaTxId   String?   @unique
+  isPublic     Boolean   @default(false)
+  status       Status    @default(DRAFT)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  publishedAt  DateTime?
+
+  // Relations
+  versions     ArticleVersion[]
+  accessTokens AccessToken[]
+  sources      ArticleSource[]
+
+  @@index([authorWallet])
+  @@index([status])
+  @@index([isPublic])
+}
+
+model ArticleVersion {
+  id            String   @id @default(uuid())
+  articleId     String
+  versionNumber Int
+  content       String
+  contentHash   String
+  arweaveId     String?
+  solanaTxId    String?
+  createdAt     DateTime @default(now())
+
+  // Relations
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@unique([articleId, versionNumber])
+}
+
+// ===========================================
+// Access Control Models
+// ===========================================
+
+model AccessToken {
+  id        String    @id @default(uuid())
+  articleId String
+  token     String    @unique
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+
+  // Relations
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([expiresAt])
+}
+
+// ===========================================
+// Source Models
+// ===========================================
+
+model Source {
+  id          String     @id @default(uuid())
+  name        String
+  type        SourceType
+  content     String?
+  url         String?
+  fileSize    Int?
+  mimeType    String?
+  ownerWallet String
+  createdAt   DateTime   @default(now())
+
+  // Relations
+  articles ArticleSource[]
+
+  @@index([ownerWallet])
+}
+
+model ArticleSource {
+  id        String   @id @default(uuid())
+  articleId String
+  sourceId  String
+  createdAt DateTime @default(now())
+
+  // Relations
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  source  Source  @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  @@unique([articleId, sourceId])
+}
+
+// ===========================================
+// AI Agent Models
+// ===========================================
+
+model AgentConfig {
+  id             String    @id @default(uuid())
+  name           String
+  type           AgentType
+  prompt         String
+  rules          String[]
+  style          String?
+  tone           String?
+  knowledgeAreas String[]
+  ethicalLimits  String[]
+  sourceId       String?
+  authorName     String?
+  ownerWallet    String
+  isPublic       Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([ownerWallet])
+  @@index([isPublic])
+}
+
+// ===========================================
+// Enums
+// ===========================================
+
+enum Status {
+  DRAFT
+  PUBLISHED
+}
+
+enum SourceType {
+  PDF
+  TEXT
+  IMAGE
+  VIDEO
+  AUDIO
+}
+
+enum AgentType {
+  DEFAULT
+  AUTHOR_BASED
+  SOURCE_BASED
+  DATA_BASED
+}
