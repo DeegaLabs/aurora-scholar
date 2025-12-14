@@ -1,0 +1,9 @@
+{
+  "buildCommand": "cd ../.. && pnpm install && pnpm --filter @aurora-scholar/sdk build && pnpm --filter web build",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
+  "installCommand": "echo 'Using root install'",
+  "env": {
+    "NEXT_PUBLIC_API_URL": "@api_url"
+  }
+}
