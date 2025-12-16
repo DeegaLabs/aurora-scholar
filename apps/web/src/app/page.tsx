@@ -2,128 +2,365 @@
 
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
+import Image from 'next/image';
+import Header from '@/components/Header';
+import { BrainIcon, EditIcon, CheckCircleIcon } from '@/components/icons';
 
 export default function Home() {
-  const t = useTranslations();
+  const t = useTranslations('home');
 
   return (
-    <main className="min-h-screen">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        <div className="aurora-gradient absolute inset-0 opacity-10" />
-        <div className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
-              {t('common.appName')}
-            </h1>
-            <p className="mt-4 text-xl text-aurora">
-              {t('common.tagline')}
-            </p>
-            <p className="mx-auto mt-6 max-w-2xl text-lg text-gray-600">
-              {t('home.hero.subtitle')}
-            </p>
-            <div className="mt-10 flex items-center justify-center gap-x-6">
-              <Link
-                href="/editor"
-                className="rounded-md bg-aurora px-6 py-3 text-lg font-semibold text-white shadow-sm hover:bg-aurora-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-aurora"
-              >
-                {t('home.hero.cta')}
-              </Link>
-              <Link
-                href="/journal"
-                className="text-lg font-semibold leading-6 text-gray-900 hover:text-aurora"
-              >
-                {t('home.hero.viewJournal')} <span aria-hidden="true">→</span>
-              </Link>
+    <>
+      <Header />
+      
+      <main className="min-h-screen bg-white">
+        {/* Hero Section - Estilo minimalista acadêmico, refletindo o PRD */}
+        <section className="relative overflow-hidden border-b border-gray-200 py-24 sm:py-32 lg:py-40">
+          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
+              {/* Logo acima do texto */}
+              <div className="mb-8 flex justify-center animate-fade-in">
+                <Image
+                  src="/logo.png"
+                  alt="Aurora Scholar"
+                  width={200}
+                  height={200}
+                  className="object-contain"
+                  priority
+                />
+              </div>
+
+              <div className="mb-6 animate-fade-in-delay-1">
+                <span className="inline-block rounded-full bg-gray-100 px-4 py-1.5 text-xs font-medium uppercase tracking-wide text-gray-700 border border-gray-200">
+                  {t('hero.tag')}
+                </span>
+              </div>
+              
+              <h1 className="mx-auto max-w-4xl text-4xl font-display font-bold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl xl:text-7xl animate-fade-in-delay-2">
+                {t('hero.title')}
+                <br />
+                <span className="text-gray-600">{t('hero.titleHighlight')}</span>
+              </h1>
+              
+              <p className="mx-auto mt-6 sm:mt-8 max-w-2xl text-base sm:text-lg leading-relaxed text-gray-600 animate-fade-in-delay-3">
+                {t('hero.description')}
+              </p>
+              
+              <div className="mt-10 sm:mt-12 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-x-4">
+                <Link
+                  href="/editor"
+                  className="w-full sm:w-auto rounded-md bg-gray-900 px-8 py-3.5 text-base font-medium text-white hover:bg-gray-800 transition shadow-sm hover:shadow-md"
+                >
+                  {t('hero.startWriting')}
+                </Link>
+                <Link
+                  href="/journal"
+                  className="group w-full sm:w-auto inline-flex items-center justify-center text-base font-medium text-gray-900 hover:text-gray-600 transition"
+                >
+                  {t('hero.viewJournal')}
+                  <span className="ml-2 transition-transform group-hover:translate-x-1">→</span>
+                </Link>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Features Section */}
-      <section className="py-24 sm:py-32">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-              {t('home.features.title')}
-            </h2>
+        {/* Features Section - As Três Camadas do PRD */}
+        <section id="features" className="border-b border-gray-200 bg-white py-16 sm:py-24 lg:py-32">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mb-12 sm:mb-16">
+              <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2 text-left">
+                {t('features.label')}
+              </h2>
+              <p className="text-2xl sm:text-3xl font-display font-bold tracking-tight text-gray-900 sm:text-4xl text-left">
+                {t('features.title')}
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {/* Layer 01 - Intuição Declarada */}
+              <div className="group border border-gray-200 bg-white p-6 sm:p-8 hover:border-gray-300 hover:shadow-sm transition-all duration-300">
+                <div className="mb-4">
+                  <div className="flex h-12 w-12 items-center justify-center text-gray-900">
+                    <BrainIcon className="w-8 h-8" />
+                  </div>
+                </div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
+                  {t('features.layer01.label')}
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2 font-display">
+                  {t('features.layer01.title')}
+                </h3>
+                <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+                  {t('features.layer01.description')}
+                </p>
+              </div>
+
+              {/* Layer 02 - Mediação Linguística Assistida */}
+              <div className="group border border-gray-200 bg-white p-6 sm:p-8 hover:border-gray-300 hover:shadow-sm transition-all duration-300">
+                <div className="mb-4">
+                  <div className="flex h-12 w-12 items-center justify-center text-gray-900">
+                    <EditIcon className="w-8 h-8" />
+                  </div>
+                </div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
+                  {t('features.layer02.label')}
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2 font-display">
+                  {t('features.layer02.title')}
+                </h3>
+                <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+                  {t('features.layer02.description')}
+                </p>
+              </div>
+
+              {/* Layer 03 - Monitoria de Coerência */}
+              <div className="group border border-gray-200 bg-white p-6 sm:p-8 hover:border-gray-300 hover:shadow-sm transition-all duration-300 sm:col-span-2 lg:col-span-1">
+                <div className="mb-4">
+                  <div className="flex h-12 w-12 items-center justify-center text-gray-900">
+                    <CheckCircleIcon className="w-8 h-8" />
+                  </div>
+                </div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
+                  {t('features.layer03.label')}
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2 font-display">
+                  {t('features.layer03.title')}
+                </h3>
+                <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+                  {t('features.layer03.description')}
+                </p>
+              </div>
+            </div>
+
+            {/* Princípios Éticos */}
+            <div className="mt-16 sm:mt-24 max-w-4xl mx-auto">
+              <div className="text-center mb-8 sm:mb-12">
+                <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
+                  {t('features.principles.label')}
+                </h2>
+                <p className="text-2xl sm:text-3xl font-display font-bold tracking-tight text-gray-900 sm:text-4xl">
+                  {t('features.principles.title')}
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-100">
+                  <div className="flex-shrink-0 mt-1">
+                    <div className="h-2 w-2 rounded-full bg-gray-900" />
+                  </div>
+                  <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
+                    <span className="font-semibold text-gray-900">{t('features.principles.principle1')}</span>
+                    {t('features.principles.principle1Detail')}
+                  </p>
+                </div>
+                <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-100">
+                  <div className="flex-shrink-0 mt-1">
+                    <div className="h-2 w-2 rounded-full bg-gray-900" />
+                  </div>
+                  <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
+                    <span className="font-semibold text-gray-900">{t('features.principles.principle2')}</span>
+                  </p>
+                </div>
+                <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-100">
+                  <div className="flex-shrink-0 mt-1">
+                    <div className="h-2 w-2 rounded-full bg-gray-900" />
+                  </div>
+                  <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
+                    <span className="font-semibold text-gray-900">{t('features.principles.principle3')}</span>
+                    {t('features.principles.principle3Detail')}
+                  </p>
+                </div>
+                <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-100">
+                  <div className="flex-shrink-0 mt-1">
+                    <div className="h-2 w-2 rounded-full bg-gray-900" />
+                  </div>
+                  <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
+                    <span className="font-semibold text-gray-900">{t('features.principles.principle4')}</span>
+                    {t('features.principles.principle4Detail')}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {/* AI Feature */}
-            <div className="rounded-2xl border border-gray-200 p-8 shadow-sm hover:shadow-md transition-shadow">
-              <div className="mb-4 text-4xl">🤖</div>
-              <h3 className="text-lg font-semibold text-gray-900">
-                {t('home.features.ai.title')}
-              </h3>
-              <p className="mt-2 text-gray-600">
-                {t('home.features.ai.description')}
+        </section>
+
+        {/* How It Works - Fluxo Funcional do Usuário (9 passos do PRD) */}
+        <section className="border-b border-gray-200 bg-gray-50 py-16 sm:py-24 lg:py-32">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mb-12 sm:mb-16">
+              <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2 text-left">
+                {t('flow.label')}
+              </h2>
+              <p className="text-2xl sm:text-3xl font-display font-bold tracking-tight text-gray-900 sm:text-4xl text-left">
+                {t('flow.title')}
               </p>
             </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
+              {/* Step 1 */}
+              <div className="relative border-l-2 border-gray-900 pl-6 pb-8 md:pb-0">
+                <div className="absolute -left-3 top-0 flex h-6 w-6 items-center justify-center rounded-full bg-gray-900 text-xs font-bold text-white">
+                  1
+                </div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2 mt-1">
+                  {t('flow.step01.label')}
+                </div>
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 font-display">{t('flow.step01.title')}</h3>
+                <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+                  {t('flow.step01.description')}
+                </p>
+              </div>
 
-            {/* Blockchain Feature */}
-            <div className="rounded-2xl border border-gray-200 p-8 shadow-sm hover:shadow-md transition-shadow">
-              <div className="mb-4 text-4xl">⛓️</div>
-              <h3 className="text-lg font-semibold text-gray-900">
-                {t('home.features.blockchain.title')}
-              </h3>
-              <p className="mt-2 text-gray-600">
-                {t('home.features.blockchain.description')}
-              </p>
-            </div>
+              {/* Step 2 */}
+              <div className="relative border-l-2 border-gray-900 pl-6 pb-8 md:pb-0">
+                <div className="absolute -left-3 top-0 flex h-6 w-6 items-center justify-center rounded-full bg-gray-900 text-xs font-bold text-white">
+                  2
+                </div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2 mt-1">
+                  {t('flow.step02.label')}
+                </div>
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 font-display">{t('flow.step02.title')}</h3>
+                <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+                  {t('flow.step02.description')}
+                </p>
+              </div>
 
-            {/* Storage Feature */}
-            <div className="rounded-2xl border border-gray-200 p-8 shadow-sm hover:shadow-md transition-shadow">
-              <div className="mb-4 text-4xl">💾</div>
-              <h3 className="text-lg font-semibold text-gray-900">
-                {t('home.features.storage.title')}
-              </h3>
-              <p className="mt-2 text-gray-600">
-                {t('home.features.storage.description')}
-              </p>
-            </div>
+              {/* Step 3 */}
+              <div className="relative border-l-2 border-gray-900 pl-6 pb-8 md:pb-0">
+                <div className="absolute -left-3 top-0 flex h-6 w-6 items-center justify-center rounded-full bg-gray-900 text-xs font-bold text-white">
+                  3
+                </div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2 mt-1">
+                  {t('flow.step03.label')}
+                </div>
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 font-display">{t('flow.step03.title')}</h3>
+                <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+                  {t('flow.step03.description')}
+                </p>
+              </div>
 
-            {/* Privacy Feature */}
-            <div className="rounded-2xl border border-gray-200 p-8 shadow-sm hover:shadow-md transition-shadow">
-              <div className="mb-4 text-4xl">🔒</div>
-              <h3 className="text-lg font-semibold text-gray-900">
-                {t('home.features.privacy.title')}
-              </h3>
-              <p className="mt-2 text-gray-600">
-                {t('home.features.privacy.description')}
-              </p>
+              {/* Step 4 */}
+              <div className="relative border-l-2 border-gray-900 pl-6 pb-8 md:pb-0">
+                <div className="absolute -left-3 top-0 flex h-6 w-6 items-center justify-center rounded-full bg-gray-900 text-xs font-bold text-white">
+                  4
+                </div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2 mt-1">
+                  {t('flow.step04.label')}
+                </div>
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 font-display">{t('flow.step04.title')}</h3>
+                <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+                  {t('flow.step04.description')}
+                </p>
+              </div>
+
+              {/* Step 5 */}
+              <div className="relative border-l-2 border-gray-900 pl-6 pb-8 md:pb-0">
+                <div className="absolute -left-3 top-0 flex h-6 w-6 items-center justify-center rounded-full bg-gray-900 text-xs font-bold text-white">
+                  5
+                </div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2 mt-1">
+                  {t('flow.step05.label')}
+                </div>
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 font-display">{t('flow.step05.title')}</h3>
+                <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+                  {t('flow.step05.description')}
+                </p>
+              </div>
+
+              {/* Step 6 */}
+              <div className="relative border-l-2 border-gray-900 pl-6 pb-8 md:pb-0">
+                <div className="absolute -left-3 top-0 flex h-6 w-6 items-center justify-center rounded-full bg-gray-900 text-xs font-bold text-white">
+                  6
+                </div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2 mt-1">
+                  {t('flow.step06.label')}
+                </div>
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 font-display">{t('flow.step06.title')}</h3>
+                <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+                  {t('flow.step06.description')}
+                </p>
+              </div>
+
+              {/* Step 7 */}
+              <div className="relative border-l-2 border-gray-900 pl-6 pb-8 md:pb-0">
+                <div className="absolute -left-3 top-0 flex h-6 w-6 items-center justify-center rounded-full bg-gray-900 text-xs font-bold text-white">
+                  7
+                </div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2 mt-1">
+                  {t('flow.step07.label')}
+                </div>
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 font-display">{t('flow.step07.title')}</h3>
+                <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+                  {t('flow.step07.description')}
+                </p>
+              </div>
+
+              {/* Step 8 */}
+              <div className="relative border-l-2 border-gray-900 pl-6 pb-8 md:pb-0">
+                <div className="absolute -left-3 top-0 flex h-6 w-6 items-center justify-center rounded-full bg-gray-900 text-xs font-bold text-white">
+                  8
+                </div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2 mt-1">
+                  {t('flow.step08.label')}
+                </div>
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 font-display">{t('flow.step08.title')}</h3>
+                <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+                  {t('flow.step08.description')}
+                </p>
+              </div>
+
+              {/* Step 9 */}
+              <div className="relative border-l-2 border-gray-900 pl-6 pb-8 md:pb-0">
+                <div className="absolute -left-3 top-0 flex h-6 w-6 items-center justify-center rounded-full bg-gray-900 text-xs font-bold text-white">
+                  9
+                </div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2 mt-1">
+                  {t('flow.step09.label')}
+                </div>
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 font-display">{t('flow.step09.title')}</h3>
+                <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+                  {t('flow.step09.description')}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Footer */}
-      <footer className="border-t border-gray-200 py-12">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-gray-500">
-              © 2024 Aurora Scholar. Built on Solana.
-            </p>
-            <div className="flex space-x-6">
-              <a
-                href="https://github.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-400 hover:text-gray-500"
-              >
-                GitHub
-              </a>
-              <a
-                href="https://solana.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-400 hover:text-gray-500"
-              >
-                Solana
-              </a>
+        {/* Footer - Minimalista */}
+        <footer className="bg-white py-8 sm:py-12">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
+              <p className="text-sm text-gray-500 text-center sm:text-left">
+                {t('footer.copyright')}
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
+                <a
+                  href="https://github.com/deegalabs/aurora-scholar"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-gray-500 hover:text-gray-900 transition"
+                >
+                  {t('footer.github')}
+                </a>
+                <a
+                  href="https://solana.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-gray-500 hover:text-gray-900 transition"
+                >
+                  {t('footer.solana')}
+                </a>
+                <a
+                  href="/docs"
+                  className="text-sm text-gray-500 hover:text-gray-900 transition"
+                >
+                  {t('footer.documentation')}
+                </a>
+              </div>
             </div>
           </div>
-        </div>
-      </footer>
-    </main>
+        </footer>
+      </main>
+    </>
   );
 }
