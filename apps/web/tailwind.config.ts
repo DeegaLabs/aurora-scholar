@@ -9,27 +9,50 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // Paleta acadêmica neutra
         primary: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          200: '#bae6fd',
-          300: '#7dd3fc',
-          400: '#38bdf8',
-          500: '#0ea5e9',
-          600: '#0284c7',
-          700: '#0369a1',
-          800: '#075985',
-          900: '#0c4a6e',
+          50: '#f9fafb',
+          100: '#f3f4f6',
+          200: '#e5e7eb',
+          300: '#d1d5db',
+          400: '#9ca3af',
+          500: '#6b7280',
+          600: '#4b5563',
+          700: '#374151',
+          800: '#1f2937',
+          900: '#111827',
+          950: '#030712',
         },
-        aurora: {
-          light: '#a855f7',
-          DEFAULT: '#7c3aed',
-          dark: '#5b21b6',
+        academic: {
+          light: '#f5f5f5',
+          DEFAULT: '#1a1a1a',
+          dark: '#0a0a0a',
         },
       },
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace'],
+        sans: ['var(--font-sans)', 'Inter', 'system-ui', 'sans-serif'],
+        display: ['var(--font-display)', 'Space Grotesk', 'Inter', 'system-ui', 'sans-serif'],
+        serif: ['Crimson Pro', 'Georgia', 'serif'],
+        mono: ['var(--font-mono)', 'JetBrains Mono', 'monospace'],
+      },
+      letterSpacing: {
+        wider: '0.05em',
+        widest: '0.1em',
+        'extra-wide': '0.3em',
+      },
+      typography: {
+        DEFAULT: {
+          css: {
+            maxWidth: '75ch',
+            color: '#374151',
+          },
+        },
+      },
+      animation: {
+        'fade-in': 'fadeIn 0.6s ease-out forwards',
+        'fade-in-delay-1': 'fadeIn 0.6s ease-out 0.1s forwards',
+        'fade-in-delay-2': 'fadeIn 0.6s ease-out 0.2s forwards',
+        'fade-in-delay-3': 'fadeIn 0.6s ease-out 0.3s forwards',
       },
     },
   },
