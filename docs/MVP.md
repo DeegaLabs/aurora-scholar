@@ -4,11 +4,13 @@
 
 ## Vision
 
-Democratize scientific publishing through blockchain, ensuring immutable authorship, open access, and transparency in the peer review process.
+**Assisted Academic Writing Monitoring** - A platform where users write their own academic texts with ethical AI guidance (never substitution), ensuring authenticity, transparency, and immutable authorship through blockchain.
+
+The AI acts as a **monitor** that guides, explains, and validates - never writes for the user.
 
 ## MVP Objective
 
-Allow a user to write an academic text, receive ethical AI guidance, and register the final version on Solana, making it:
+Allow a user to write an academic text following a complete ethical workflow, receive ethical AI guidance, and register the final version on Solana, making it:
 
 - **Public** (appears in On-Chain Journal)
 - **Private** (accessible via link + optional expiration)
@@ -40,6 +42,7 @@ All in a simple, functional application that can be demonstrated in a 3-minute v
 - Sidebar for source management
 
 **Interface:**
+- **Declared Intuition field** - User states their initial idea/declaration
 - Main text box (rich text)
 - Sidebar with AI suggestions (continuous updates)
 - AI agent status indicator (connected/disconnected)
@@ -47,48 +50,71 @@ All in a simple, functional application that can be demonstrated in a 3-minute v
 - "Register on Blockchain" button
 - "Preview Article" button
 
-#### 2. Ethical AI Assistant (Always-Active Agent)
+#### 2. Three-Layer Ethical System
 
-**Default Academic Agent (always connected):**
+Aurora Scholar implements a **Three-Layer Ethical System** that ensures authentic academic writing:
 
-The AI agent is **always active and observing** the document. No button click needed - the agent continuously analyzes as the user writes or pastes content.
+**Layer 1: Declared Intuition**
+- User declares their initial idea/vision for the article
+- This declaration is captured and registered on-chain
+- Serves as the foundation for coherence monitoring
+- Hash of declared intuition is stored on Solana
+
+**Layer 2: Linguistic Mediation (AI Assistant)**
+- AI acts as a **mediator**, not a writer
+- Always-active agent that continuously observes the document
+- Provides real-time guidance on structure, language, and references
+- **Never writes** - only suggests, explains, and guides
+- Based exclusively on declared sources provided by user
+
+**Layer 3: Coherence Monitoring**
+- AI continuously validates consistency between:
+  - Declared intuition (Layer 1)
+  - Declared sources (uploaded by user)
+  - Final written text
+- Alerts if there are inconsistencies or if text seems too automated
+- Ensures the final work aligns with user's original intention
 
 **How it works:**
 - ✅ Automatically connects when editor opens
 - ✅ Observes text changes in real-time (2-3s debounce)
-- ✅ Continuously analyzes text + loaded sources
+- ✅ Continuously analyzes text + declared sources + declared intuition
 - ✅ Updates sidebar with real-time suggestions
 - ✅ Detects when text is pasted (not written)
 - ✅ Immediately alerts if text seems too automated
+- ✅ Monitors coherence between all three layers
 
 **Chat for Specific Questions:**
 - ✅ "Ask AI Guidance" button opens interactive chat
 - ✅ User can ask specific questions about the text
-- ✅ Agent responds based on document context + sources
+- ✅ Agent responds based on document context + declared sources
 - ✅ Conversation history maintained during session
 - ✅ Chat complements continuous agent observation
 
 **What the AI does (does NOT write):**
 - ✅ Explains concepts
 - ✅ Suggests structure (abstract, introduction, methodology, etc.)
-- ✅ Indicates references based on provided sources
+- ✅ Indicates references based on declared sources
 - ✅ Light grammatical review
 - ✅ Methodological help
 - ✅ Alerts if text seems excessively automated (AI-pasted)
 - ✅ Guides user to rewrite with more criticality
 - ✅ Proposes structure according to ABNT/General standards
+- ✅ Monitors coherence between intuition, sources, and text
 
 **Security rules:**
 - AI never writes the complete text
 - AI only corrects, explains, guides, and alerts
-- Based exclusively on sources provided by user
+- Based exclusively on declared sources provided by user
 - No hallucinations or automatic writing
 - Continuous validation of text authenticity
+- Coherence validation between all three layers
 
 **Technologies:**
 - WebSocket for real-time communication
 - OpenAI API or other LLM via backend
 - Debounce to optimize requests
+- Vectorization for declared sources processing
 
 **Customizable Agents (Phase 2 - Future):**
 - User will be able to configure specific agents:
@@ -98,10 +124,13 @@ The AI agent is **always active and observing** the document. No button click ne
 - Each agent has its own style, rules, and knowledge
 - Agents can be shared between users
 
-#### 3. Source Upload
+#### 3. Declared Sources (NotebookLM-style)
+
+**Concept:** Users explicitly declare and upload sources that the AI can use as reference. The AI **never generates new content** - it only guides based on these declared sources.
 
 **Supported file types:**
 - PDFs (books, scientific articles)
+- Links (web pages, articles)
 - Images (with OCR for text extraction)
 - Videos (with automatic transcription)
 - Audio (with automatic transcription)
@@ -109,10 +138,18 @@ The AI agent is **always active and observing** the document. No button click ne
 - Bibliographic references
 
 **Features:**
-- Multiple file upload
-- List of added sources visible in sidebar
-- AI processes and uses only these sources as base
+- Multiple file/link upload
+- List of declared sources visible in sidebar
+- AI processes and vectorizes sources for reference
+- AI uses **only** these declared sources as knowledge base
 - Sources available for consultation during writing
+- **Ethical limit**: AI never generates content beyond what's in declared sources
+
+**Processing:**
+- Text extraction from PDFs, images, videos, audio
+- Vectorization and embedding for AI reference
+- Metadata extraction (title, author, date, etc.)
+- Indexed for fast retrieval during AI guidance
 
 #### 4. Wallet Connect
 
@@ -128,8 +165,10 @@ The AI agent is **always active and observing** the document. No button click ne
 
 **Items registered on blockchain:**
 - SHA-256 hash of final text
+- SHA-256 hash of declared intuition (Layer 1)
 - Timestamp
 - Author (public wallet)
+- AI scope (what AI was allowed to do - registered for transparency)
 - Status: Public or Private
 - Private access expiration date (optional)
 - Link to content on Arweave
@@ -235,22 +274,35 @@ According to [Solana Student Hackathon Fall 2025](https://solana.com/universitie
 3. **Code**: Clean, documented, running locally
 4. **Pitch**: Clear vision of problem and solution
 
+## 9-Step User Flow
+
+1. **Declare Intuition** - User states their initial idea/declaration
+2. **Upload Declared Sources** - PDFs, links, videos, etc. (AI uses only these)
+3. **Write with AI Guidance** - Real-time ethical assistance (AI never writes)
+4. **AI Monitors Coherence** - Continuous validation of consistency
+5. **Review and Refine** - User reviews suggestions and improves
+6. **Generate Final Version** - User finalizes their work
+7. **Register on-Chain** - Hash + timestamp + AI scope on Solana
+8. **Store Permanently** - Full content on Arweave
+9. **Share** - Public (On-Chain Journal) or Private (temporary links)
+
 ## Demonstration Flow (3-minute Video)
 
 1. **User opens the site** (0:00-0:10)
    - Clean and direct interface
    - Buttons: "Create Article" and "On-Chain Journal"
 
-2. **Opens editor and starts writing** (0:10-0:40)
-   - Shows academic text writing
-   - Uploads sources (PDF)
-   - Requests AI help
-   - AI returns ethical suggestions (does not write)
+2. **Opens editor and follows workflow** (0:10-0:40)
+   - Declares initial intuition
+   - Uploads declared sources (PDF, link)
+   - Starts writing with AI guidance
+   - Shows AI suggestions (does not write)
+   - Shows coherence monitoring
 
 3. **User registers on-chain** (0:40-1:30)
    - Chooses public or private
    - Shows: "Uploading to Arweave..."
-   - Shows: "Hash registered on Solana."
+   - Shows: "Hash registered on Solana (including intuition hash and AI scope)."
    - Displays hash and verification link
 
 4. **Opens On-Chain Journal** (1:30-2:00)
@@ -265,7 +317,7 @@ According to [Solana Student Hackathon Fall 2025](https://solana.com/universitie
 
 6. **Closing** (2:40-3:00)
    - Summary of delivered value
-   - Future vision (Roadmap)
+   - Future vision (Roadmap, ZK compatibility)
 
 ## Project Structure
 
