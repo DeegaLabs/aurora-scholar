@@ -20,9 +20,9 @@ Students use AI without understanding the ethical implications. Scientific produ
 ### 0:20 - 1:00 | Solution
 
 **Speech:**
-"Our project, Aurora Scholar, solves this by creating an academic editor assisted by ethical AI — that guides, but doesn't write — and registering the final article on Solana blockchain, ensuring authenticity, authorship, and transparency.
+"Our project, Aurora Scholar, solves this through **Assisted Academic Writing Monitoring** — an academic editor with ethical AI that monitors and guides, but never writes. The system registers the final article on Solana blockchain, ensuring authenticity, authorship, and transparency.
 
-The student writes their own content, receives ethical guidance from AI, and when finished, the system registers an immutable hash on Solana, proving who wrote and when."
+The student declares their initial idea, uploads their sources, writes their own content with AI guidance, and when finished, the system registers an immutable hash on Solana — including the hash of their declared intuition — proving who wrote, when, and what AI was allowed to do."
 
 **Visual:**
 - Show editor interface
@@ -102,7 +102,7 @@ Thank you!"
 ## Short Version (30 seconds)
 
 **Speech:**
-"Teachers don't know if students really wrote their texts. Aurora Scholar solves this with an academic editor assisted by ethical AI that registers articles on Solana blockchain, ensuring immutable authenticity. Articles can be public in our On-Chain Journal or private with temporary access. It's transparent, verifiable, and designed for the education of the future."
+"Teachers don't know if students really wrote their texts. Aurora Scholar solves this through Assisted Academic Writing Monitoring — an editor with ethical AI that monitors and guides, never writes. Articles are registered on Solana with immutable hashes including declared intuition. Articles can be public in our On-Chain Journal or private with temporary access. It's transparent, verifiable, and designed for the education of the future."
 
 ---
 
@@ -124,9 +124,9 @@ Third, the ethical issue. Students use AI without understanding the implications
 **Speech:**
 "Aurora Scholar is a complete platform that solves these three problems:
 
-1. **Editor with Ethical AI Assistant**: The student writes their own content. The AI doesn't write for them — it only guides, suggests improvements, explains concepts, and alerts when text seems too automated. It's a copilot, not autopilot.
+1. **Editor with Three-Layer Ethical System**: The student declares their initial intuition, uploads declared sources, and writes their own content. The AI doesn't write for them — it only guides, suggests improvements, explains concepts, monitors coherence, and alerts when text seems too automated. It's a monitor, not a writer.
 
-2. **On-Chain Registration**: When the student finishes, the system generates a SHA-256 hash of the content, uploads to Arweave (permanent storage) and registers the hash on Solana. This creates an immutable proof of authorship and timestamp.
+2. **On-Chain Registration**: When the student finishes, the system generates SHA-256 hashes of the content and declared intuition, uploads to Arweave (permanent storage) and registers both hashes plus AI scope on Solana. This creates an immutable proof of authorship, timestamp, and what AI was allowed to do.
 
 3. **On-Chain Academic Journal**: Public articles appear in a permanent and transparent digital journal. Anyone can verify authenticity by checking the hash on the blockchain.
 
@@ -154,7 +154,7 @@ Third, the ethical issue. Students use AI without understanding the implications
 
 1. **Editor**: Clean interface, Google Docs style. The student writes normally.
 
-2. **Source Upload**: They can upload PDFs, videos, audios. The AI processes and uses only these sources as base.
+2. **Declared Sources**: They upload PDFs, links, videos, audios as declared sources. The AI processes, vectorizes, and uses **only** these declared sources as reference — never generates beyond them.
 
 3. **AI Assistant**: When they need help, they click 'Ask Guidance'. See: the AI returns structure suggestions, references, grammatical corrections. But never writes the complete text.
 
@@ -178,6 +178,8 @@ Third, the ethical issue. Students use AI without understanding the implications
 **Academic DAO**: Teachers, universities, and researchers will govern ethical guidelines in a decentralized way. This creates a 'decentralized ethics' of knowledge.
 
 **Gamified Trails**: Students will go through educational trails about ethics in AI use, scientific research, methodology. Upon completion, they earn badges and educational tokens.
+
+**Zero-Knowledge Compatibility**: Our architecture is designed to be ZK-compatible, enabling future verification of authenticity and compliance without revealing sensitive content.
 
 **Impact**: Aurora Scholar is not just a tool — it's a new protocol for academic authorship. We ensure knowledge is human, transparent, and verifiable.
 

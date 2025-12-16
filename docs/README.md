@@ -21,14 +21,24 @@ Democratize scientific publishing through blockchain, ensuring that academic tex
 
 **Core Features:**
 - ✅ Academic editor with TipTap (Google Docs style)
+- ✅ **Three-Layer Ethical System**
+  - Layer 1: Declared Intuition (user states initial idea)
+  - Layer 2: Linguistic Mediation (AI guides, never writes)
+  - Layer 3: Coherence Monitoring (validates consistency)
 - ✅ **Ethical AI Assistant** (always-active agent, continuously observes)
   - Does not write for the user
   - Guides on structure, references, grammar
   - Alerts about authenticity (detects too automated text)
+  - Monitors coherence between intuition, sources, and text
   - Chat for specific questions
-- ✅ Source upload (PDFs, images, videos, audios)
+- ✅ **Declared Sources** (NotebookLM-style)
+  - User uploads PDFs, links, videos, audios
+  - AI uses **only** these declared sources as reference
+  - Vectorization and embedding for AI processing
+  - Never generates content beyond declared sources
 - ✅ Wallet Connect (Phantom/Solflare)
 - ✅ On-chain publication (Arweave + Solana)
+  - Hash of content + declared intuition + AI scope
 - ✅ Access control (Public/Private with expiration)
 - ✅ On-Chain Journal (public article listing)
 
@@ -62,10 +72,14 @@ aurora-scholar/
 - **WebSocket** - real-time communication with AI agent
 
 **Smart Contracts:**
-- `publish_article()` - hash and metadata registration
+- `publish_article()` - hash, declared intuition hash, AI scope, and metadata registration
 - `create_board()` - board creation (Phase 2)
 - `submit_to_board()` - article submission
 - `record_evaluation()` - on-chain evaluations
+
+**ZK Compatibility:**
+- Architecture designed to be ZK-compatible (Phase 3)
+- Future ZK circuits can prove authenticity without revealing content
 
 ### 3. ROADMAP.md - Project Evolution
 
@@ -92,14 +106,18 @@ aurora-scholar/
 - Mobile apps (iOS/Android)
 - Browser extension
 - Public API
+- **Zero-Knowledge Proofs** (future vision for privacy-preserving verification)
 
 ### 4. USE_CASES.md - Detailed Use Cases
 **15 complete use cases** with Mermaid diagrams:
 
 **MVP (UC01-UC08):**
-- UC01: User writes article with always-active AI assistant
-- UC02: Source upload
-- UC03: Public publication
+- UC01: User writes article with always-active AI assistant (Three-Layer System)
+  - Declared Intuition (Layer 1)
+  - Linguistic Mediation (Layer 2)
+  - Coherence Monitoring (Layer 3)
+- UC02: User uploads declared sources (NotebookLM-style)
+- UC03: Public publication (with intuition hash and AI scope)
 - UC04: Private publication
 - UC05: Temporary sharing
 - UC06: Journal viewing
@@ -174,18 +192,24 @@ aurora-scholar/
 
 ## 🎯 Main Differentiators
 
-### 1. Ethical AI Assistant (Never Writes)
+### 1. Three-Layer Ethical System
+- **Layer 1: Declared Intuition** - User states initial idea (registered on-chain)
+- **Layer 2: Linguistic Mediation** - AI guides structure and language (never writes)
+- **Layer 3: Coherence Monitoring** - AI validates consistency between intuition, sources, and text
 - **Always-active agent** - continuously observes document
 - **Does not write** - only guides, explains, suggests
 - **Authenticity alert** - detects too automated text
 - **Interactive chat** - for specific questions
-- **Source-based** - uses only sources provided by user
+- **Declared Sources** - AI uses only explicitly declared sources (NotebookLM-style)
 
 ### 2. Verifiable Authenticity
-- SHA-256 hash registered on-chain
+- SHA-256 hash of content registered on-chain
+- SHA-256 hash of declared intuition registered on-chain
+- AI scope registered on-chain (what AI was allowed to do)
 - Immutable timestamp
 - Author identified by wallet
 - Public verification on Solana Explorer
+- ZK-compatible architecture (future: prove without revealing)
 
 ### 3. Flexible Permission System
 - **No fixed roles** - contextual permissions
@@ -200,14 +224,16 @@ aurora-scholar/
 
 ## 🔄 Main Flows
 
-### Article Publication
-1. User writes in editor
-2. AI agent observes and suggests (real-time)
-3. Source upload (optional)
-4. Choice: Public or Private
-5. Upload to Arweave
-6. On-chain registration on Solana
-7. Appears in Journal (if public) or generates link (if private)
+### Article Publication (9-Step Flow)
+1. User declares initial intuition (Layer 1)
+2. User uploads declared sources (PDFs, links, etc.)
+3. User writes with AI guidance (Layer 2 - Linguistic Mediation)
+4. AI monitors coherence (Layer 3 - Coherence Monitoring)
+5. User reviews and refines
+6. User finalizes work
+7. Upload to Arweave (permanent storage)
+8. On-chain registration on Solana (content hash + intuition hash + AI scope)
+9. Share: Public (On-Chain Journal) or Private (temporary links)
 
 ### Board System (Phase 2)
 1. User creates board (public/private/hybrid)
@@ -274,11 +300,16 @@ aurora-scholar/
 ### Complete and Updated
 - ✅ All Mermaid diagrams corrected
 - ✅ Generic terminology (no fixed roles)
+- ✅ Three-Layer Ethical System documented
+- ✅ Declared Intuition (Layer 1) documented
+- ✅ Declared Sources (NotebookLM-style) documented
+- ✅ Coherence Monitoring (Layer 3) documented
 - ✅ Always-active AI agent documented
 - ✅ Board system detailed
 - ✅ Chat for specific questions included
 - ✅ Correction and resubmission flows
 - ✅ Reputation system documented
+- ✅ ZK compatibility mentioned (Phase 3)
 
 ### Consistency
 - ✅ Uniform terminology across all files
