@@ -12,10 +12,10 @@ This document describes all main use cases of the Aurora Scholar platform. Each 
 - **Activity Diagram:** Shows flow of activities and decisions
 - **Actors:** User (any), Author User, Evaluator User, Creator User, System, Community
 
-## UC01: User writes article with always-active AI assistant
+## UC01: User writes article with always-active AI assistant (Three-Layer System)
 
 ### Description
-User uses the editor to write an academic article. An AI agent is always connected and observing the document, continuously evaluating as the user writes or pastes content. The agent provides real-time ethical guidance on structure, references, grammar, and authenticity.
+User uses the editor to write an academic article following the Three-Layer Ethical System. First, user declares their initial intuition (Layer 1). Then, an AI agent (Layer 2) is always connected and observing the document, continuously evaluating as the user writes or pastes content. The agent provides real-time ethical guidance on structure, references, grammar, and authenticity. Finally, the agent monitors coherence (Layer 3) between declared intuition, declared sources, and final text.
 
 ### Actors
 - User (article author)
@@ -29,21 +29,27 @@ User uses the editor to write an academic article. An AI agent is always connect
 ### Main Flow
 
 1. User opens editor
-2. System automatically connects AI agent
-3. Agent starts continuous document observation
-4. User begins writing or pasting text
-5. Agent detects text changes (2-3 second debounce)
-6. Agent analyzes current text + loaded sources
-7. Agent generates real-time suggestions:
-   - Structural suggestions
+2. **User declares initial intuition** (Layer 1 - Declared Intuition)
+   - User states their initial idea/vision for the article
+   - System captures and stores declared intuition
+   - Hash of declared intuition is prepared for on-chain registration
+3. System automatically connects AI agent
+4. Agent starts continuous document observation
+5. User uploads declared sources (see UC02)
+6. User begins writing or pasting text
+7. Agent detects text changes (2-3 second debounce)
+8. Agent analyzes current text + declared intuition + declared sources
+9. Agent generates real-time suggestions:
+   - Structural suggestions (Layer 2 - Linguistic Mediation)
    - Grammatical corrections
    - Authenticity alerts (if text seems too automated)
-   - References based on sources
-8. System displays suggestions in sidebar (continuous updates)
-9. User reviews suggestions in real-time
-10. User decides to apply or ignore suggestions
-11. User continues writing (cycle repeats)
-12. Agent continues observing and suggesting
+   - References based on declared sources only
+   - Coherence alerts (Layer 3 - Coherence Monitoring)
+10. System displays suggestions in sidebar (continuous updates)
+11. User reviews suggestions in real-time
+12. User decides to apply or ignore suggestions
+13. User continues writing (cycle repeats)
+14. Agent continues observing, suggesting, and monitoring coherence
 
 ### Mermaid Diagram
 
@@ -66,11 +72,11 @@ sequenceDiagram
         Note over Editor,Agent: {text, sources, cursorPosition}
         
         Agent->>Backend: POST /api/ai-assistant/analyze
-        Note over Agent,Backend: {text, sources, context, agentConfig}
+        Note over Agent,Backend: {text, declaredIntuition, declaredSources, context, agentConfig}
         Backend->>IAService: Processes with LLM
-        Note over Backend,IAService: Ethical prompt + agent configuration
-        IAService-->>Backend: Real-time suggestions
-        Backend-->>Agent: {suggestions, corrections, warnings, alerts}
+        Note over Backend,IAService: Ethical prompt + agent configuration + declared sources only
+        IAService-->>Backend: Real-time suggestions (never writes)
+        Backend-->>Agent: {suggestions, corrections, warnings, alerts, coherenceAlerts}
         Agent-->>Editor: Updates sidebar with suggestions
         
         Editor-->>Usuario: Displays suggestions in sidebar
@@ -90,11 +96,14 @@ sequenceDiagram
 ```
 
 ### Postconditions
-- AI agent connected and continuously observing
+- Declared intuition captured and stored (Layer 1)
+- AI agent connected and continuously observing (Layer 2)
+- Coherence monitoring active (Layer 3)
 - Text updated (if suggestions applied)
 - Suggestions available in real-time in sidebar
 - Interaction history with AI saved
 - Authenticity alerts displayed when detected
+- Coherence alerts displayed when inconsistencies detected
 
 ### Alternative Flows
 
@@ -146,28 +155,35 @@ sequenceDiagram
 
 ---
 
-## UC02: User uploads sources
+## UC02: User uploads declared sources (NotebookLM-style)
 
 ### Description
-User uploads files (PDFs, images, videos, audios) that will be used as sources for the AI assistant during writing.
+User explicitly declares and uploads sources (PDFs, links, images, videos, audios) that will be used as reference for the AI assistant during writing. The AI uses **only** these declared sources - never generates content beyond what's in them. This follows the NotebookLM-style approach where sources are explicitly declared.
 
 ### Actors
 - User
 
 ### Preconditions
 - User is in editor
-- Editor supports file upload
+- Editor supports file/link upload
+- User has declared their intuition (Layer 1)
 
 ### Main Flow
 
-1. User clicks "Add Source"
-2. System displays file selector
-3. User selects one or more files
+1. User clicks "Add Declared Source"
+2. System displays options: Upload file or Add link
+3. User selects one or more files/links
 4. System validates types and sizes
-5. System uploads files
-6. System processes files (OCR, transcription, etc.)
-7. System displays added sources in sidebar
-8. Sources available for AI to consult
+5. System uploads files or processes links
+6. System processes sources:
+   - Extracts text from PDFs, images (OCR)
+   - Transcribes videos and audios
+   - Extracts content from links
+   - Vectorizes and creates embeddings for AI reference
+   - Extracts metadata (title, author, date, etc.)
+7. System displays added declared sources in sidebar
+8. Declared sources available for AI to consult **only**
+9. AI uses only these declared sources as knowledge base (never generates beyond them)
 
 ### Mermaid Diagram
 
@@ -186,15 +202,19 @@ activityDiagram
             
             if PDF type? then
                 :Extracts text with OCR;
+            else if Link type? then
+                :Fetches and extracts content;
             else if Video/Audio type? then
                 :Transcribes to text;
             else if Image type? then
                 :Extracts text with OCR;
             end
             
-            :System saves processed sources;
+            :System vectorizes and creates embeddings;
+            :System extracts metadata;
+            :System saves processed declared sources;
             :System displays in sidebar;
-            :Sources available for AI;
+            :Declared sources available for AI (only these);
             stop
         else
             :Displays validation error;
