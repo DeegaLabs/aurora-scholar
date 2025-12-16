@@ -165,19 +165,48 @@ Article (JSON) → Irys SDK → Arweave → Transaction ID → Solana (registrat
 **Simplified Schema:**
 ```prisma
 model Article {
+  id                  String   @id @default(uuid())
+  title               String
+  abstract            String?
+  declaredIntuition   String?  // User's initial idea/declaration (Layer 1)
+  declaredIntuitionHash String? // Hash of declared intuition (for on-chain registration)
+  aiScope             String?  // What AI was allowed to do (registered on-chain)
+  authorWallet        String
+  arweaveId           String   @unique
+  solanaTxId          String?  @unique
+  status              Status   @default(DRAFT)
+  isPublic            Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  publishedAt         DateTime?
+  declaredSources     Source[] // Declared sources (NotebookLM-style)
+  versions            ArticleVersion[]
+  submissions        Submission[]
+  accessTokens        AccessToken[]
+}
+
+model Source {
   id            String   @id @default(uuid())
-  title         String
-  abstract      String?
-  authorWallet  String
-  arweaveId     String   @unique
-  solanaTxId    String?  @unique
-  status        Status   @default(DRAFT)
-  isPublic      Boolean  @default(false)
+  articleId     String
+  type          SourceType
+  url           String?  // For links
+  filePath      String?  // For uploaded files
+  content       String?  // Extracted text from PDF, etc.
+  metadata      Json?    // Title, author, date, etc.
+  vectorized    Boolean  @default(false) // For AI processing
+  embedding     Json?    // Vector embeddings for AI reference
   createdAt     DateTime @default(now())
-  publishedAt   DateTime?
-  versions      ArticleVersion[]
-  submissions   Submission[]
-  accessTokens  AccessToken[]
+  article       Article  @relation(fields: [articleId], references: [id])
+  
+  @@index([articleId])
+}
+
+enum SourceType {
+  PDF
+  LINK
+  VIDEO
+  AUDIO
+  IMAGE
+  TEXT
 }
 
 model ArticleVersion {
@@ -315,6 +344,8 @@ pub mod aurora_scholar {
         ctx: Context<PublishArticle>,
         arweave_id: String,
         content_hash: [u8; 32],
+        declared_intuition_hash: [u8; 32], // Hash of user's declared intuition (Layer 1)
+        ai_scope: String, // What AI was allowed to do (for transparency)
         title: String,
         is_public: bool,
     ) -> Result<()> {
@@ -322,6 +353,8 @@ pub mod aurora_scholar {
         article.author = ctx.accounts.author.key();
         article.arweave_id = arweave_id;
         article.content_hash = content_hash;
+        article.declared_intuition_hash = declared_intuition_hash;
+        article.ai_scope = ai_scope;
         article.title = title;
         article.is_public = is_public;
         article.timestamp = Clock::get()?.unix_timestamp;
@@ -346,11 +379,20 @@ pub struct Article {
     pub author: Pubkey,
     pub arweave_id: String,
     pub content_hash: [u8; 32],
+    pub declared_intuition_hash: [u8; 32], // Hash of declared intuition (Layer 1)
+    pub ai_scope: String, // What AI was allowed to do
     pub title: String,
     pub is_public: bool,
     pub timestamp: i64,
 }
 ```
+
+**ZK Compatibility Note:**
+The contract structure is designed to be ZK-compatible. Future ZK circuits can prove:
+- Content hash matches registered hash (without revealing content)
+- Declared intuition hash consistency (without revealing intuition)
+- Author signature validity (without revealing identity)
+- AI scope compliance (without revealing sources)
 
 ### 6. Ethical AI Assistant (Always-Active Agent)
 
@@ -371,23 +413,25 @@ pub struct Article {
 **Input:**
 ```typescript
 {
-  text: string;              // Current document text
-  sources: Source[];         // Loaded sources
-  agentConfig?: AgentConfig; // Agent configuration (default or custom)
-  context?: string;          // Additional context
-  cursorPosition?: number;   // Cursor position
+  text: string;                    // Current document text
+  declaredIntuition: string;       // User's declared intuition (Layer 1)
+  declaredSources: Source[];       // Declared sources (NotebookLM-style)
+  agentConfig?: AgentConfig;       // Agent configuration (default or custom)
+  context?: string;                // Additional context
+  cursorPosition?: number;        // Cursor position
 }
 ```
 
 **Output:**
 ```typescript
 {
-  suggestions: Suggestion[];      // Structural suggestions
-  corrections: Correction[];       // Grammatical corrections
-  references: Reference[];        // Suggested references
-  warnings: Warning[];            // Ethics alerts
-  authenticityAlerts: Alert[];    // Authenticity alerts (too automated text)
-  timestamp: number;              // Analysis timestamp
+  suggestions: Suggestion[];        // Structural suggestions
+  corrections: Correction[];        // Grammatical corrections
+  references: Reference[];            // Suggested references (from declared sources only)
+  warnings: Warning[];               // Ethics alerts
+  authenticityAlerts: Alert[];      // Authenticity alerts (too automated text)
+  coherenceAlerts: CoherenceAlert[]; // Coherence monitoring (Layer 3)
+  timestamp: number;                 // Analysis timestamp
 }
 ```
 
@@ -616,42 +660,52 @@ pub struct CommunityVote {
 
 ## Data Flow
 
-### Public Article Publication
+### Public Article Publication (9-Step Flow)
 
 ```
-1. User writes in Editor (TipTap)
-2. Uploads sources (optional)
-3. Requests AI help (optional)
-4. Connects wallet (Phantom)
-5. Clicks "Publish" → Chooses "Public"
-6. Frontend → Backend API (POST /api/articles/publish)
-7. Backend:
-   a. Generates SHA-256 hash of content
-   b. Uploads to Arweave via Irys
-   c. Receives Arweave Transaction ID
-   d. Calls Solana smart contract (publish_article)
-   e. Saves metadata to PostgreSQL
-8. Returns confirmation + links (Solana Explorer, Arweave)
-9. Article appears in On-Chain Journal
+1. User declares intuition (Layer 1)
+2. User uploads declared sources (PDFs, links, etc.)
+3. Backend processes sources (vectorization, embeddings)
+4. User writes in Editor (TipTap) with AI guidance
+5. AI monitors coherence (Layer 3) continuously
+6. User reviews and refines
+7. User connects wallet (Phantom)
+8. User clicks "Publish" → Chooses "Public"
+9. Frontend → Backend API (POST /api/articles/publish)
+10. Backend:
+    a. Generates SHA-256 hash of content
+    b. Generates SHA-256 hash of declared intuition
+    c. Determines AI scope (what AI was allowed to do)
+    d. Uploads to Arweave via Irys
+    e. Receives Arweave Transaction ID
+    f. Calls Solana smart contract (publish_article with intuition hash and AI scope)
+    g. Saves metadata to PostgreSQL
+11. Returns confirmation + links (Solana Explorer, Arweave)
+12. Article appears in On-Chain Journal
 ```
 
 ### Private Article Publication
 
 ```
-1. User writes in Editor (TipTap)
-2. Connects wallet (Phantom)
-3. Clicks "Publish" → Chooses "Private"
-4. Sets expiration (24h, 7d, 30d, unlimited)
-5. Frontend → Backend API (POST /api/articles/publish)
-6. Backend:
+1. User declares intuition (Layer 1)
+2. User uploads declared sources
+3. User writes in Editor (TipTap) with AI guidance
+4. AI monitors coherence (Layer 3)
+5. User connects wallet (Phantom)
+6. User clicks "Publish" → Chooses "Private"
+7. Sets expiration (24h, 7d, 30d, unlimited)
+8. Frontend → Backend API (POST /api/articles/publish)
+9. Backend:
    a. Generates SHA-256 hash of content
-   b. Uploads to Arweave via Irys
-   c. Calls Solana smart contract (is_public: false)
-   d. Generates unique access token
-   e. Saves AccessToken to PostgreSQL
-   f. Saves metadata to PostgreSQL
-7. Returns private link: /article/[id]?token=[token]
-8. Article does NOT appear in On-Chain Journal
+   b. Generates SHA-256 hash of declared intuition
+   c. Determines AI scope
+   d. Uploads to Arweave via Irys
+   e. Calls Solana smart contract (is_public: false, with intuition hash and AI scope)
+   f. Generates unique access token
+   g. Saves AccessToken to PostgreSQL
+   h. Saves metadata to PostgreSQL
+10. Returns private link: /article/[id]?token=[token]
+11. Article does NOT appear in On-Chain Journal
 ```
 
 ### Temporary Sharing
@@ -682,22 +736,29 @@ pub struct CommunityVote {
 7. Displays link to verify hash on Solana Explorer
 ```
 
-### AI Assistant Processes Request
+### AI Assistant Processes Request (Three-Layer System)
 
 ```
-1. User writes text in editor
-2. AI agent continuously observes (WebSocket)
-3. Frontend → Backend API (POST /api/ai-assistant/analyze)
-4. Backend:
-   a. Receives text + loaded sources
-   b. Processes sources (extracts text from PDFs, etc.)
-   c. Sends to LLM with ethical prompt
+1. User declares intuition (Layer 1)
+2. User uploads declared sources (PDFs, links, etc.)
+3. Backend processes sources:
+   a. Extracts text from PDFs, images, videos, audio
+   b. Vectorizes and creates embeddings
+   c. Indexes for fast retrieval
+4. User writes text in editor
+5. AI agent continuously observes (WebSocket)
+6. Frontend → Backend API (POST /api/ai-assistant/analyze)
+7. Backend:
+   a. Receives text + declared intuition + declared sources
+   b. Uses vectorized sources for reference (only declared sources)
+   c. Sends to LLM with ethical prompt (never writes)
    d. LLM returns suggestions (not complete text)
    e. Validates response (ensures it didn't write)
-5. Returns suggestions, corrections, references
-6. Frontend displays suggestions in sidebar in real-time
-7. User decides to apply or ignore
-8. Chat for specific questions (POST /api/ai-assistant/chat)
+   f. Monitors coherence (Layer 3) between intuition, sources, and text
+8. Returns suggestions, corrections, references, coherence alerts
+9. Frontend displays suggestions in sidebar in real-time
+10. User decides to apply or ignore
+11. Chat for specific questions (POST /api/ai-assistant/chat)
 ```
 
 ## Code Standards
