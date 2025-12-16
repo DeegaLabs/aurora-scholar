@@ -23,29 +23,97 @@
   },
   "home": {
     "hero": {
-      "title": "Your Authorship, Permanent and Verifiable",
-      "subtitle": "Write academic articles with ethical AI guidance and register them on the Solana blockchain",
-      "cta": "Create Article",
+      "tag": "Ethical Academic Writing",
+      "title": "Assisted Monitoring of",
+      "titleHighlight": "Ethical Academic Writing",
+      "description": "Aurora Scholar is an academic writing platform that implements AI-assisted monitoring, ensuring that thinking is human, mediation is technical, and authorship is verifiable on-chain. The system does not write new content. It organizes, translates, and audits coherence of ideas previously declared by the student, preserving intellectual autonomy and ethical responsibility.",
+      "startWriting": "Start Writing",
       "viewJournal": "View Journal"
     },
     "features": {
-      "title": "Why Aurora Scholar?",
-      "ai": {
-        "title": "Ethical AI Assistant",
-        "description": "AI that guides, explains and suggests - but never writes for you"
+      "label": "Product Vision",
+      "title": "Three-Layer Ethical System",
+      "layer01": {
+        "label": "Layer 01",
+        "title": "Declared Intuition",
+        "description": "Mandatory space where the student describes, in free language, the intention of the paragraph or section. This semantic anchor is hashed and versioned."
       },
-      "blockchain": {
-        "title": "On-Chain Registration",
-        "description": "Immutable proof of authorship with SHA-256 hash on Solana"
+      "layer02": {
+        "label": "Layer 02",
+        "title": "Linguistic Mediation",
+        "description": "AI reformulates the text without adding new content, only adjusting clarity, logical coherence, and academic register. User must explicitly choose or reject suggestions."
       },
-      "storage": {
-        "title": "Permanent Storage",
-        "description": "Your articles stored forever on Arweave"
+      "layer03": {
+        "label": "Layer 03",
+        "title": "Coherence Monitoring",
+        "description": "AI audits logical coherence between declared intuition and mediated text. It indicates gaps or contradictions, never suggesting how to write, only what needs clarification."
       },
-      "privacy": {
-        "title": "Access Control",
-        "description": "Publish publicly or share privately with expiration"
+      "principles": {
+        "label": "Ethical Principles",
+        "title": "Our Commitment to Academic Integrity",
+        "principle1": "AI does not generate thought",
+        "principle1Detail": "— only reorganizes declared intent.",
+        "principle2": "All mediation is explicit and auditable.",
+        "principle3": "Authorship remains human",
+        "principle3Detail": " at all stages.",
+        "principle4": "Intellectual responsibility is signed",
+        "principle4Detail": " by the user."
       }
+    },
+    "flow": {
+      "label": "User Flow",
+      "title": "From Idea to On-Chain Proof",
+      "step01": {
+        "label": "Step 01",
+        "title": "Connect Wallet",
+        "description": "Securely connect your Solana wallet to begin your ethical writing journey."
+      },
+      "step02": {
+        "label": "Step 02",
+        "title": "Declare Intuition",
+        "description": "Articulate your core ideas in free language. This forms the semantic anchor for your work."
+      },
+      "step03": {
+        "label": "Step 03",
+        "title": "Write Free Text",
+        "description": "Develop your academic content in the editor, knowing your initial intent is recorded."
+      },
+      "step04": {
+        "label": "Step 04",
+        "title": "Request Mediation",
+        "description": "Ask the AI to refine your text for clarity, coherence, and academic register, without adding new concepts."
+      },
+      "step05": {
+        "label": "Step 05",
+        "title": "Choose Reformulation",
+        "description": "Select the AI's best reformulation or reject them, maintaining full intellectual control."
+      },
+      "step06": {
+        "label": "Step 06",
+        "title": "Coherence Audit",
+        "description": "The AI audits the logical consistency between your intuition and the mediated text, highlighting gaps."
+      },
+      "step07": {
+        "label": "Step 07",
+        "title": "Confirm Responsibility",
+        "description": "Sign your intellectual responsibility for the final content, ensuring human authorship."
+      },
+      "step08": {
+        "label": "Step 08",
+        "title": "On-Chain Registration",
+        "description": "Hashes of your intuition, final text, and AI scope are immutably recorded on Solana."
+      },
+      "step09": {
+        "label": "Step 09",
+        "title": "Publish",
+        "description": "Publish your article publicly in the journal or privately with controlled access."
+      }
+    },
+    "footer": {
+      "copyright": "© 2025 Aurora Scholar. Open source on GitHub.",
+      "github": "GitHub",
+      "solana": "Solana",
+      "documentation": "Documentation"
     }
   },
   "editor": {

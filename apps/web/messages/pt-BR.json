@@ -23,29 +23,97 @@
   },
   "home": {
     "hero": {
-      "title": "Sua Autoria, Permanente e Verificável",
-      "subtitle": "Escreva artigos acadêmicos com orientação ética de IA e registre-os na blockchain Solana",
-      "cta": "Criar Artigo",
+      "tag": "Escrita Acadêmica Ética",
+      "title": "Monitoria Assistida de",
+      "titleHighlight": "Escrita Acadêmica Ética",
+      "description": "Aurora Scholar é uma plataforma de escrita acadêmica que implementa monitoria assistida por IA, garantindo que o pensamento seja humano, a mediação seja técnica e a autoria seja verificável on-chain. O sistema não escreve conteúdo novo. Ele organiza, traduz e audita coerência de ideias previamente declaradas pelo estudante, preservando autonomia intelectual e responsabilidade ética.",
+      "startWriting": "Começar a Escrever",
       "viewJournal": "Ver Revista"
     },
     "features": {
-      "title": "Por que Aurora Scholar?",
-      "ai": {
-        "title": "Assistente de IA Ético",
-        "description": "IA que orienta, explica e sugere - mas nunca escreve por você"
+      "label": "Visão do Produto",
+      "title": "Sistema Ético de Três Camadas",
+      "layer01": {
+        "label": "Camada 01",
+        "title": "Intuição Declarada",
+        "description": "Espaço obrigatório onde o estudante descreve, em linguagem livre, a intenção do parágrafo ou seção. Esta âncora semântica é hasheada e versionada."
       },
-      "blockchain": {
-        "title": "Registro On-Chain",
-        "description": "Prova imutável de autoria com hash SHA-256 na Solana"
+      "layer02": {
+        "label": "Camada 02",
+        "title": "Mediação Linguística",
+        "description": "A IA reformula o texto sem adicionar conteúdo novo, apenas ajustando clareza, coerência lógica e registro acadêmico. O usuário deve escolher ou rejeitar explicitamente as sugestões."
       },
-      "storage": {
-        "title": "Armazenamento Permanente",
-        "description": "Seus artigos armazenados para sempre no Arweave"
+      "layer03": {
+        "label": "Camada 03",
+        "title": "Monitoria de Coerência",
+        "description": "A IA audita a coerência lógica entre a intuição declarada e o texto mediado. Indica lacunas ou contradições, nunca sugerindo como escrever, apenas o que precisa ser esclarecido."
       },
-      "privacy": {
-        "title": "Controle de Acesso",
-        "description": "Publique publicamente ou compartilhe privadamente com expiração"
+      "principles": {
+        "label": "Princípios Éticos",
+        "title": "Nosso Compromisso com a Integridade Acadêmica",
+        "principle1": "IA não gera pensamento",
+        "principle1Detail": " — apenas reorganiza intenção declarada.",
+        "principle2": "Toda mediação é explícita e auditável.",
+        "principle3": "Autoria permanece humana",
+        "principle3Detail": " em todas as etapas.",
+        "principle4": "Responsabilidade intelectual é assinada",
+        "principle4Detail": " pelo usuário."
       }
+    },
+    "flow": {
+      "label": "Fluxo do Usuário",
+      "title": "Da Ideia à Prova On-Chain",
+      "step01": {
+        "label": "Passo 01",
+        "title": "Conectar Carteira",
+        "description": "Conecte sua carteira Solana com segurança para iniciar sua jornada de escrita ética."
+      },
+      "step02": {
+        "label": "Passo 02",
+        "title": "Declarar Intuição",
+        "description": "Articule suas ideias principais em linguagem livre. Isso forma a âncora semântica do seu trabalho."
+      },
+      "step03": {
+        "label": "Passo 03",
+        "title": "Escrever Texto Livre",
+        "description": "Desenvolva seu conteúdo acadêmico no editor, sabendo que sua intenção inicial está registrada."
+      },
+      "step04": {
+        "label": "Passo 04",
+        "title": "Solicitar Mediação",
+        "description": "Peça à IA para refinar seu texto em clareza, coerência e registro acadêmico, sem adicionar novos conceitos."
+      },
+      "step05": {
+        "label": "Passo 05",
+        "title": "Escolher Reformulação",
+        "description": "Selecione a melhor reformulação da IA ou rejeite-as, mantendo controle intelectual total."
+      },
+      "step06": {
+        "label": "Passo 06",
+        "title": "Auditoria de Coerência",
+        "description": "A IA audita a consistência lógica entre sua intuição e o texto mediado, destacando lacunas."
+      },
+      "step07": {
+        "label": "Passo 07",
+        "title": "Confirmar Responsabilidade",
+        "description": "Assine sua responsabilidade intelectual pelo conteúdo final, garantindo autoria humana."
+      },
+      "step08": {
+        "label": "Passo 08",
+        "title": "Registro On-Chain",
+        "description": "Hashes da sua intuição, texto final e escopo da IA são registrados imutavelmente na Solana."
+      },
+      "step09": {
+        "label": "Passo 09",
+        "title": "Publicar",
+        "description": "Publique seu artigo publicamente na revista ou privadamente com acesso controlado."
+      }
+    },
+    "footer": {
+      "copyright": "© 2025 Aurora Scholar. Código aberto no GitHub.",
+      "github": "GitHub",
+      "solana": "Solana",
+      "documentation": "Documentação"
     }
   },
   "editor": {
