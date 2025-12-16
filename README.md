@@ -7,16 +7,45 @@
 
 ## 🎯 Vision
 
-Democratize scientific publishing through blockchain, ensuring immutable authorship, open access, and transparency in the peer review process.
+**Assisted Academic Writing Monitoring** - A platform where users write their own academic texts with ethical AI guidance (never substitution), ensuring authenticity, transparency, and immutable authorship through blockchain. The AI acts as a **monitor** that guides, explains, and validates - never writes for the user.
 
 ## ✨ Main Features
 
 - **Academic Editor** with Ethical AI Assistant (always-active agent)
+- **Three-Layer Ethical System** (Declared Intuition, Linguistic Mediation, Coherence Monitoring)
+- **Declared Sources** (NotebookLM-style) - User uploads PDFs, links, etc. - AI uses only these as reference
 - **On-Chain Publishing** on Solana (immutable hash + timestamp)
 - **Permanent Storage** on Arweave
 - **Access Control** (Public/Private with expiration)
 - **On-Chain Journal** (public article listing)
 - **Evaluation Board System** (Phase 2)
+
+## 🌐 Aurora Scholar Ecosystem
+
+Aurora Scholar operates as an integrated ecosystem where each component works together:
+
+**9-Step User Flow:**
+1. **Declare Intuition** - User states their initial idea/declaration
+2. **Upload Declared Sources** - PDFs, links, videos, etc. (AI uses only these)
+3. **Write with AI Guidance** - Real-time ethical assistance (AI never writes)
+4. **AI Monitors Coherence** - Continuous validation of consistency
+5. **Review and Refine** - User reviews suggestions and improves
+6. **Generate Final Version** - User finalizes their work
+7. **Register on-Chain** - Hash + timestamp on Solana (immutable proof)
+8. **Store Permanently** - Full content on Arweave (permanent, single payment)
+9. **Share** - Public (On-Chain Journal) or Private (temporary links)
+
+**Three-Layer Ethical System:**
+- **Layer 1: Declared Intuition** - User's initial idea is captured and registered
+- **Layer 2: Linguistic Mediation** - AI guides structure and language (never writes)
+- **Layer 3: Coherence Monitoring** - AI validates consistency between intuition, sources, and final text
+
+**Key Components:**
+- **Editor + AI Assistant**: Real-time ethical guidance as user writes
+- **Declared Sources Processing**: Vectorization and embedding for AI reference
+- **On-Chain Registration**: Hash + timestamp + AI scope on Solana
+- **Permanent Storage**: Full content on Arweave
+- **Verification**: Anyone can verify authenticity via Solana Explorer
 
 ## 🚀 Quick Start
 
