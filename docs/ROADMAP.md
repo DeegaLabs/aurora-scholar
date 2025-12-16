@@ -366,6 +366,26 @@ As custom agents become more complex (embedding processing, advanced chains, loc
 - Webhooks for integrations
 - Complete documentation
 
+### 3.8. Zero-Knowledge Proofs (Future Vision)
+
+**Objective:** Enable authenticity verification without revealing content.
+
+**Potential Applications:**
+- Prove article authenticity without exposing full text
+- Verify authorship for private articles
+- Enable anonymous peer review with verified credentials
+- Prove source usage compliance without revealing sources
+
+**Technical Note:** MVP architecture is ZK-compatible. Future implementation would use ZK circuits to prove:
+- Content hash matches registered hash (without revealing content)
+- Author signature validity (without revealing identity)
+- Source usage compliance (without revealing sources)
+- Declared intuition consistency (without revealing intuition)
+
+**Status:** Design phase - not implemented in MVP, but architecture supports future integration.
+
+**Pitch phrase for future:** "Aurora Scholar is designed to be ZK-compatible, enabling future verification of authenticity and compliance without revealing sensitive content."
+
 ## Timeline and Milestones
 
 ### Q1 2025 (Post-Hackathon)
