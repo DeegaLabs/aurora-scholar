@@ -403,7 +403,7 @@ export function DeclaredSources({ sources, onAddSource, onRemoveSource }: Declar
                       value={linkUrls}
                       onChange={(e) => setLinkUrls(e.target.value)}
                       placeholder="Paste URLs here*"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 min-h-[120px] font-mono text-sm"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 min-h-[120px] font-mono text-sm"
                     />
                   </div>
                   <div className="bg-gray-50 p-4 rounded-lg">
@@ -442,7 +442,7 @@ export function DeclaredSources({ sources, onAddSource, onRemoveSource }: Declar
                         value={linkUrl}
                         onChange={(e) => setLinkUrl(e.target.value)}
                         placeholder="Paste YouTube URL*"
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"
                       />
                     </div>
                   </div>
@@ -478,7 +478,7 @@ export function DeclaredSources({ sources, onAddSource, onRemoveSource }: Declar
                       value={pastedText}
                       onChange={(e) => setPastedText(e.target.value)}
                       placeholder="Paste text here*"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 min-h-[200px]"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 min-h-[200px]"
                     />
                   </div>
                   <button
