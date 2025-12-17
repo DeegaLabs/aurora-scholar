@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
 
 interface AiSidebarProps {
   content: string;
@@ -15,7 +14,6 @@ interface AiSuggestion {
 }
 
 export function AiSidebar({ content, declaredIntuition }: AiSidebarProps) {
-  const t = useTranslations('editor');
   const [suggestions, setSuggestions] = useState<AiSuggestion[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);

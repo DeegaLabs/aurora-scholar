@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
-import { useWallet } from '@solana/wallet-adapter-react';
-import { PublicKey } from '@solana/web3.js';
+// Wallet integration will be added in Task 10
+// import { useWallet } from '@solana/wallet-adapter-react';
+// import { PublicKey } from '@solana/web3.js';
 
 interface PublishModalProps {
   isOpen: boolean;
@@ -18,8 +18,8 @@ export function PublishModal({
   content,
   declaredIntuition,
 }: PublishModalProps) {
-  const t = useTranslations('editor');
-  const { publicKey, signTransaction } = useWallet();
+  // TODO: Add wallet integration in Task 10
+  const publicKey = null;
   const [title, setTitle] = useState('');
   const [isPublic, setIsPublic] = useState(true);
   const [aiScope, setAiScope] = useState('Grammar checking and style suggestions only');
@@ -30,7 +30,7 @@ export function PublishModal({
 
   const handlePublish = async () => {
     if (!publicKey || !title.trim()) {
-      alert('Please provide a title');
+      alert('Please connect your wallet and provide a title');
       return;
     }
 
@@ -57,11 +57,12 @@ export function PublishModal({
       setStep('publishing');
 
       // Step 2: Publish to Solana
+      // TODO: This will be implemented when wallet integration is added (Task 10)
       const publishResponse = await fetch('/api/blockchain/publish', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          author: publicKey.toString(),
+          author: publicKey ? String(publicKey) : '',
           content,
           declaredIntuition,
           arweaveId,
@@ -75,7 +76,7 @@ export function PublishModal({
         throw new Error('Failed to publish to blockchain');
       }
 
-      const { transactionId } = await publishResponse.json();
+      const { transactionId: _transactionId } = await publishResponse.json();
       setStep('success');
 
       // Clear localStorage

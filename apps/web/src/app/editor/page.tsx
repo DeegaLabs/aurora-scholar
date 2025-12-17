@@ -6,11 +6,14 @@ import { Editor } from '@/components/editor/Editor';
 import { IntuitionField } from '@/components/editor/IntuitionField';
 import { AiSidebar } from '@/components/editor/AiSidebar';
 import { PublishModal } from '@/components/editor/PublishModal';
-import { useWallet } from '@solana/wallet-adapter-react';
+// Wallet integration will be added in Task 10
+// import { useWallet } from '@solana/wallet-adapter-react';
 
 export default function EditorPage() {
   const t = useTranslations('editor');
-  const { publicKey, connected } = useWallet();
+  // TODO: Add wallet integration in Task 10
+  const publicKey = null;
+  const connected = false;
   const [content, setContent] = useState<string>('');
   const [declaredIntuition, setDeclaredIntuition] = useState<string>('');
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
