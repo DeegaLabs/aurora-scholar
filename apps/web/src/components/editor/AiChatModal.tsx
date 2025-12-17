@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
 
 interface Message {
   id: string;
@@ -23,7 +22,6 @@ export function AiChatModal({
   content: _content,
   declaredIntuition: _declaredIntuition,
 }: AiChatModalProps) {
-  const t = useTranslations('editor');
   // TODO: Use content and declaredIntuition when connecting to AI API (Task 6)
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -36,7 +34,7 @@ export function AiChatModal({
       setMessages([{
         id: '1',
         role: 'assistant',
-        content: 'Hello! I\'m your ethical AI assistant. I can help you with structure, references, grammar, and coherence. I will never write content for you - only guide and explain. How can I help?',
+        content: 'Olá! Sou seu assistente de IA ético. Posso ajudar com estrutura, referências, gramática e coerência. Nunca escrevo conteúdo por você - apenas guio e explico. Como posso ajudar?',
         timestamp: new Date(),
       }]);
     }
@@ -65,7 +63,7 @@ export function AiChatModal({
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: `I understand you're asking about: "${userMessage.content}". Based on your declared intuition and current content, I can help guide you. However, I will not write the content for you. Would you like me to suggest how to structure this section or explain a concept?`,
+        content: `Entendo que você está perguntando sobre: "${userMessage.content}". Com base na sua intenção declarada e no conteúdo atual, posso ajudar a guiá-lo. No entanto, não escrevo o conteúdo por você. Gostaria que eu sugerisse como estruturar esta seção ou explicasse um conceito?`,
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, assistantMessage]);
@@ -83,51 +81,50 @@ export function AiChatModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={onClose}>
+      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
-        <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900">AI Guidance Chat</h3>
-            <p className="text-xs text-gray-500 mt-1">
-              I guide, explain, and suggest - I never write for you
-            </p>
+        <div className="px-6 py-4 flex items-center justify-between border-b border-gray-200">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 flex items-center justify-center">
+              <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900">Chat com IA</h3>
           </div>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
           {messages.map((message) => (
             <div
               key={message.id}
               className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                className={`max-w-[85%] rounded-lg px-3 py-2 ${
                   message.role === 'user'
-                    ? 'bg-gray-900 text-white'
+                    ? 'bg-blue-600 text-white'
                     : 'bg-gray-100 text-gray-900'
                 }`}
               >
                 <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                <p className="text-xs opacity-70 mt-1">
-                  {message.timestamp.toLocaleTimeString()}
-                </p>
               </div>
             </div>
           ))}
 
           {isLoading && (
             <div className="flex justify-start">
-              <div className="bg-gray-100 rounded-lg px-4 py-2">
+              <div className="bg-gray-100 rounded-lg px-3 py-2">
                 <div className="flex space-x-1">
                   <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
                   <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
@@ -141,22 +138,22 @@ export function AiChatModal({
         </div>
 
         {/* Input */}
-        <div className="border-t border-gray-200 px-6 py-4">
+        <div className="px-6 py-4">
           <div className="flex gap-2">
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder={t('ai.chatPlaceholder')}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 resize-none"
+              placeholder="Digite sua pergunta..."
+              className="flex-1 px-4 py-2 rounded-md focus:outline-none resize-none"
               rows={2}
             />
             <button
               onClick={handleSend}
               disabled={!input.trim() || isLoading}
-              className="px-6 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Send
+              Enviar
             </button>
           </div>
         </div>
@@ -164,4 +161,3 @@ export function AiChatModal({
     </div>
   );
 }
-
