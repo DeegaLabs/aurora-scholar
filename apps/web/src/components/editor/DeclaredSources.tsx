@@ -20,7 +20,6 @@ interface DeclaredSourcesProps {
 const MAX_SOURCES = 300;
 
 export function DeclaredSources({ sources, onAddSource, onRemoveSource }: DeclaredSourcesProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [modalStep, setModalStep] = useState<'main' | 'link' | 'youtube' | 'text'>('main');
   const [linkUrl, setLinkUrl] = useState('');
@@ -185,40 +184,21 @@ export function DeclaredSources({ sources, onAddSource, onRemoveSource }: Declar
 
   return (
     <>
-      <div className="border border-gray-200 rounded-lg bg-white p-6">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              <h3 className="text-sm font-semibold text-gray-900">
-                Declared Sources
-              </h3>
+      <div className="bg-white">
+        {/* Always expanded in sidebar layout */}
+        <div className="mb-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              {sources.length > 0 && (
+                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                  {sources.length}/{MAX_SOURCES}
+                </span>
+              )}
             </div>
-            <p className="text-xs text-gray-500">
-              Upload PDFs, links, videos, or audio. AI will use only these as reference.
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            {sources.length > 0 && (
-              <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                {sources.length}/{MAX_SOURCES}
-              </span>
-            )}
-            {!isExpanded && (
-              <button
-                onClick={() => setIsExpanded(true)}
-                className="text-sm text-gray-600 hover:text-gray-900"
-              >
-                Show
-              </button>
-            )}
           </div>
         </div>
 
-        {isExpanded && (
-          <div className="space-y-4">
+        <div className="space-y-4">
             {/* Add Source Button */}
             <button
               onClick={() => {
@@ -283,8 +263,7 @@ export function DeclaredSources({ sources, onAddSource, onRemoveSource }: Declar
                 <p className="text-xs mt-1">Click &quot;Add Sources&quot; to include PDFs, websites, text, video or audio files</p>
               </div>
             )}
-          </div>
-        )}
+        </div>
       </div>
 
       {/* Add Source Modal */}
