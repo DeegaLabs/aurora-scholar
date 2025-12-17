@@ -9,6 +9,10 @@ import { PreviewModal } from '@/components/editor/PreviewModal';
 import { AiChatModal } from '@/components/editor/AiChatModal';
 import { DeclaredSources, Source } from '@/components/editor/DeclaredSources';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { HelpWriteModal } from '@/components/editor/HelpWriteModal';
+import { SuggestStructureModal } from '@/components/editor/SuggestStructureModal';
+import { CheckCoherenceModal } from '@/components/editor/CheckCoherenceModal';
+import { RefinementMenu } from '@/components/editor/RefinementMenu';
 // Wallet integration will be added in Task 10
 // import { useWallet } from '@solana/wallet-adapter-react';
 
@@ -24,8 +28,13 @@ export default function EditorPage() {
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [isAiChatModalOpen, setIsAiChatModalOpen] = useState(false);
+  const [isHelpWriteModalOpen, setIsHelpWriteModalOpen] = useState(false);
+  const [isSuggestStructureModalOpen, setIsSuggestStructureModalOpen] = useState(false);
+  const [isCheckCoherenceModalOpen, setIsCheckCoherenceModalOpen] = useState(false);
+  const [isRefinementMenuOpen, setIsRefinementMenuOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [floatingButtonsEnabled, setFloatingButtonsEnabled] = useState(true);
 
   // Auto-save to localStorage with debounce
   useEffect(() => {
@@ -33,6 +42,7 @@ export default function EditorPage() {
     const savedIntuition = localStorage.getItem('aurora-editor-intuition');
     const savedSources = localStorage.getItem('aurora-editor-sources');
     const savedTitle = localStorage.getItem('aurora-editor-title');
+    const savedFloatingButtons = localStorage.getItem('aurora-editor-floating-buttons');
     
     if (savedContent) setContent(savedContent);
     if (savedIntuition) setDeclaredIntuition(savedIntuition);
@@ -43,6 +53,9 @@ export default function EditorPage() {
       } catch {
         // Ignore parse errors
       }
+    }
+    if (savedFloatingButtons !== null) {
+      setFloatingButtonsEnabled(savedFloatingButtons === 'true');
     }
   }, []);
 
@@ -76,6 +89,10 @@ export default function EditorPage() {
       localStorage.setItem('aurora-editor-title', articleTitle);
     }
   }, [articleTitle]);
+
+  useEffect(() => {
+    localStorage.setItem('aurora-editor-floating-buttons', String(floatingButtonsEnabled));
+  }, [floatingButtonsEnabled]);
 
   const handleAddSource = (source: Source) => {
     setSources((prev) => [...prev, source]);
@@ -161,11 +178,16 @@ export default function EditorPage() {
         <div className="flex-1 flex flex-col overflow-hidden bg-gray-50">
           <div className="flex-1 overflow-y-auto p-6">
             {/* Main Editor */}
-            <div className="border border-gray-200 rounded-lg bg-white shadow-sm">
+            <div className="border border-gray-200 rounded-lg bg-white shadow-sm relative overflow-visible">
               <Editor
                 content={content}
                 onChange={setContent}
                 placeholder={t('editorPlaceholder')}
+                floatingButtonsEnabled={floatingButtonsEnabled}
+                onHelpWrite={() => setIsHelpWriteModalOpen(true)}
+                onSuggestStructure={() => setIsSuggestStructureModalOpen(true)}
+                onCheckCoherence={() => setIsCheckCoherenceModalOpen(true)}
+                onMoreOptions={() => setIsRefinementMenuOpen(true)}
               />
               {/* Word count */}
               {content && (
@@ -217,6 +239,8 @@ export default function EditorPage() {
             declaredIntuition={declaredIntuition}
             onDeclaredIntuitionChange={setDeclaredIntuition}
             onOpenChat={() => setIsAiChatModalOpen(true)}
+            floatingButtonsEnabled={floatingButtonsEnabled}
+            onFloatingButtonsEnabledChange={setFloatingButtonsEnabled}
           />
         </div>
       </div>
@@ -256,6 +280,52 @@ export default function EditorPage() {
           onClose={() => setIsAiChatModalOpen(false)}
           content={content}
           declaredIntuition={declaredIntuition}
+        />
+      )}
+
+      {/* Help Write Modal */}
+      {isHelpWriteModalOpen && (
+        <HelpWriteModal
+          isOpen={isHelpWriteModalOpen}
+          onClose={() => {
+            setIsHelpWriteModalOpen(false);
+          }}
+          onGenerate={async (description) => {
+            // TODO: Call API to generate structure suggestions
+            console.log('Generate help for:', description);
+            // For now, just close the modal
+          }}
+        />
+      )}
+
+      {/* Suggest Structure Modal */}
+      {isSuggestStructureModalOpen && (
+        <SuggestStructureModal
+          isOpen={isSuggestStructureModalOpen}
+          onClose={() => setIsSuggestStructureModalOpen(false)}
+          content={content}
+        />
+      )}
+
+      {/* Check Coherence Modal */}
+      {isCheckCoherenceModalOpen && (
+        <CheckCoherenceModal
+          isOpen={isCheckCoherenceModalOpen}
+          onClose={() => setIsCheckCoherenceModalOpen(false)}
+          content={content}
+          declaredIntuition={declaredIntuition}
+        />
+      )}
+
+      {/* Refinement Menu */}
+      {isRefinementMenuOpen && (
+        <RefinementMenu
+          isOpen={isRefinementMenuOpen}
+          onClose={() => setIsRefinementMenuOpen(false)}
+          onAction={(action) => {
+            console.log('Refinement action:', action);
+            // TODO: Implement refinement actions
+          }}
         />
       )}
     </div>

@@ -10,14 +10,29 @@ import TableRow from '@tiptap/extension-table-row';
 import TableCell from '@tiptap/extension-table-cell';
 import TableHeader from '@tiptap/extension-table-header';
 import { useEffect, useState } from 'react';
+import { FloatingAiButtons } from './FloatingAiButtons';
 
 interface EditorProps {
   content: string;
   onChange: (content: string) => void;
   placeholder?: string;
+  floatingButtonsEnabled?: boolean;
+  onHelpWrite?: () => void;
+  onSuggestStructure?: () => void;
+  onCheckCoherence?: () => void;
+  onMoreOptions?: () => void;
 }
 
-export function Editor({ content, onChange, placeholder = 'Start writing...' }: EditorProps) {
+export function Editor({ 
+  content, 
+  onChange, 
+  placeholder = 'Start writing...', 
+  floatingButtonsEnabled = true,
+  onHelpWrite,
+  onSuggestStructure,
+  onCheckCoherence,
+  onMoreOptions,
+}: EditorProps) {
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
   const [showTableModal, setShowTableModal] = useState(false);
@@ -30,6 +45,7 @@ export function Editor({ content, onChange, placeholder = 'Start writing...' }: 
   const [tableCols, setTableCols] = useState('3');
 
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit.configure({
         heading: {
@@ -62,7 +78,7 @@ export function Editor({ content, onChange, placeholder = 'Start writing...' }: 
       TableHeader,
       TableCell,
     ],
-    content,
+    content: content || '',
     editorProps: {
       attributes: {
         class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-xl max-w-none focus:outline-none px-6 py-4 min-h-[500px]',
@@ -73,9 +89,22 @@ export function Editor({ content, onChange, placeholder = 'Start writing...' }: 
     },
   });
 
+  // Sync content from props to editor (only when content changes externally)
   useEffect(() => {
-    if (editor && content !== editor.getHTML()) {
-      editor.commands.setContent(content);
+    if (!editor) return;
+    
+    const currentContent = editor.getHTML();
+    // Only update if content actually changed (avoid infinite loops)
+    // Skip if editor content matches or if both are empty
+    const editorIsEmpty = !currentContent || currentContent === '<p></p>' || currentContent === '<p><br></p>';
+    const propIsEmpty = !content || content.trim() === '';
+    
+    if (editorIsEmpty && propIsEmpty) {
+      return; // Both empty, no need to update
+    }
+    
+    if (content && content !== currentContent) {
+      editor.commands.setContent(content, false);
     }
   }, [content, editor]);
 
@@ -369,7 +398,18 @@ export function Editor({ content, onChange, placeholder = 'Start writing...' }: 
       </div>
 
       {/* Editor Content */}
-      <EditorContent editor={editor} />
+      <div className="relative overflow-visible">
+        <EditorContent editor={editor} />
+        {/* Floating AI Buttons */}
+        <FloatingAiButtons
+          editor={editor}
+          enabled={floatingButtonsEnabled}
+          onHelpWrite={onHelpWrite}
+          onSuggestStructure={onSuggestStructure}
+          onCheckCoherence={onCheckCoherence}
+          onMoreOptions={onMoreOptions}
+        />
+      </div>
 
       {/* Link Modal */}
       {showLinkModal && (
