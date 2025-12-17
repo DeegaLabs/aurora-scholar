@@ -290,11 +290,8 @@ export default function EditorPage() {
           onClose={() => {
             setIsHelpWriteModalOpen(false);
           }}
-          onGenerate={async (description) => {
-            // TODO: Call API to generate structure suggestions
-            console.log('Generate help for:', description);
-            // For now, just close the modal
-          }}
+          content={content}
+          declaredIntuition={declaredIntuition}
         />
       )}
 

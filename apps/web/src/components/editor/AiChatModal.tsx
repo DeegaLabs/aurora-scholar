@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { aiAssistantChat } from '@/lib/api/aiAssistant';
 
 interface Message {
   id: string;
@@ -19,13 +20,13 @@ interface AiChatModalProps {
 export function AiChatModal({
   isOpen,
   onClose,
-  content: _content,
-  declaredIntuition: _declaredIntuition,
+  content,
+  declaredIntuition,
 }: AiChatModalProps) {
-  // TODO: Use content and declaredIntuition when connecting to AI API (Task 6)
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -34,7 +35,8 @@ export function AiChatModal({
       setMessages([{
         id: '1',
         role: 'assistant',
-        content: 'Olá! Sou seu assistente de IA ético. Posso ajudar com estrutura, referências, gramática e coerência. Nunca escrevo conteúdo por você - apenas guio e explico. Como posso ajudar?',
+        content:
+          'Olá! Sou seu assistente de IA ético. Posso ajudar com estrutura, referências, gramática e coerência. Nunca escrevo conteúdo por você — apenas guio e explico. Como posso ajudar?',
         timestamp: new Date(),
       }]);
     }
@@ -47,6 +49,8 @@ export function AiChatModal({
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
+    setError(null);
+
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
@@ -58,17 +62,26 @@ export function AiChatModal({
     setInput('');
     setIsLoading(true);
 
-    // TODO: Replace with real API call (Task 6)
-    setTimeout(() => {
+    try {
+      const data = await aiAssistantChat({
+        question: userMessage.content,
+        text: content || '',
+        chatHistory: messages.map((m) => ({ role: m.role, content: m.content })),
+        agentConfig: declaredIntuition ? { declaredIntuition } : undefined,
+      });
+
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: `Entendo que você está perguntando sobre: "${userMessage.content}". Com base na sua intenção declarada e no conteúdo atual, posso ajudar a guiá-lo. No entanto, não escrevo o conteúdo por você. Gostaria que eu sugerisse como estruturar esta seção ou explicasse um conceito?`,
+        content: data.answer,
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, assistantMessage]);
+    } catch (e: any) {
+      setError(e?.message || 'Falha ao consultar a IA.');
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -105,6 +118,12 @@ export function AiChatModal({
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
+          {error && (
+            <div className="border border-red-200 bg-red-50 text-red-800 rounded-lg px-3 py-2 text-sm">
+              {error}
+            </div>
+          )}
+
           {messages.map((message) => (
             <div
               key={message.id}

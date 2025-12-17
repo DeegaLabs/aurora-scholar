@@ -1,16 +1,20 @@
 'use client';
 
 import { useState } from 'react';
+import { aiAssistantChat } from '@/lib/api/aiAssistant';
 
 interface HelpWriteModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onGenerate?: (description: string) => void;
+  content: string;
+  declaredIntuition: string;
 }
 
-export function HelpWriteModal({ isOpen, onClose, onGenerate }: HelpWriteModalProps) {
+export function HelpWriteModal({ isOpen, onClose, content, declaredIntuition }: HelpWriteModalProps) {
   const [description, setDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [result, setResult] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
@@ -18,19 +22,30 @@ export function HelpWriteModal({ isOpen, onClose, onGenerate }: HelpWriteModalPr
     if (!description.trim()) return;
 
     setIsLoading(true);
+    setError(null);
+    setResult(null);
     
-    // Call callback to handle generation
-    if (onGenerate) {
-      await onGenerate(description);
-    }
-    
-    // TODO: Call API /api/ai-assistant/help-write
-    // For now, just close after a delay
-    setTimeout(() => {
+    try {
+      const question = [
+        'Preciso de ajuda para escrever (sem você escrever o texto por mim).',
+        declaredIntuition ? `Minha intenção declarada é: "${declaredIntuition}".` : null,
+        `Pedido: ${description}`,
+        'Responda apenas com orientação: estrutura, passos, perguntas-guia e checklist.',
+      ]
+        .filter(Boolean)
+        .join('\n');
+
+      const data = await aiAssistantChat({
+        question,
+        text: content || '',
+      });
+
+      setResult(data.answer);
+    } catch (e: any) {
+      setError(e?.message || 'Falha ao consultar a IA.');
+    } finally {
       setIsLoading(false);
-      setDescription('');
-      onClose();
-    }, 1000);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -70,6 +85,18 @@ export function HelpWriteModal({ isOpen, onClose, onGenerate }: HelpWriteModalPr
             className="w-full px-4 py-3 rounded-md focus:outline-none min-h-[120px] resize-none"
             autoFocus
           />
+
+          {error && (
+            <div className="mt-4 border border-red-200 bg-red-50 text-red-800 rounded-lg px-4 py-3 text-sm">
+              {error}
+            </div>
+          )}
+
+          {result && (
+            <div className="mt-4 border border-gray-200 bg-gray-50 rounded-lg px-4 py-3 text-sm text-gray-900 whitespace-pre-wrap">
+              {result}
+            </div>
+          )}
         </div>
 
         {/* Footer */}
@@ -79,7 +106,7 @@ export function HelpWriteModal({ isOpen, onClose, onGenerate }: HelpWriteModalPr
             disabled={!description.trim() || isLoading}
             className="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? 'Criando...' : 'Criar'}
+            {isLoading ? 'Analisando...' : 'Criar'}
           </button>
         </div>
       </div>
