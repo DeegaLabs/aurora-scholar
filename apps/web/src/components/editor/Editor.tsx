@@ -19,8 +19,13 @@ interface EditorProps {
 
 export function Editor({ content, onChange, placeholder = 'Start writing...' }: EditorProps) {
   const [showLinkModal, setShowLinkModal] = useState(false);
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [showTableModal, setShowTableModal] = useState(false);
   const [linkUrl, setLinkUrl] = useState('');
   const [linkText, setLinkText] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
+  const [tableRows, setTableRows] = useState('3');
+  const [tableCols, setTableCols] = useState('3');
 
   const editor = useEditor({
     extensions: [
@@ -94,19 +99,21 @@ export function Editor({ content, onChange, placeholder = 'Start writing...' }: 
   };
 
   const handleInsertImage = () => {
-    if (!editor) return;
-    const url = prompt('Enter image URL:');
-    if (url) {
-      editor.chain().focus().setImage({ src: url }).run();
-    }
+    if (!editor || !imageUrl.trim()) return;
+    editor.chain().focus().setImage({ src: imageUrl }).run();
+    setImageUrl('');
+    setShowImageModal(false);
   };
 
   const handleInsertTable = () => {
     if (!editor) return;
-    const rows = prompt('Number of rows:', '3');
-    const cols = prompt('Number of columns:', '3');
-    if (rows && cols) {
-      editor.chain().focus().insertTable({ rows: parseInt(rows), cols: parseInt(cols), withHeaderRow: true }).run();
+    const rows = parseInt(tableRows) || 3;
+    const cols = parseInt(tableCols) || 3;
+    if (rows > 0 && cols > 0) {
+      editor.chain().focus().insertTable({ rows, cols, withHeaderRow: true }).run();
+      setTableRows('3');
+      setTableCols('3');
+      setShowTableModal(false);
     }
   };
 
@@ -254,7 +261,7 @@ export function Editor({ content, onChange, placeholder = 'Start writing...' }: 
 
         {/* Image */}
         <button
-          onClick={handleInsertImage}
+          onClick={() => setShowImageModal(true)}
           className="px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded"
           title="Insert Image"
         >
@@ -265,7 +272,7 @@ export function Editor({ content, onChange, placeholder = 'Start writing...' }: 
 
         {/* Table */}
         <button
-          onClick={handleInsertTable}
+          onClick={() => setShowTableModal(true)}
           className="px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded"
           title="Insert Table"
         >
@@ -353,6 +360,11 @@ export function Editor({ content, onChange, placeholder = 'Start writing...' }: 
                   placeholder="https://..."
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"
                   autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && linkUrl.trim()) {
+                      handleSetLink();
+                    }
+                  }}
                 />
               </div>
               <div>
@@ -365,6 +377,11 @@ export function Editor({ content, onChange, placeholder = 'Start writing...' }: 
                   onChange={(e) => setLinkText(e.target.value)}
                   placeholder="Link text"
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && linkUrl.trim()) {
+                      handleSetLink();
+                    }
+                  }}
                 />
               </div>
             </div>
@@ -382,6 +399,132 @@ export function Editor({ content, onChange, placeholder = 'Start writing...' }: 
               <button
                 onClick={handleSetLink}
                 disabled={!linkUrl.trim()}
+                className="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Insert
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Image Modal */}
+      {showImageModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={() => setShowImageModal(false)}>
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
+            <div className="border-b border-gray-200 px-6 py-4">
+              <h3 className="text-lg font-semibold text-gray-900">Insert Image</h3>
+            </div>
+            <div className="px-6 py-4 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Image URL *
+                </label>
+                <input
+                  type="url"
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                  placeholder="https://..."
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && imageUrl.trim()) {
+                      handleInsertImage();
+                    }
+                  }}
+                />
+              </div>
+              <p className="text-xs text-gray-500">
+                Enter the URL of the image you want to insert. For now, only external URLs are supported.
+              </p>
+            </div>
+            <div className="border-t border-gray-200 px-6 py-4 flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowImageModal(false);
+                  setImageUrl('');
+                }}
+                className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-md"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleInsertImage}
+                disabled={!imageUrl.trim()}
+                className="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Insert
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Table Modal */}
+      {showTableModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={() => setShowTableModal(false)}>
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
+            <div className="border-b border-gray-200 px-6 py-4">
+              <h3 className="text-lg font-semibold text-gray-900">Insert Table</h3>
+            </div>
+            <div className="px-6 py-4 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Rows *
+                  </label>
+                  <input
+                    type="number"
+                    value={tableRows}
+                    onChange={(e) => setTableRows(e.target.value)}
+                    min="1"
+                    max="20"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && tableRows && tableCols) {
+                        handleInsertTable();
+                      }
+                    }}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Columns *
+                  </label>
+                  <input
+                    type="number"
+                    value={tableCols}
+                    onChange={(e) => setTableCols(e.target.value)}
+                    min="1"
+                    max="20"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && tableRows && tableCols) {
+                        handleInsertTable();
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+              <p className="text-xs text-gray-500">
+                The table will include a header row. You can add or remove rows and columns after insertion.
+              </p>
+            </div>
+            <div className="border-t border-gray-200 px-6 py-4 flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowTableModal(false);
+                  setTableRows('3');
+                  setTableCols('3');
+                }}
+                className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-md"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleInsertTable}
+                disabled={!tableRows || !tableCols || parseInt(tableRows) < 1 || parseInt(tableCols) < 1}
                 className="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Insert
