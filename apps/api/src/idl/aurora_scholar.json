@@ -1,0 +1,294 @@
+{
+  "address": "HoRNS4q7T69m6YHYx8Qsg4kAffwNNu8R25XpReZnvWAe",
+  "metadata": {
+    "name": "aurora_scholar",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Decentralized academic publishing on Solana"
+  },
+  "instructions": [
+    {
+      "name": "publish_article",
+      "discriminator": [
+        151,
+        40,
+        172,
+        108,
+        86,
+        138,
+        159,
+        171
+      ],
+      "accounts": [
+        {
+          "name": "article",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  114,
+                  116,
+                  105,
+                  99,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "author"
+              },
+              {
+                "kind": "arg",
+                "path": "content_hash"
+              }
+            ]
+          }
+        },
+        {
+          "name": "author",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "content_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "intuition_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "arweave_id",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "type": "string"
+        },
+        {
+          "name": "ai_scope",
+          "type": "string"
+        },
+        {
+          "name": "is_public",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "update_visibility",
+      "discriminator": [
+        164,
+        181,
+        36,
+        151,
+        250,
+        65,
+        206,
+        17
+      ],
+      "accounts": [
+        {
+          "name": "article",
+          "writable": true
+        },
+        {
+          "name": "author",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "is_public",
+          "type": "bool"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Article",
+      "discriminator": [
+        190,
+        223,
+        81,
+        111,
+        130,
+        251,
+        187,
+        202
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "ArticlePublished",
+      "discriminator": [
+        238,
+        179,
+        87,
+        158,
+        6,
+        100,
+        27,
+        216
+      ]
+    },
+    {
+      "name": "VisibilityUpdated",
+      "discriminator": [
+        67,
+        74,
+        163,
+        161,
+        188,
+        229,
+        136,
+        114
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "Unauthorized",
+      "msg": "You are not authorized to perform this action"
+    },
+    {
+      "code": 6001,
+      "name": "InvalidContentHash",
+      "msg": "Invalid content hash"
+    },
+    {
+      "code": 6002,
+      "name": "TitleTooLong",
+      "msg": "Title too long (max 128 chars)"
+    },
+    {
+      "code": 6003,
+      "name": "AiScopeTooLong",
+      "msg": "AI scope too long (max 256 chars)"
+    }
+  ],
+  "types": [
+    {
+      "name": "Article",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "author",
+            "type": "pubkey"
+          },
+          {
+            "name": "content_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "intuition_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "arweave_id",
+            "type": "string"
+          },
+          {
+            "name": "title",
+            "type": "string"
+          },
+          {
+            "name": "ai_scope",
+            "type": "string"
+          },
+          {
+            "name": "is_public",
+            "type": "bool"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ArticlePublished",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "author",
+            "type": "pubkey"
+          },
+          {
+            "name": "content_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          },
+          {
+            "name": "is_public",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VisibilityUpdated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "article",
+            "type": "pubkey"
+          },
+          {
+            "name": "is_public",
+            "type": "bool"
+          }
+        ]
+      }
+    }
+  ]
+}
