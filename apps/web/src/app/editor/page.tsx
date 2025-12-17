@@ -113,9 +113,23 @@ export default function EditorPage() {
       <header className="border-b border-gray-200 bg-white sticky top-0 z-40 flex-shrink-0">
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <h1 className="text-xl font-display font-semibold text-gray-900">
-              {t('title')}
-            </h1>
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              {/* Logo/Icon */}
+              <div className="w-8 h-8 rounded-full bg-white border border-gray-300 flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              {/* Title Input */}
+              <input
+                type="text"
+                value={articleTitle || ''}
+                onChange={(e) => setArticleTitle(e.target.value)}
+                placeholder="Untitled article"
+                className="flex-1 min-w-0 px-2 py-1 text-lg font-medium text-gray-900 bg-transparent border-none outline-none focus:bg-gray-50 rounded focus:ring-1 focus:ring-gray-300"
+                maxLength={128}
+              />
+            </div>
             <div className="flex items-center gap-4">
               <LanguageSwitcher />
               {/* Save indicator */}
@@ -185,21 +199,6 @@ export default function EditorPage() {
         {/* Center Column - Editor */}
         <div className="flex-1 flex flex-col overflow-hidden bg-gray-50">
           <div className="flex-1 overflow-y-auto p-6">
-            {/* Article Title */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Article Title (optional)
-              </label>
-              <input
-                type="text"
-                value={articleTitle}
-                onChange={(e) => setArticleTitle(e.target.value)}
-                placeholder={t('titlePlaceholder')}
-                className="w-full px-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white"
-                maxLength={128}
-              />
-            </div>
-
             {/* Main Editor */}
             <div className="border border-gray-200 rounded-lg bg-white shadow-sm">
               <Editor
