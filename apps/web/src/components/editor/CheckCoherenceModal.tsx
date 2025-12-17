@@ -1,0 +1,114 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+
+interface CheckCoherenceModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  content: string;
+  declaredIntuition: string;
+}
+
+export function CheckCoherenceModal({ isOpen, onClose, content, declaredIntuition }: CheckCoherenceModalProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [results, setResults] = useState<{ aligned: boolean; alerts: string[] } | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsLoading(true);
+      // TODO: Call API /api/ai-assistant/check-coherence
+      setTimeout(() => {
+        const hasIntuition = declaredIntuition.trim().length > 0;
+        const hasContent = content.trim().length > 0;
+        
+        if (!hasIntuition) {
+          setResults({
+            aligned: false,
+            alerts: ['No declared intuition found. Please declare your initial idea in the Ethical Layers panel.'],
+          });
+        } else if (!hasContent) {
+          setResults({
+            aligned: false,
+            alerts: ['No content found. Start writing to check coherence.'],
+          });
+        } else {
+          // Mock coherence check
+          setResults({
+            aligned: true,
+            alerts: [
+              '✓ Content aligns with declared intuition',
+              '✓ No inconsistencies detected',
+              'Consider adding more details to strengthen your arguments',
+            ],
+          });
+        }
+        setIsLoading(false);
+      }, 1000);
+    }
+  }, [isOpen, content, declaredIntuition]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={onClose}>
+      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+        {/* Header */}
+        <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-gray-900">Coherence Check</h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto px-6 py-4">
+          {isLoading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+              <p className="text-sm text-gray-600">Checking coherence...</p>
+            </div>
+          ) : results ? (
+            <div className="space-y-4">
+              <div className={`p-4 rounded-lg ${results.aligned ? 'bg-green-50 border border-green-200' : 'bg-yellow-50 border border-yellow-200'}`}>
+                <div className="flex items-center gap-2 mb-2">
+                  {results.aligned ? (
+                    <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                  )}
+                  <h4 className={`text-sm font-semibold ${results.aligned ? 'text-green-900' : 'text-yellow-900'}`}>
+                    {results.aligned ? 'Coherent' : 'Attention Needed'}
+                  </h4>
+                </div>
+              </div>
+              <div className="space-y-2">
+                {results.alerts.map((alert, index) => (
+                  <div key={index} className="text-sm text-gray-700 p-3 bg-gray-50 rounded-lg">
+                    {alert}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
+
+        {/* Footer */}
+        <div className="border-t border-gray-200 px-6 py-4 flex justify-end">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-md"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
