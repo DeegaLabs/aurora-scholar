@@ -9,6 +9,7 @@ import Table from '@tiptap/extension-table';
 import TableRow from '@tiptap/extension-table-row';
 import TableCell from '@tiptap/extension-table-cell';
 import TableHeader from '@tiptap/extension-table-header';
+import TextAlign from '@tiptap/extension-text-align';
 import { useEffect, useState } from 'react';
 import { FloatingAiButtons } from './FloatingAiButtons';
 
@@ -43,6 +44,7 @@ export function Editor({
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [tableRows, setTableRows] = useState('3');
   const [tableCols, setTableCols] = useState('3');
+  const [showAlignMenu, setShowAlignMenu] = useState(false);
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -77,6 +79,9 @@ export function Editor({
       TableRow,
       TableHeader,
       TableCell,
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+      }),
     ],
     content: content || '',
     editorProps: {
@@ -90,6 +95,21 @@ export function Editor({
   });
 
   // Sync content from props to editor (only when content changes externally)
+  // Close align menu when clicking outside
+  useEffect(() => {
+    if (!showAlignMenu) return;
+    
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (!target.closest('[data-align-menu]')) {
+        setShowAlignMenu(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showAlignMenu]);
+
   useEffect(() => {
     if (!editor) return;
     
@@ -197,7 +217,7 @@ export function Editor({
               ? 'bg-gray-900 text-white'
               : 'text-gray-700 hover:bg-gray-100'
           }`}
-          title="Bold"
+          title="Negrito"
         >
           <strong>B</strong>
         </button>
@@ -209,7 +229,7 @@ export function Editor({
               ? 'bg-gray-900 text-white'
               : 'text-gray-700 hover:bg-gray-100'
           }`}
-          title="Italic"
+          title="Itálico"
         >
           <em>I</em>
         </button>
@@ -217,62 +237,197 @@ export function Editor({
 
         {/* Headings */}
         <button
-          onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => {
+            if (editor.isActive('heading', { level: 1 })) {
+              // Se já está em H1, remove o heading (volta para parágrafo)
+              editor.chain().focus().setParagraph().run();
+            } else {
+              // Aplica H1 ao texto selecionado ou parágrafo atual
+              editor.chain().focus().setHeading({ level: 1 }).run();
+            }
+          }}
           className={`px-3 py-1.5 text-sm font-medium rounded ${
             editor.isActive('heading', { level: 1 })
               ? 'bg-gray-900 text-white'
               : 'text-gray-700 hover:bg-gray-100'
           }`}
-          title="Heading 1"
+          title="Título 1"
         >
-          H1
+          <span className="text-xs font-bold">H1</span>
         </button>
         <button
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => {
+            if (editor.isActive('heading', { level: 2 })) {
+              // Se já está em H2, remove o heading (volta para parágrafo)
+              editor.chain().focus().setParagraph().run();
+            } else {
+              // Aplica H2 ao texto selecionado ou parágrafo atual
+              editor.chain().focus().setHeading({ level: 2 }).run();
+            }
+          }}
           className={`px-3 py-1.5 text-sm font-medium rounded ${
             editor.isActive('heading', { level: 2 })
               ? 'bg-gray-900 text-white'
               : 'text-gray-700 hover:bg-gray-100'
           }`}
-          title="Heading 2"
+          title="Título 2"
         >
-          H2
+          <span className="text-xs font-bold">H2</span>
         </button>
         <button
-          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => {
+            if (editor.isActive('heading', { level: 3 })) {
+              // Se já está em H3, remove o heading (volta para parágrafo)
+              editor.chain().focus().setParagraph().run();
+            } else {
+              // Aplica H3 ao texto selecionado ou parágrafo atual
+              editor.chain().focus().setHeading({ level: 3 }).run();
+            }
+          }}
           className={`px-3 py-1.5 text-sm font-medium rounded ${
             editor.isActive('heading', { level: 3 })
               ? 'bg-gray-900 text-white'
               : 'text-gray-700 hover:bg-gray-100'
           }`}
-          title="Heading 3"
+          title="Título 3"
         >
-          H3
+          <span className="text-xs font-bold">H3</span>
         </button>
         <div className="w-px h-6 bg-gray-300" />
 
         {/* Lists */}
         <button
+          onMouseDown={(e) => e.preventDefault()}
           onClick={() => editor.chain().focus().toggleBulletList().run()}
           className={`px-3 py-1.5 text-sm font-medium rounded ${
             editor.isActive('bulletList')
               ? 'bg-gray-900 text-white'
               : 'text-gray-700 hover:bg-gray-100'
           }`}
-          title="Bullet List"
+          title="Lista com marcadores"
         >
-          •
+          <span className="text-base">•</span>
         </button>
         <button
+          onMouseDown={(e) => e.preventDefault()}
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
           className={`px-3 py-1.5 text-sm font-medium rounded ${
             editor.isActive('orderedList')
               ? 'bg-gray-900 text-white'
               : 'text-gray-700 hover:bg-gray-100'
           }`}
-          title="Numbered List"
+          title="Lista numerada"
         >
-          1.
+          <span className="text-xs">1.</span>
+        </button>
+        <div className="w-px h-6 bg-gray-300" />
+
+        {/* Text Alignment */}
+        <div className="relative" data-align-menu>
+          <button
+            onClick={() => setShowAlignMenu(!showAlignMenu)}
+            className={`px-3 py-1.5 text-sm font-medium rounded flex items-center gap-1 ${
+              editor.isActive({ textAlign: 'left' }) || 
+              editor.isActive({ textAlign: 'center' }) || 
+              editor.isActive({ textAlign: 'right' }) || 
+              editor.isActive({ textAlign: 'justify' })
+                ? 'bg-gray-900 text-white'
+                : 'text-gray-700 hover:bg-gray-100'
+            }`}
+            title="Alinhar"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          {showAlignMenu && (
+            <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-50">
+              <button
+                onClick={() => {
+                  editor.chain().focus().setTextAlign('left').run();
+                  setShowAlignMenu(false);
+                }}
+                className={`w-full px-3 py-2 flex items-center justify-center hover:bg-gray-50 ${
+                  editor.isActive({ textAlign: 'left' }) ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
+                }`}
+                title="Alinhar à esquerda"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h8M4 18h16" />
+                </svg>
+              </button>
+              <button
+                onClick={() => {
+                  editor.chain().focus().setTextAlign('center').run();
+                  setShowAlignMenu(false);
+                }}
+                className={`w-full px-3 py-2 flex items-center justify-center hover:bg-gray-50 ${
+                  editor.isActive({ textAlign: 'center' }) ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
+                }`}
+                title="Centralizar"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M8 12h8M4 18h16" />
+                </svg>
+              </button>
+              <button
+                onClick={() => {
+                  editor.chain().focus().setTextAlign('right').run();
+                  setShowAlignMenu(false);
+                }}
+                className={`w-full px-3 py-2 flex items-center justify-center hover:bg-gray-50 ${
+                  editor.isActive({ textAlign: 'right' }) ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
+                }`}
+                title="Alinhar à direita"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M12 12h8M4 18h16" />
+                </svg>
+              </button>
+              <button
+                onClick={() => {
+                  editor.chain().focus().setTextAlign('justify').run();
+                  setShowAlignMenu(false);
+                }}
+                className={`w-full px-3 py-2 flex items-center justify-center hover:bg-gray-50 ${
+                  editor.isActive({ textAlign: 'justify' }) ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
+                }`}
+                title="Justificar"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Indent */}
+        <button
+          onClick={() => editor.chain().focus().liftListItem('listItem').run()}
+          disabled={!editor.can().liftListItem('listItem')}
+          className="px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+          title="Diminuir recuo"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <button
+          onClick={() => editor.chain().focus().sinkListItem('listItem').run()}
+          disabled={!editor.can().sinkListItem('listItem')}
+          className="px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+          title="Aumentar recuo"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
         </button>
         <div className="w-px h-6 bg-gray-300" />
 
@@ -284,14 +439,14 @@ export function Editor({
               ? 'bg-gray-900 text-white'
               : 'text-gray-700 hover:bg-gray-100'
           }`}
-          title="Quote"
+          title="Citação"
         >
           &quot;
         </button>
         <button
           onClick={() => editor.chain().focus().setHorizontalRule().run()}
           className="px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded"
-          title="Horizontal Rule"
+          title="Linha horizontal"
         >
           ─
         </button>
@@ -311,7 +466,7 @@ export function Editor({
               ? 'bg-gray-900 text-white'
               : 'text-gray-700 hover:bg-gray-100'
           }`}
-          title="Link"
+          title="Inserir link"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
@@ -322,7 +477,7 @@ export function Editor({
         <button
           onClick={() => setShowImageModal(true)}
           className="px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded"
-          title="Insert Image"
+          title="Inserir imagem"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -333,7 +488,7 @@ export function Editor({
         <button
           onClick={() => setShowTableModal(true)}
           className="px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded"
-          title="Insert Table"
+          title="Inserir tabela"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -347,49 +502,49 @@ export function Editor({
             <button
               onClick={() => editor.chain().focus().addColumnBefore().run()}
               className="px-2 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded"
-              title="Add Column Before"
+              title="Adicionar coluna antes"
             >
               +Col
             </button>
             <button
               onClick={() => editor.chain().focus().addColumnAfter().run()}
               className="px-2 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded"
-              title="Add Column After"
+              title="Adicionar coluna depois"
             >
               Col+
             </button>
             <button
               onClick={() => editor.chain().focus().deleteColumn().run()}
               className="px-2 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded"
-              title="Delete Column"
+              title="Remover coluna"
             >
               -Col
             </button>
             <button
               onClick={() => editor.chain().focus().addRowBefore().run()}
               className="px-2 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded"
-              title="Add Row Before"
+              title="Adicionar linha antes"
             >
               +Row
             </button>
             <button
               onClick={() => editor.chain().focus().addRowAfter().run()}
               className="px-2 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded"
-              title="Add Row After"
+              title="Adicionar linha depois"
             >
               Row+
             </button>
             <button
               onClick={() => editor.chain().focus().deleteRow().run()}
               className="px-2 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded"
-              title="Delete Row"
+              title="Remover linha"
             >
               -Row
             </button>
             <button
               onClick={() => editor.chain().focus().deleteTable().run()}
               className="px-2 py-1.5 text-xs font-medium text-red-700 hover:bg-red-50 rounded"
-              title="Delete Table"
+              title="Remover tabela"
             >
               Del
             </button>
@@ -416,7 +571,7 @@ export function Editor({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={() => setShowLinkModal(false)}>
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
             <div className="border-b border-gray-200 px-6 py-4">
-              <h3 className="text-lg font-semibold text-gray-900">Insert Link</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Inserir Link</h3>
             </div>
             <div className="px-6 py-4 space-y-4">
               <div>
@@ -439,13 +594,13 @@ export function Editor({
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Text (optional - uses selected text if empty)
+                  Texto (opcional - usa texto selecionado se vazio)
                 </label>
                 <input
                   type="text"
                   value={linkText}
                   onChange={(e) => setLinkText(e.target.value)}
-                  placeholder="Link text"
+                  placeholder="Texto do link"
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && linkUrl.trim()) {
@@ -464,14 +619,14 @@ export function Editor({
                 }}
                 className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-md"
               >
-                Cancel
+                Cancelar
               </button>
               <button
                 onClick={handleSetLink}
                 disabled={!linkUrl.trim()}
                 className="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Insert
+                Inserir
               </button>
             </div>
           </div>
@@ -488,13 +643,13 @@ export function Editor({
         }}>
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
             <div className="border-b border-gray-200 px-6 py-4">
-              <h3 className="text-lg font-semibold text-gray-900">Insert Image</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Inserir Imagem</h3>
             </div>
             <div className="px-6 py-4 space-y-4">
               {/* File Upload */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Upload Image
+                  Enviar Imagem
                 </label>
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
                   <input
@@ -512,9 +667,9 @@ export function Editor({
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                     </svg>
                     <span className="text-sm text-gray-600">
-                      {imageFile ? imageFile.name : 'Click to upload or drag and drop'}
+                      {imageFile ? imageFile.name : 'Clique para enviar ou arraste e solte'}
                     </span>
-                    <span className="text-xs text-gray-500 mt-1">PNG, JPG, GIF up to 10MB</span>
+                    <span className="text-xs text-gray-500 mt-1">PNG, JPG, GIF até 10MB</span>
                   </label>
                 </div>
                 {imagePreview && (
@@ -530,14 +685,14 @@ export function Editor({
                   <div className="w-full border-t border-gray-300"></div>
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">OR</span>
+                  <span className="px-2 bg-white text-gray-500">OU</span>
                 </div>
               </div>
 
               {/* URL Input */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Image URL
+                  URL da Imagem
                 </label>
                 <input
                   type="url"
@@ -567,14 +722,14 @@ export function Editor({
                 }}
                 className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-md"
               >
-                Cancel
+                Cancelar
               </button>
               <button
                 onClick={handleInsertImage}
                 disabled={!imageUrl.trim() && !imageFile}
                 className="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Insert
+                Inserir
               </button>
             </div>
           </div>
@@ -586,13 +741,13 @@ export function Editor({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={() => setShowTableModal(false)}>
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
             <div className="border-b border-gray-200 px-6 py-4">
-              <h3 className="text-lg font-semibold text-gray-900">Insert Table</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Inserir Tabela</h3>
             </div>
             <div className="px-6 py-4 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Rows *
+                    Linhas *
                   </label>
                   <input
                     type="number"
@@ -611,7 +766,7 @@ export function Editor({
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Columns *
+                    Colunas *
                   </label>
                   <input
                     type="number"
@@ -629,7 +784,7 @@ export function Editor({
                 </div>
               </div>
               <p className="text-xs text-gray-500">
-                The table will include a header row. You can add or remove rows and columns after insertion.
+                A tabela incluirá uma linha de cabeçalho. Você pode adicionar ou remover linhas e colunas após a inserção.
               </p>
             </div>
             <div className="border-t border-gray-200 px-6 py-4 flex justify-end gap-3">
@@ -641,14 +796,14 @@ export function Editor({
                 }}
                 className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-md"
               >
-                Cancel
+                Cancelar
               </button>
               <button
                 onClick={handleInsertTable}
                 disabled={!tableRows || !tableCols || parseInt(tableRows) < 1 || parseInt(tableCols) < 1}
                 className="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Insert
+                Inserir
               </button>
             </div>
           </div>

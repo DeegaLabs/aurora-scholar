@@ -141,6 +141,9 @@ importers:
       '@tiptap/extension-table-row':
         specifier: ^2.1.0
         version: 2.27.1(@tiptap/core@2.27.1)
+      '@tiptap/extension-text-align':
+        specifier: ^2.1.0
+        version: 2.27.1(@tiptap/core@2.27.1)
       '@tiptap/react':
         specifier: ^2.1.0
         version: 2.27.1(@tiptap/core@2.27.1)(@tiptap/pm@2.27.1)(react-dom@18.3.1)(react@18.3.1)
@@ -4617,6 +4620,14 @@ packages:
     dependencies:
       '@tiptap/core': 2.27.1(@tiptap/pm@2.27.1)
       '@tiptap/pm': 2.27.1
+    dev: false
+
+  /@tiptap/extension-text-align@2.27.1(@tiptap/core@2.27.1):
+    resolution: {integrity: sha512-D7dLPk7y5mDn9ZNANQ4K2gCq4vy+Emm5AdeWOGzNeqJsYrBotiQYXd9rb1QYjdup2kzAoKduMTUXV92ujo5cEg==}
+    peerDependencies:
+      '@tiptap/core': ^2.7.0
+    dependencies:
+      '@tiptap/core': 2.27.1(@tiptap/pm@2.27.1)
     dev: false
 
   /@tiptap/extension-text-style@2.27.1(@tiptap/core@2.27.1):
