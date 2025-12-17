@@ -119,6 +119,8 @@
   "editor": {
     "title": "Article Editor",
     "placeholder": "Start writing your article...",
+    "editorPlaceholder": "Start writing your article...",
+    "intuitionPlaceholder": "What is your initial idea or research hypothesis?",
     "titlePlaceholder": "Article Title",
     "abstractPlaceholder": "Abstract (optional)",
     "addSource": "Add Source",
@@ -129,6 +131,9 @@
     "publishPrivate": "Publish Private",
     "saveDraft": "Save Draft",
     "preview": "Preview",
+    "showAi": "Show AI",
+    "hideAi": "Hide AI",
+    "walletRequired": "Please connect your wallet to publish",
     "ai": {
       "title": "AI Assistant",
       "status": {
