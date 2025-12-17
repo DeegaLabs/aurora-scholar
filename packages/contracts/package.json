@@ -8,11 +8,16 @@
     "deploy": "anchor deploy"
   },
   "dependencies": {
-    "@coral-xyz/anchor": "^0.29.0",
+    "@coral-xyz/anchor": "^0.32.1",
     "@solana/web3.js": "^1.87.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "@types/mocha": "^10.0.0",
+    "@types/chai": "^4.3.0",
+    "chai": "^4.3.0",
+    "mocha": "^10.0.0",
+    "ts-mocha": "^10.0.0",
     "typescript": "^5.3.0"
   }
 }
