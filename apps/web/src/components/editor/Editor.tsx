@@ -3,7 +3,13 @@
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
-import { useEffect } from 'react';
+import Link from '@tiptap/extension-link';
+import Image from '@tiptap/extension-image';
+import Table from '@tiptap/extension-table';
+import TableRow from '@tiptap/extension-table-row';
+import TableCell from '@tiptap/extension-table-cell';
+import TableHeader from '@tiptap/extension-table-header';
+import { useEffect, useState } from 'react';
 
 interface EditorProps {
   content: string;
@@ -12,6 +18,10 @@ interface EditorProps {
 }
 
 export function Editor({ content, onChange, placeholder = 'Start writing...' }: EditorProps) {
+  const [showLinkModal, setShowLinkModal] = useState(false);
+  const [linkUrl, setLinkUrl] = useState('');
+  const [linkText, setLinkText] = useState('');
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -22,6 +32,28 @@ export function Editor({ content, onChange, placeholder = 'Start writing...' }: 
       Placeholder.configure({
         placeholder,
       }),
+      Link.configure({
+        openOnClick: false,
+        HTMLAttributes: {
+          class: 'text-blue-600 underline hover:text-blue-800',
+        },
+      }),
+      Image.configure({
+        inline: true,
+        allowBase64: true,
+        HTMLAttributes: {
+          class: 'max-w-full h-auto rounded-lg',
+        },
+      }),
+      Table.configure({
+        resizable: true,
+        HTMLAttributes: {
+          class: 'border-collapse border border-gray-300',
+        },
+      }),
+      TableRow,
+      TableHeader,
+      TableCell,
     ],
     content,
     editorProps: {
@@ -40,6 +72,44 @@ export function Editor({ content, onChange, placeholder = 'Start writing...' }: 
     }
   }, [content, editor]);
 
+  const handleSetLink = () => {
+    if (!editor) return;
+
+    if (linkUrl) {
+      if (linkText) {
+        // Insert new link with text
+        editor.chain().focus().insertContent(`<a href="${linkUrl}">${linkText}</a>`).run();
+      } else {
+        // Set link on selected text
+        editor.chain().focus().setLink({ href: linkUrl }).run();
+      }
+    } else {
+      // Remove link
+      editor.chain().focus().unsetLink().run();
+    }
+
+    setLinkUrl('');
+    setLinkText('');
+    setShowLinkModal(false);
+  };
+
+  const handleInsertImage = () => {
+    if (!editor) return;
+    const url = prompt('Enter image URL:');
+    if (url) {
+      editor.chain().focus().setImage({ src: url }).run();
+    }
+  };
+
+  const handleInsertTable = () => {
+    if (!editor) return;
+    const rows = prompt('Number of rows:', '3');
+    const cols = prompt('Number of columns:', '3');
+    if (rows && cols) {
+      editor.chain().focus().insertTable({ rows: parseInt(rows), cols: parseInt(cols), withHeaderRow: true }).run();
+    }
+  };
+
   if (!editor) {
     return (
       <div className="px-6 py-4 min-h-[500px] flex items-center justify-center text-gray-400">
@@ -52,6 +122,7 @@ export function Editor({ content, onChange, placeholder = 'Start writing...' }: 
     <div className="relative">
       {/* Toolbar */}
       <div className="border-b border-gray-200 px-6 py-3 flex items-center gap-2 flex-wrap">
+        {/* Text Formatting */}
         <button
           onClick={() => editor.chain().focus().toggleBold().run()}
           disabled={!editor.can().chain().focus().toggleBold().run()}
@@ -60,6 +131,7 @@ export function Editor({ content, onChange, placeholder = 'Start writing...' }: 
               ? 'bg-gray-900 text-white'
               : 'text-gray-700 hover:bg-gray-100'
           }`}
+          title="Bold"
         >
           <strong>B</strong>
         </button>
@@ -71,10 +143,13 @@ export function Editor({ content, onChange, placeholder = 'Start writing...' }: 
               ? 'bg-gray-900 text-white'
               : 'text-gray-700 hover:bg-gray-100'
           }`}
+          title="Italic"
         >
           <em>I</em>
         </button>
         <div className="w-px h-6 bg-gray-300" />
+
+        {/* Headings */}
         <button
           onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
           className={`px-3 py-1.5 text-sm font-medium rounded ${
@@ -82,6 +157,7 @@ export function Editor({ content, onChange, placeholder = 'Start writing...' }: 
               ? 'bg-gray-900 text-white'
               : 'text-gray-700 hover:bg-gray-100'
           }`}
+          title="Heading 1"
         >
           H1
         </button>
@@ -92,6 +168,7 @@ export function Editor({ content, onChange, placeholder = 'Start writing...' }: 
               ? 'bg-gray-900 text-white'
               : 'text-gray-700 hover:bg-gray-100'
           }`}
+          title="Heading 2"
         >
           H2
         </button>
@@ -102,10 +179,13 @@ export function Editor({ content, onChange, placeholder = 'Start writing...' }: 
               ? 'bg-gray-900 text-white'
               : 'text-gray-700 hover:bg-gray-100'
           }`}
+          title="Heading 3"
         >
           H3
         </button>
         <div className="w-px h-6 bg-gray-300" />
+
+        {/* Lists */}
         <button
           onClick={() => editor.chain().focus().toggleBulletList().run()}
           className={`px-3 py-1.5 text-sm font-medium rounded ${
@@ -113,6 +193,7 @@ export function Editor({ content, onChange, placeholder = 'Start writing...' }: 
               ? 'bg-gray-900 text-white'
               : 'text-gray-700 hover:bg-gray-100'
           }`}
+          title="Bullet List"
         >
           •
         </button>
@@ -123,10 +204,13 @@ export function Editor({ content, onChange, placeholder = 'Start writing...' }: 
               ? 'bg-gray-900 text-white'
               : 'text-gray-700 hover:bg-gray-100'
           }`}
+          title="Numbered List"
         >
           1.
         </button>
         <div className="w-px h-6 bg-gray-300" />
+
+        {/* Blockquote & Horizontal Rule */}
         <button
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
           className={`px-3 py-1.5 text-sm font-medium rounded ${
@@ -134,20 +218,178 @@ export function Editor({ content, onChange, placeholder = 'Start writing...' }: 
               ? 'bg-gray-900 text-white'
               : 'text-gray-700 hover:bg-gray-100'
           }`}
+          title="Quote"
         >
           &quot;
         </button>
         <button
           onClick={() => editor.chain().focus().setHorizontalRule().run()}
           className="px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded"
+          title="Horizontal Rule"
         >
           ─
         </button>
+        <div className="w-px h-6 bg-gray-300" />
+
+        {/* Link */}
+        <button
+          onClick={() => {
+            if (editor.isActive('link')) {
+              editor.chain().focus().unsetLink().run();
+            } else {
+              setShowLinkModal(true);
+            }
+          }}
+          className={`px-3 py-1.5 text-sm font-medium rounded ${
+            editor.isActive('link')
+              ? 'bg-gray-900 text-white'
+              : 'text-gray-700 hover:bg-gray-100'
+          }`}
+          title="Link"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+          </svg>
+        </button>
+
+        {/* Image */}
+        <button
+          onClick={handleInsertImage}
+          className="px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded"
+          title="Insert Image"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+        </button>
+
+        {/* Table */}
+        <button
+          onClick={handleInsertTable}
+          className="px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded"
+          title="Insert Table"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+          </svg>
+        </button>
+
+        {/* Table Controls (when table is selected) */}
+        {editor.isActive('table') && (
+          <>
+            <div className="w-px h-6 bg-gray-300" />
+            <button
+              onClick={() => editor.chain().focus().addColumnBefore().run()}
+              className="px-2 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded"
+              title="Add Column Before"
+            >
+              +Col
+            </button>
+            <button
+              onClick={() => editor.chain().focus().addColumnAfter().run()}
+              className="px-2 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded"
+              title="Add Column After"
+            >
+              Col+
+            </button>
+            <button
+              onClick={() => editor.chain().focus().deleteColumn().run()}
+              className="px-2 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded"
+              title="Delete Column"
+            >
+              -Col
+            </button>
+            <button
+              onClick={() => editor.chain().focus().addRowBefore().run()}
+              className="px-2 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded"
+              title="Add Row Before"
+            >
+              +Row
+            </button>
+            <button
+              onClick={() => editor.chain().focus().addRowAfter().run()}
+              className="px-2 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded"
+              title="Add Row After"
+            >
+              Row+
+            </button>
+            <button
+              onClick={() => editor.chain().focus().deleteRow().run()}
+              className="px-2 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded"
+              title="Delete Row"
+            >
+              -Row
+            </button>
+            <button
+              onClick={() => editor.chain().focus().deleteTable().run()}
+              className="px-2 py-1.5 text-xs font-medium text-red-700 hover:bg-red-50 rounded"
+              title="Delete Table"
+            >
+              Del
+            </button>
+          </>
+        )}
       </div>
 
       {/* Editor Content */}
       <EditorContent editor={editor} />
+
+      {/* Link Modal */}
+      {showLinkModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={() => setShowLinkModal(false)}>
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
+            <div className="border-b border-gray-200 px-6 py-4">
+              <h3 className="text-lg font-semibold text-gray-900">Insert Link</h3>
+            </div>
+            <div className="px-6 py-4 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  URL *
+                </label>
+                <input
+                  type="url"
+                  value={linkUrl}
+                  onChange={(e) => setLinkUrl(e.target.value)}
+                  placeholder="https://..."
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Text (optional - uses selected text if empty)
+                </label>
+                <input
+                  type="text"
+                  value={linkText}
+                  onChange={(e) => setLinkText(e.target.value)}
+                  placeholder="Link text"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"
+                />
+              </div>
+            </div>
+            <div className="border-t border-gray-200 px-6 py-4 flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowLinkModal(false);
+                  setLinkUrl('');
+                  setLinkText('');
+                }}
+                className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-md"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSetLink}
+                disabled={!linkUrl.trim()}
+                className="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Insert
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-

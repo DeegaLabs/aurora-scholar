@@ -9,28 +9,34 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "next": "^14.2.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "@tiptap/react": "^2.1.0",
-    "@tiptap/starter-kit": "^2.1.0",
-    "@tiptap/extension-placeholder": "^2.1.0",
+    "@aurora-scholar/sdk": "workspace:*",
     "@solana/wallet-adapter-react": "^0.15.0",
     "@solana/wallet-adapter-react-ui": "^0.9.0",
     "@solana/wallet-adapter-wallets": "^0.19.0",
     "@solana/web3.js": "^1.87.0",
+    "@tiptap/extension-image": "^2.1.0",
+    "@tiptap/extension-link": "^2.1.0",
+    "@tiptap/extension-placeholder": "^2.1.0",
+    "@tiptap/extension-table": "^2.1.0",
+    "@tiptap/extension-table-cell": "^2.1.0",
+    "@tiptap/extension-table-header": "^2.1.0",
+    "@tiptap/extension-table-row": "^2.1.0",
+    "@tiptap/react": "^2.1.0",
+    "@tiptap/starter-kit": "^2.1.0",
+    "next": "^14.2.0",
     "next-intl": "^3.4.0",
-    "@aurora-scholar/sdk": "workspace:*"
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "autoprefixer": "^10.4.0",
+    "eslint": "^8.0.0",
+    "eslint-config-next": "^14.2.0",
     "postcss": "^8.4.0",
     "tailwindcss": "^3.4.0",
-    "typescript": "^5.3.0",
-    "eslint": "^8.0.0",
-    "eslint-config-next": "^14.2.0"
+    "typescript": "^5.3.0"
   }
 }
