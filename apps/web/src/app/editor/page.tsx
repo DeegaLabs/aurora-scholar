@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Editor } from '@/components/editor/Editor';
-import { IntuitionField } from '@/components/editor/IntuitionField';
 import { AiGuidancePanel } from '@/components/editor/AiGuidancePanel';
 import { PublishModal } from '@/components/editor/PublishModal';
 import { PreviewModal } from '@/components/editor/PreviewModal';
@@ -184,15 +183,6 @@ export default function EditorPage() {
               onAddSource={handleAddSource}
               onRemoveSource={handleRemoveSource}
             />
-            
-            {/* Declared Intuition below Sources */}
-            <div className="mt-4">
-              <IntuitionField
-                value={declaredIntuition}
-                onChange={setDeclaredIntuition}
-                placeholder={t('intuitionPlaceholder')}
-              />
-            </div>
           </div>
         </div>
 
@@ -221,6 +211,7 @@ export default function EditorPage() {
           <AiGuidancePanel
             content={content}
             declaredIntuition={declaredIntuition}
+            onDeclaredIntuitionChange={setDeclaredIntuition}
             onOpenChat={() => setIsAiChatModalOpen(true)}
           />
         </div>

@@ -46,10 +46,11 @@ function ExpandableCard({ title, icon, defaultExpanded = false, children }: Expa
 interface AiGuidancePanelProps {
   content: string;
   declaredIntuition: string;
+  onDeclaredIntuitionChange?: (value: string) => void;
   onOpenChat?: () => void;
 }
 
-export function AiGuidancePanel({ content, declaredIntuition, onOpenChat }: AiGuidancePanelProps) {
+export function AiGuidancePanel({ content, declaredIntuition, onDeclaredIntuitionChange, onOpenChat }: AiGuidancePanelProps) {
   const [isConnected] = useState(false); // TODO: Connect to AI service
 
   return (
@@ -137,20 +138,39 @@ export function AiGuidancePanel({ content, declaredIntuition, onOpenChat }: AiGu
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
             </svg>
           }
-          defaultExpanded={false}
+          defaultExpanded={true}
         >
-          <div className="space-y-3 text-xs">
+          <div className="space-y-4">
+            {/* Layer 1: Declared Intuition */}
             <div>
-              <p className="font-medium text-gray-900 mb-1">Layer 1: Declared Intuition</p>
-              <p className="text-gray-600">Your initial idea or research hypothesis</p>
+              <div className="mb-2">
+                <p className="text-xs font-semibold text-gray-900 mb-1">Layer 1: Declared Intuition</p>
+                <p className="text-xs text-gray-500">State your initial idea or research hypothesis. This will be registered on-chain.</p>
+              </div>
+              <textarea
+                value={declaredIntuition}
+                onChange={(e) => onDeclaredIntuitionChange?.(e.target.value)}
+                placeholder="What is your initial idea or research hypothesis?"
+                className="w-full min-h-[100px] px-3 py-2 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent resize-none"
+                maxLength={500}
+              />
+              {declaredIntuition && (
+                <div className="mt-1 text-xs text-gray-400">
+                  {declaredIntuition.length} / 500 characters
+                </div>
+              )}
             </div>
-            <div>
-              <p className="font-medium text-gray-900 mb-1">Layer 2: Linguistic Mediation</p>
-              <p className="text-gray-600">AI guidance without content generation</p>
-            </div>
-            <div>
-              <p className="font-medium text-gray-900 mb-1">Layer 3: Coherence Monitoring</p>
-              <p className="text-gray-600">Alignment verification between intuition and content</p>
+
+            {/* Layer 2 & 3 Info */}
+            <div className="space-y-2 pt-3 border-t border-gray-200">
+              <div>
+                <p className="text-xs font-medium text-gray-900 mb-1">Layer 2: Linguistic Mediation</p>
+                <p className="text-xs text-gray-600">AI guidance without content generation</p>
+              </div>
+              <div>
+                <p className="text-xs font-medium text-gray-900 mb-1">Layer 3: Coherence Monitoring</p>
+                <p className="text-xs text-gray-600">Alignment verification between intuition and content</p>
+              </div>
             </div>
           </div>
         </ExpandableCard>
