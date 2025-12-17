@@ -37,7 +37,7 @@ export function IntuitionField({ value, onChange, placeholder }: IntuitionFieldP
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder || 'What is your initial idea or research hypothesis?'}
-          className="w-full min-h-[120px] px-4 py-3 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent resize-none"
+          className="w-full min-h-[120px] px-4 py-3 text-sm rounded-md focus:outline-none resize-none"
           maxLength={500}
         />
       )}

@@ -48,16 +48,25 @@ interface AiGuidancePanelProps {
   declaredIntuition: string;
   onDeclaredIntuitionChange?: (value: string) => void;
   onOpenChat?: () => void;
+  floatingButtonsEnabled?: boolean;
+  onFloatingButtonsEnabledChange?: (enabled: boolean) => void;
 }
 
-export function AiGuidancePanel({ content, declaredIntuition, onDeclaredIntuitionChange, onOpenChat }: AiGuidancePanelProps) {
+export function AiGuidancePanel({ 
+  content, 
+  declaredIntuition, 
+  onDeclaredIntuitionChange, 
+  onOpenChat,
+  floatingButtonsEnabled = true,
+  onFloatingButtonsEnabledChange,
+}: AiGuidancePanelProps) {
   const [isConnected] = useState(false); // TODO: Connect to AI service
 
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
       <div className="border-b border-gray-200 px-4 py-3 bg-white">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-semibold text-gray-900">AI Guidance</h3>
           <div className="flex items-center gap-2">
             <div
@@ -69,6 +78,18 @@ export function AiGuidancePanel({ content, declaredIntuition, onDeclaredIntuitio
               {isConnected ? 'Connected' : 'Disconnected'}
             </span>
           </div>
+        </div>
+        {/* Floating Buttons Toggle */}
+        <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={floatingButtonsEnabled}
+              onChange={(e) => onFloatingButtonsEnabledChange?.(e.target.checked)}
+              className="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-900"
+            />
+            <span className="text-xs text-gray-700">Show floating AI buttons</span>
+          </label>
         </div>
       </div>
 
@@ -151,7 +172,7 @@ export function AiGuidancePanel({ content, declaredIntuition, onDeclaredIntuitio
                 value={declaredIntuition}
                 onChange={(e) => onDeclaredIntuitionChange?.(e.target.value)}
                 placeholder="What is your initial idea or research hypothesis?"
-                className="w-full min-h-[100px] px-3 py-2 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent resize-none"
+                className="w-full min-h-[100px] px-3 py-2 text-xs rounded-md focus:outline-none resize-none"
                 maxLength={500}
               />
               {declaredIntuition && (

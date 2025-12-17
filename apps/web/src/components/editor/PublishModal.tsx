@@ -132,7 +132,7 @@ export function PublishModal({
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Enter article title"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"
+                  className="w-full px-4 py-2 rounded-md focus:outline-none"
                   maxLength={128}
                 />
               </div>
@@ -146,7 +146,7 @@ export function PublishModal({
                   value={aiScope}
                   onChange={(e) => setAiScope(e.target.value)}
                   placeholder="Describe how AI was used (e.g., 'Grammar checking only')"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 min-h-[80px]"
+                  className="w-full px-4 py-2 rounded-md focus:outline-none min-h-[80px]"
                   maxLength={256}
                 />
                 <p className="mt-1 text-xs text-gray-500">
@@ -222,7 +222,7 @@ export function PublishModal({
 
         {/* Footer */}
         {step === 'form' && (
-          <div className="border-t border-gray-200 px-6 py-4 flex justify-end gap-3">
+          <div className="px-6 py-4 flex justify-end gap-3">
             <button
               onClick={onClose}
               className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-md"
