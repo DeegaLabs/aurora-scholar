@@ -24,6 +24,8 @@ export function Editor({ content, onChange, placeholder = 'Start writing...' }: 
   const [linkUrl, setLinkUrl] = useState('');
   const [linkText, setLinkText] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [tableRows, setTableRows] = useState('3');
   const [tableCols, setTableCols] = useState('3');
 
@@ -98,11 +100,39 @@ export function Editor({ content, onChange, placeholder = 'Start writing...' }: 
     setShowLinkModal(false);
   };
 
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      setImageFile(file);
+      setImageUrl(''); // Clear URL when file is selected
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleInsertImage = () => {
-    if (!editor || !imageUrl.trim()) return;
-    editor.chain().focus().setImage({ src: imageUrl }).run();
-    setImageUrl('');
-    setShowImageModal(false);
+    if (!editor) return;
+
+    if (imageFile) {
+      // Convert file to base64 for now (TODO: upload to Arweave/Irys)
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const imageSrc = reader.result as string;
+        editor.chain().focus().setImage({ src: imageSrc }).run();
+        setImageFile(null);
+        setImagePreview(null);
+        setShowImageModal(false);
+      };
+      reader.readAsDataURL(imageFile);
+    } else if (imageUrl.trim()) {
+      // Use URL
+      editor.chain().focus().setImage({ src: imageUrl }).run();
+      setImageUrl('');
+      setShowImageModal(false);
+    }
   };
 
   const handleInsertTable = () => {
@@ -410,23 +440,75 @@ export function Editor({ content, onChange, placeholder = 'Start writing...' }: 
 
       {/* Image Modal */}
       {showImageModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={() => setShowImageModal(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={() => {
+          setShowImageModal(false);
+          setImageUrl('');
+          setImageFile(null);
+          setImagePreview(null);
+        }}>
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
             <div className="border-b border-gray-200 px-6 py-4">
               <h3 className="text-lg font-semibold text-gray-900">Insert Image</h3>
             </div>
             <div className="px-6 py-4 space-y-4">
+              {/* File Upload */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Image URL *
+                  Upload Image
+                </label>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageFileChange}
+                    className="hidden"
+                    id="image-upload"
+                  />
+                  <label
+                    htmlFor="image-upload"
+                    className="cursor-pointer flex flex-col items-center"
+                  >
+                    <svg className="w-8 h-8 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    <span className="text-sm text-gray-600">
+                      {imageFile ? imageFile.name : 'Click to upload or drag and drop'}
+                    </span>
+                    <span className="text-xs text-gray-500 mt-1">PNG, JPG, GIF up to 10MB</span>
+                  </label>
+                </div>
+                {imagePreview && (
+                  <div className="mt-3">
+                    <img src={imagePreview} alt="Preview" className="max-w-full h-32 object-contain rounded border border-gray-200" />
+                  </div>
+                )}
+              </div>
+
+              {/* Divider */}
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white text-gray-500">OR</span>
+                </div>
+              </div>
+
+              {/* URL Input */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Image URL
                 </label>
                 <input
                   type="url"
                   value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
+                  onChange={(e) => {
+                    setImageUrl(e.target.value);
+                    setImageFile(null);
+                    setImagePreview(null);
+                  }}
                   placeholder="https://..."
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"
-                  autoFocus
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && imageUrl.trim()) {
                       handleInsertImage();
@@ -434,15 +516,14 @@ export function Editor({ content, onChange, placeholder = 'Start writing...' }: 
                   }}
                 />
               </div>
-              <p className="text-xs text-gray-500">
-                Enter the URL of the image you want to insert. For now, only external URLs are supported.
-              </p>
             </div>
             <div className="border-t border-gray-200 px-6 py-4 flex justify-end gap-3">
               <button
                 onClick={() => {
                   setShowImageModal(false);
                   setImageUrl('');
+                  setImageFile(null);
+                  setImagePreview(null);
                 }}
                 className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-md"
               >
@@ -450,7 +531,7 @@ export function Editor({ content, onChange, placeholder = 'Start writing...' }: 
               </button>
               <button
                 onClick={handleInsertImage}
-                disabled={!imageUrl.trim()}
+                disabled={!imageUrl.trim() && !imageFile}
                 className="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Insert
