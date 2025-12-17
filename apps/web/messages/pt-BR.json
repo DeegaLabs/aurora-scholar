@@ -119,6 +119,8 @@
   "editor": {
     "title": "Editor de Artigos",
     "placeholder": "Comece a escrever seu artigo...",
+    "editorPlaceholder": "Comece a escrever seu artigo...",
+    "intuitionPlaceholder": "Qual é sua ideia inicial ou hipótese de pesquisa?",
     "titlePlaceholder": "Título do Artigo",
     "abstractPlaceholder": "Resumo (opcional)",
     "addSource": "Adicionar Fonte",
@@ -129,6 +131,9 @@
     "publishPrivate": "Publicar Privado",
     "saveDraft": "Salvar Rascunho",
     "preview": "Visualizar",
+    "showAi": "Mostrar IA",
+    "hideAi": "Ocultar IA",
+    "walletRequired": "Por favor, conecte sua carteira para publicar",
     "ai": {
       "title": "Assistente de IA",
       "status": {

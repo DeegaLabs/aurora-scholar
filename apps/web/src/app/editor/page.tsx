@@ -6,6 +6,7 @@ import { Editor } from '@/components/editor/Editor';
 import { IntuitionField } from '@/components/editor/IntuitionField';
 import { AiSidebar } from '@/components/editor/AiSidebar';
 import { PublishModal } from '@/components/editor/PublishModal';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 // Wallet integration will be added in Task 10
 // import { useWallet } from '@solana/wallet-adapter-react';
 
@@ -58,6 +59,7 @@ export default function EditorPage() {
               {t('title')}
             </h1>
             <div className="flex items-center gap-4">
+              <LanguageSwitcher />
               <button
                 onClick={() => setIsAiSidebarOpen(!isAiSidebarOpen)}
                 className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 border border-gray-300 rounded-md hover:bg-gray-50"
