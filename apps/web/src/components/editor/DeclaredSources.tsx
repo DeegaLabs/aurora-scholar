@@ -85,7 +85,7 @@ export function DeclaredSources({ sources, onAddSource, onRemoveSource }: Declar
         <div className="flex items-start justify-between mb-3">
           <div>
             <h3 className="text-sm font-semibold text-gray-900 mb-1">
-              Declared Sources (NotebookLM-style)
+              Declared Sources
             </h3>
             <p className="text-xs text-gray-500">
               Upload PDFs, links, videos, or audio. AI will use only these as reference.

@@ -13,7 +13,7 @@
 
 - **Academic Editor** with Ethical AI Assistant (always-active agent)
 - **Three-Layer Ethical System** (Declared Intuition, Linguistic Mediation, Coherence Monitoring)
-- **Declared Sources** (NotebookLM-style) - User uploads PDFs, links, etc. - AI uses only these as reference
+- **Declared Sources** - User uploads PDFs, links, etc. - AI uses only these as reference
 - **On-Chain Publishing** on Solana (immutable hash + timestamp)
 - **Permanent Storage** on Arweave
 - **Access Control** (Public/Private with expiration)

@@ -124,7 +124,7 @@ Aurora Scholar implements a **Three-Layer Ethical System** that ensures authenti
 - Each agent has its own style, rules, and knowledge
 - Agents can be shared between users
 
-#### 3. Declared Sources (NotebookLM-style)
+#### 3. Declared Sources
 
 **Concept:** Users explicitly declare and upload sources that the AI can use as reference. The AI **never generates new content** - it only guides based on these declared sources.
 

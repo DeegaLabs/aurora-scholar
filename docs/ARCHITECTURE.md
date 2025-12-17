@@ -178,7 +178,7 @@ model Article {
   isPublic            Boolean  @default(false)
   createdAt           DateTime @default(now())
   publishedAt         DateTime?
-  declaredSources     Source[] // Declared sources (NotebookLM-style)
+  declaredSources     Source[] // Declared sources
   versions            ArticleVersion[]
   submissions        Submission[]
   accessTokens        AccessToken[]
@@ -415,7 +415,7 @@ The contract structure is designed to be ZK-compatible. Future ZK circuits can p
 {
   text: string;                    // Current document text
   declaredIntuition: string;       // User's declared intuition (Layer 1)
-  declaredSources: Source[];       // Declared sources (NotebookLM-style)
+  declaredSources: Source[];       // Declared sources
   agentConfig?: AgentConfig;       // Agent configuration (default or custom)
   context?: string;                // Additional context
   cursorPosition?: number;        // Cursor position

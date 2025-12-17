@@ -155,10 +155,10 @@ sequenceDiagram
 
 ---
 
-## UC02: User uploads declared sources (NotebookLM-style)
+## UC02: User uploads declared sources
 
 ### Description
-User explicitly declares and uploads sources (PDFs, links, images, videos, audios) that will be used as reference for the AI assistant during writing. The AI uses **only** these declared sources - never generates content beyond what's in them. This follows the NotebookLM-style approach where sources are explicitly declared.
+User explicitly declares and uploads sources (PDFs, links, images, videos, audios) that will be used as reference for the AI assistant during writing. The AI uses **only** these declared sources - never generates content beyond what's in them. Sources are explicitly declared and processed for reference.
 
 ### Actors
 - User

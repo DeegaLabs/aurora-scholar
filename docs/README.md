@@ -31,7 +31,7 @@ Democratize scientific publishing through blockchain, ensuring that academic tex
   - Alerts about authenticity (detects too automated text)
   - Monitors coherence between intuition, sources, and text
   - Chat for specific questions
-- ✅ **Declared Sources** (NotebookLM-style)
+- ✅ **Declared Sources**
   - User uploads PDFs, links, videos, audios
   - AI uses **only** these declared sources as reference
   - Vectorization and embedding for AI processing
@@ -116,7 +116,7 @@ aurora-scholar/
   - Declared Intuition (Layer 1)
   - Linguistic Mediation (Layer 2)
   - Coherence Monitoring (Layer 3)
-- UC02: User uploads declared sources (NotebookLM-style)
+- UC02: User uploads declared sources
 - UC03: Public publication (with intuition hash and AI scope)
 - UC04: Private publication
 - UC05: Temporary sharing
@@ -200,7 +200,7 @@ aurora-scholar/
 - **Does not write** - only guides, explains, suggests
 - **Authenticity alert** - detects too automated text
 - **Interactive chat** - for specific questions
-- **Declared Sources** - AI uses only explicitly declared sources (NotebookLM-style)
+- **Declared Sources** - AI uses only explicitly declared sources
 
 ### 2. Verifiable Authenticity
 - SHA-256 hash of content registered on-chain
@@ -302,7 +302,7 @@ aurora-scholar/
 - ✅ Generic terminology (no fixed roles)
 - ✅ Three-Layer Ethical System documented
 - ✅ Declared Intuition (Layer 1) documented
-- ✅ Declared Sources (NotebookLM-style) documented
+- ✅ Declared Sources documented
 - ✅ Coherence Monitoring (Layer 3) documented
 - ✅ Always-active AI agent documented
 - ✅ Board system detailed
