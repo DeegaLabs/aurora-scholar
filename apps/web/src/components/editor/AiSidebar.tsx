@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 interface AiSidebarProps {
   content: string;
   declaredIntuition: string;
+  onOpenChat?: () => void;
 }
 
 interface AiSuggestion {
@@ -13,7 +14,7 @@ interface AiSuggestion {
   timestamp: Date;
 }
 
-export function AiSidebar({ content, declaredIntuition }: AiSidebarProps) {
+export function AiSidebar({ content, declaredIntuition, onOpenChat }: AiSidebarProps) {
   const [suggestions, setSuggestions] = useState<AiSuggestion[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -55,8 +56,10 @@ export function AiSidebar({ content, declaredIntuition }: AiSidebarProps) {
   }, [content, declaredIntuition]);
 
   const handleAskAi = () => {
-    // TODO: Open chat modal
-    alert('AI chat feature coming soon');
+    // This will be handled by parent component
+    if (onOpenChat) {
+      onOpenChat();
+    }
   };
 
   return (

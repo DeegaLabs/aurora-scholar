@@ -10,6 +10,7 @@ interface PublishModalProps {
   onClose: () => void;
   content: string;
   declaredIntuition: string;
+  onSuccess?: () => void;
 }
 
 export function PublishModal({
@@ -17,6 +18,7 @@ export function PublishModal({
   onClose,
   content,
   declaredIntuition,
+  onSuccess,
 }: PublishModalProps) {
   // TODO: Add wallet integration in Task 10
   const publicKey = null;
@@ -29,8 +31,16 @@ export function PublishModal({
   if (!isOpen) return null;
 
   const handlePublish = async () => {
-    if (!publicKey || !title.trim()) {
-      alert('Please connect your wallet and provide a title');
+    if (!publicKey) {
+      alert('Please connect your wallet to publish');
+      return;
+    }
+    if (!title.trim()) {
+      alert('Please provide a title for your article');
+      return;
+    }
+    if (!content.trim()) {
+      alert('Please add content to your article');
       return;
     }
 
@@ -82,6 +92,11 @@ export function PublishModal({
       // Clear localStorage
       localStorage.removeItem('aurora-editor-content');
       localStorage.removeItem('aurora-editor-intuition');
+
+      // Call success callback if provided
+      if (onSuccess) {
+        onSuccess();
+      }
 
       // Redirect after 2 seconds
       setTimeout(() => {

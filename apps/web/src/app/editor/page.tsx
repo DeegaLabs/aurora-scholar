@@ -6,6 +6,9 @@ import { Editor } from '@/components/editor/Editor';
 import { IntuitionField } from '@/components/editor/IntuitionField';
 import { AiSidebar } from '@/components/editor/AiSidebar';
 import { PublishModal } from '@/components/editor/PublishModal';
+import { PreviewModal } from '@/components/editor/PreviewModal';
+import { AiChatModal } from '@/components/editor/AiChatModal';
+import { DeclaredSources, Source } from '@/components/editor/DeclaredSources';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 // Wallet integration will be added in Task 10
 // import { useWallet } from '@solana/wallet-adapter-react';
@@ -17,21 +20,44 @@ export default function EditorPage() {
   const connected = false;
   const [content, setContent] = useState<string>('');
   const [declaredIntuition, setDeclaredIntuition] = useState<string>('');
+  const [sources, setSources] = useState<Source[]>([]);
+  const [articleTitle, setArticleTitle] = useState<string>('');
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+  const [isAiChatModalOpen, setIsAiChatModalOpen] = useState(false);
   const [isAiSidebarOpen, setIsAiSidebarOpen] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
-  // Auto-save to localStorage
+  // Auto-save to localStorage with debounce
   useEffect(() => {
     const savedContent = localStorage.getItem('aurora-editor-content');
     const savedIntuition = localStorage.getItem('aurora-editor-intuition');
+    const savedSources = localStorage.getItem('aurora-editor-sources');
+    const savedTitle = localStorage.getItem('aurora-editor-title');
     
     if (savedContent) setContent(savedContent);
     if (savedIntuition) setDeclaredIntuition(savedIntuition);
+    if (savedTitle) setArticleTitle(savedTitle);
+    if (savedSources) {
+      try {
+        setSources(JSON.parse(savedSources));
+      } catch {
+        // Ignore parse errors
+      }
+    }
   }, []);
 
   useEffect(() => {
     if (content) {
-      localStorage.setItem('aurora-editor-content', content);
+      setIsSaving(true);
+      const timer = setTimeout(() => {
+        localStorage.setItem('aurora-editor-content', content);
+        setLastSaved(new Date());
+        setIsSaving(false);
+      }, 1000); // Debounce 1 second
+
+      return () => clearTimeout(timer);
     }
   }, [content]);
 
@@ -41,12 +67,45 @@ export default function EditorPage() {
     }
   }, [declaredIntuition]);
 
+  useEffect(() => {
+    if (sources.length > 0) {
+      localStorage.setItem('aurora-editor-sources', JSON.stringify(sources));
+    }
+  }, [sources]);
+
+  useEffect(() => {
+    if (articleTitle) {
+      localStorage.setItem('aurora-editor-title', articleTitle);
+    }
+  }, [articleTitle]);
+
+  const handleAddSource = (source: Source) => {
+    setSources((prev) => [...prev, source]);
+  };
+
+  const handleRemoveSource = (id: string) => {
+    setSources((prev) => prev.filter((s) => s.id !== id));
+  };
+
   const handlePublish = () => {
     if (!connected || !publicKey) {
       alert(t('walletRequired'));
       return;
     }
+    if (!content.trim()) {
+      alert('Please add content to your article');
+      return;
+    }
     setIsPublishModalOpen(true);
+  };
+
+  const handlePreview = () => {
+    setIsPreviewModalOpen(true);
+  };
+
+  const getWordCount = (text: string) => {
+    const htmlText = text.replace(/<[^>]*>/g, '');
+    return htmlText.trim().split(/\s+/).filter(word => word.length > 0).length;
   };
 
   return (
@@ -60,6 +119,27 @@ export default function EditorPage() {
             </h1>
             <div className="flex items-center gap-4">
               <LanguageSwitcher />
+              {/* Save indicator */}
+              <div className="flex items-center gap-2 text-xs text-gray-500">
+                {isSaving ? (
+                  <>
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                    <span>Saving...</span>
+                  </>
+                ) : lastSaved ? (
+                  <>
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span>Saved {lastSaved.toLocaleTimeString()}</span>
+                  </>
+                ) : null}
+              </div>
+              <button
+                onClick={handlePreview}
+                disabled={!content.trim()}
+                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {t('preview')}
+              </button>
               <button
                 onClick={() => setIsAiSidebarOpen(!isAiSidebarOpen)}
                 className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 border border-gray-300 rounded-md hover:bg-gray-50"
@@ -70,6 +150,7 @@ export default function EditorPage() {
                 onClick={handlePublish}
                 disabled={!connected || !content.trim()}
                 className="px-6 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                title={!content.trim() ? 'Add content to publish' : !connected ? t('walletRequired') : ''}
               >
                 {t('publish')}
               </button>
@@ -84,11 +165,33 @@ export default function EditorPage() {
           {/* Left Column - Editor */}
           <div className={`${isAiSidebarOpen ? 'lg:col-span-2' : 'lg:col-span-3'} transition-all duration-300`}>
             <div className="space-y-6">
+              {/* Article Title (optional, for preview) */}
+              <div className="border border-gray-200 rounded-lg bg-white p-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Article Title (optional)
+                </label>
+                <input
+                  type="text"
+                  value={articleTitle}
+                  onChange={(e) => setArticleTitle(e.target.value)}
+                  placeholder={t('titlePlaceholder')}
+                  className="w-full px-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"
+                  maxLength={128}
+                />
+              </div>
+
               {/* Declared Intuition Field (Layer 1) */}
               <IntuitionField
                 value={declaredIntuition}
                 onChange={setDeclaredIntuition}
                 placeholder={t('intuitionPlaceholder')}
+              />
+
+              {/* Declared Sources */}
+              <DeclaredSources
+                sources={sources}
+                onAddSource={handleAddSource}
+                onRemoveSource={handleRemoveSource}
               />
 
               {/* Main Editor */}
@@ -98,6 +201,12 @@ export default function EditorPage() {
                   onChange={setContent}
                   placeholder={t('editorPlaceholder')}
                 />
+                {/* Word count */}
+                {content && (
+                  <div className="border-t border-gray-200 px-6 py-2 text-xs text-gray-500">
+                    {getWordCount(content)} words
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -108,6 +217,7 @@ export default function EditorPage() {
               <AiSidebar
                 content={content}
                 declaredIntuition={declaredIntuition}
+                onOpenChat={() => setIsAiChatModalOpen(true)}
               />
             </div>
           )}
@@ -119,6 +229,34 @@ export default function EditorPage() {
         <PublishModal
           isOpen={isPublishModalOpen}
           onClose={() => setIsPublishModalOpen(false)}
+          content={content}
+          declaredIntuition={declaredIntuition}
+          onSuccess={() => {
+            // Clear localStorage on successful publish
+            localStorage.removeItem('aurora-editor-content');
+            localStorage.removeItem('aurora-editor-intuition');
+            localStorage.removeItem('aurora-editor-sources');
+            localStorage.removeItem('aurora-editor-title');
+          }}
+        />
+      )}
+
+      {/* Preview Modal */}
+      {isPreviewModalOpen && (
+        <PreviewModal
+          isOpen={isPreviewModalOpen}
+          onClose={() => setIsPreviewModalOpen(false)}
+          title={articleTitle || 'Untitled Article'}
+          content={content}
+          declaredIntuition={declaredIntuition}
+        />
+      )}
+
+      {/* AI Chat Modal */}
+      {isAiChatModalOpen && (
+        <AiChatModal
+          isOpen={isAiChatModalOpen}
+          onClose={() => setIsAiChatModalOpen(false)}
           content={content}
           declaredIntuition={declaredIntuition}
         />
