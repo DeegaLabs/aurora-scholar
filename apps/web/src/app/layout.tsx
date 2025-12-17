@@ -35,8 +35,17 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const locale = await getLocale();
-  const messages = await getMessages();
+  let locale = 'en';
+  let messages = {};
+  
+  try {
+    locale = await getLocale();
+    messages = await getMessages();
+  } catch (error) {
+    console.error('Error loading locale/messages:', error);
+    // Fallback to English
+    messages = (await import('../../messages/en.json')).default;
+  }
 
   return (
     <html lang={locale}>
