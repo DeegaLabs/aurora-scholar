@@ -4,6 +4,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
 import './globals.css';
 import { SolanaWalletProvider } from '@/components/wallet/SolanaWalletProvider';
+import { ToastProvider } from '@/components/ui/toast';
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -52,7 +53,9 @@ export default async function RootLayout({
     <html lang={locale}>
       <body className={`${inter.variable} ${spaceGrotesk.variable} ${jetBrainsMono.variable} font-sans antialiased`}>
         <NextIntlClientProvider messages={messages}>
-          <SolanaWalletProvider>{children}</SolanaWalletProvider>
+          <SolanaWalletProvider>
+            <ToastProvider>{children}</ToastProvider>
+          </SolanaWalletProvider>
         </NextIntlClientProvider>
       </body>
     </html>
