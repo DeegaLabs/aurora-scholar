@@ -246,12 +246,14 @@ export const getArticleById = asyncHandler(
     if (!article) throw createError('Article not found', 404);
 
     if (article.isPublic) {
-      return res.json({ success: true, data: article });
+      res.json({ success: true, data: article });
+      return;
     }
 
     // Private: author or an active grant can access metadata.
     if (article.authorWallet === wallet) {
-      return res.json({ success: true, data: article });
+      res.json({ success: true, data: article });
+      return;
     }
 
     const grant = await prisma.accessGrant.findUnique({
@@ -260,7 +262,8 @@ export const getArticleById = asyncHandler(
     const active = grant && !grant.revokedAt && (!grant.expiresAt || grant.expiresAt.getTime() > Date.now());
     if (!active) throw createError('Access denied', 403);
 
-    return res.json({ success: true, data: article });
+    res.json({ success: true, data: article });
+    return;
   }
 );
 
