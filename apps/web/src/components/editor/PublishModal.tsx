@@ -6,6 +6,7 @@ import { Transaction, TransactionMessage, VersionedTransaction } from '@solana/w
 import { buildPublishArticleIx, deriveArticlePda } from '@/lib/solana/auroraProgram';
 import { useToast } from '@/components/ui/toast';
 import { getAuthHeader } from '@/lib/auth/api';
+import { aesGcmEncrypt, bytesToBase64 as bytesToBase64Local } from '@/lib/crypto/aesGcm';
 
 function formatUnknownError(err: any): string {
   if (!err) return 'Erro desconhecido';
@@ -128,6 +129,18 @@ export function PublishModal({
       const signatureBytes = await signMessage(new TextEncoder().encode(canonicalPayload));
       const signature = bytesToBase64(signatureBytes);
 
+      // If private, encrypt payload (ciphertext goes to Arweave; key stored server-side encrypted-at-rest).
+      let articleKeyB64: string | null = null;
+      let encryptedPayload: any = null;
+      if (!isPublic) {
+        const keyBytes = crypto.getRandomValues(new Uint8Array(32));
+        articleKeyB64 = bytesToBase64Local(keyBytes);
+        encryptedPayload = await aesGcmEncrypt({
+          keyBytes32: keyBytes,
+          plaintextJson: { content, declaredIntuition, title, aiScope },
+        });
+      }
+
       // Step 1: Upload to Arweave via API (Irys)
       const uploadResponse = await fetch('http://localhost:3001/api/articles/publish/prepare', {
         method: 'POST',
@@ -139,6 +152,12 @@ export function PublishModal({
           declaredIntuition,
           aiScope,
           isPublic,
+          ...(isPublic
+            ? {}
+            : {
+                articleKey: articleKeyB64,
+                encryptedPayload,
+              }),
           // Backend currently requires signature at top-level + signedPayload.createdAt (MVP).
           signature,
           signedPayload: { createdAt },
