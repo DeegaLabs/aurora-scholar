@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
+import { Transaction } from '@solana/web3.js';
 import { getAuroraProgram, deriveArticlePda, SYSTEM_PROGRAM_ID } from '@/lib/solana/auroraProgram';
 
 function hexToBytes(hex: string) {
@@ -51,7 +52,7 @@ export function PublishModal({
   onSuccess,
 }: PublishModalProps) {
   const { connection } = useConnection();
-  const { publicKey, wallet, signTransaction, signAllTransactions, signMessage } = useWallet();
+  const { publicKey, wallet, signMessage, sendTransaction } = useWallet();
   const [title, setTitle] = useState('');
   const [isPublic, setIsPublic] = useState(true);
   const [aiScope, setAiScope] = useState('Grammar checking and style suggestions only');
@@ -66,8 +67,8 @@ export function PublishModal({
       alert('Please connect your wallet to publish');
       return;
     }
-    if (!wallet || !signTransaction || !signAllTransactions) {
-      alert('Wallet does not support signing');
+    if (!wallet || !sendTransaction) {
+      alert('Wallet does not support sending transactions');
       return;
     }
     if (!signMessage) {
@@ -140,26 +141,28 @@ export function PublishModal({
       setStep('publishing');
 
       // Step 2: Publish to Solana on-chain (wallet signs)
-      // wallet-adapter wallet implements the minimal Anchor wallet interface (publicKey + signTransaction + signAllTransactions)
-      const anchorWallet = {
+      // Build instruction via Anchor, then send via wallet-adapter (most stable in browser).
+      const dummyWallet = {
         publicKey,
-        signTransaction: signTransaction as any,
-        signAllTransactions: signAllTransactions as any,
+        signTransaction: async (tx: any) => tx,
+        signAllTransactions: async (txs: any[]) => txs,
       } as any;
-
-      const program = getAuroraProgram(connection as any, anchorWallet);
+      const program = getAuroraProgram(connection as any, dummyWallet);
       const contentHashBytes = hexToBytes(contentHashHex);
       const intuitionHashBytes = hexToBytes(intuitionHashHex);
       const [articlePda] = deriveArticlePda(publicKey, contentHashBytes);
 
-      const sig = await program.methods
+      const ix = await program.methods
         .publishArticle(Array.from(contentHashBytes), Array.from(intuitionHashBytes), arweaveId, title, aiScope, isPublic)
         .accounts({
           article: articlePda,
           author: publicKey,
           systemProgram: SYSTEM_PROGRAM_ID,
         })
-        .rpc();
+        .instruction();
+
+      const tx = new Transaction().add(ix);
+      const sig = await sendTransaction(tx, connection, { skipPreflight: false });
 
       const explorerUrl = `https://explorer.solana.com/tx/${sig}?cluster=devnet`;
       setSuccessInfo({ arweaveUrl: arweaveUrl || `https://arweave.net/${arweaveId}`, explorerUrl });
