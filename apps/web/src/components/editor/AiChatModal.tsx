@@ -15,6 +15,7 @@ interface AiChatModalProps {
   onClose: () => void;
   content: string;
   declaredIntuition: string;
+  sources?: unknown[];
 }
 
 export function AiChatModal({
@@ -22,6 +23,7 @@ export function AiChatModal({
   onClose,
   content,
   declaredIntuition,
+  sources,
 }: AiChatModalProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -66,6 +68,7 @@ export function AiChatModal({
       const data = await aiAssistantChat({
         question: userMessage.content,
         text: content || '',
+        sources,
         chatHistory: messages.map((m) => ({ role: m.role, content: m.content })),
         agentConfig: declaredIntuition ? { declaredIntuition } : undefined,
       });

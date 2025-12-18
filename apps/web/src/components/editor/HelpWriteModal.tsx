@@ -8,9 +8,10 @@ interface HelpWriteModalProps {
   onClose: () => void;
   content: string;
   declaredIntuition: string;
+  sources?: unknown[];
 }
 
-export function HelpWriteModal({ isOpen, onClose, content, declaredIntuition }: HelpWriteModalProps) {
+export function HelpWriteModal({ isOpen, onClose, content, declaredIntuition, sources }: HelpWriteModalProps) {
   const [description, setDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
@@ -38,6 +39,7 @@ export function HelpWriteModal({ isOpen, onClose, content, declaredIntuition }: 
       const data = await aiAssistantChat({
         question,
         text: content || '',
+        sources,
       });
 
       setResult(data.answer);

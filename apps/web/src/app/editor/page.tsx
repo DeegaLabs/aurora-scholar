@@ -280,6 +280,7 @@ export default function EditorPage() {
           onClose={() => setIsAiChatModalOpen(false)}
           content={content}
           declaredIntuition={declaredIntuition}
+          sources={sources}
         />
       )}
 
@@ -292,6 +293,7 @@ export default function EditorPage() {
           }}
           content={content}
           declaredIntuition={declaredIntuition}
+          sources={sources}
         />
       )}
 
