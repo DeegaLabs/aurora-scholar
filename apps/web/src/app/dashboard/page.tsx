@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { SearchFilter, type JournalFilters } from '@/components/journal/SearchFilter';
-import { ArticleCard } from '@/components/journal/ArticleCard';
-import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { useWallet } from '@solana/wallet-adapter-react';
+import { ArticleCard } from '@/components/journal/ArticleCard';
+import { SearchFilter, type JournalFilters } from '@/components/journal/SearchFilter';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { useToast } from '@/components/ui/toast';
 
 type ApiListResponse = {
   items: Array<{
@@ -24,16 +25,14 @@ type ApiListResponse = {
 function getApiBaseUrl() {
   const envUrl = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/+$/, '');
   if (envUrl) return envUrl;
-
-  // Dev fallback: API usually runs on 3001; avoid calling the Next server (e.g. 3002).
   if (process.env.NODE_ENV !== 'production') return 'http://localhost:3001';
-
-  // Prod fallback: assume same-origin (e.g. behind a reverse proxy)
   return '';
 }
 
-export default function JournalPage() {
-  const { connected } = useWallet();
+export default function DashboardPage() {
+  const { publicKey } = useWallet();
+  const { toast } = useToast();
+
   const [data, setData] = useState<ApiListResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,19 +40,22 @@ export default function JournalPage() {
 
   useEffect(() => {
     let cancelled = false;
+    if (!publicKey) return;
+
     setIsLoading(true);
     setError(null);
 
     (async () => {
       try {
-        const url = `${getApiBaseUrl()}/api/articles?page=1&limit=100`;
+        const author = publicKey.toBase58();
+        const url = `${getApiBaseUrl()}/api/articles?page=1&limit=200&author=${encodeURIComponent(author)}`;
         const res = await fetch(url);
         const json = await res.json();
         if (!res.ok) throw new Error(json?.message || `HTTP ${res.status}`);
         const payload = json?.data as ApiListResponse;
         if (!cancelled) setData(payload);
       } catch (e: any) {
-        if (!cancelled) setError(e?.message || 'Falha ao carregar artigos.');
+        if (!cancelled) setError(e?.message || 'Falha ao carregar seus artigos.');
       } finally {
         if (!cancelled) setIsLoading(false);
       }
@@ -62,26 +64,16 @@ export default function JournalPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [publicKey]);
 
   const items = data?.items || [];
-
-  const authors = useMemo(() => items.map((i) => i.author), [items]);
 
   const filtered = useMemo(() => {
     const q = filters.query.trim().toLowerCase();
     let list = items.slice();
-
-    if (filters.author) {
-      list = list.filter((i) => i.author === filters.author);
-    }
-
     if (q) {
-      list = list.filter((i) => {
-        return (i.title || '').toLowerCase().includes(q) || (i.author || '').toLowerCase().includes(q);
-      });
+      list = list.filter((i) => (i.title || '').toLowerCase().includes(q));
     }
-
     list.sort((a, b) => (filters.sort === 'newest' ? b.timestamp - a.timestamp : a.timestamp - b.timestamp));
     return list;
   }, [items, filters]);
@@ -96,16 +88,14 @@ export default function JournalPage() {
                 <span className="text-xs font-semibold text-gray-700">AS</span>
               </div>
               <div>
-                <h1 className="text-sm font-semibold text-gray-900">On-Chain Journal</h1>
-                <p className="text-xs text-gray-500">Artigos públicos publicados no Solana + Arweave</p>
+                <h1 className="text-sm font-semibold text-gray-900">Meu Dashboard</h1>
+                <p className="text-xs text-gray-500">Seus artigos públicos (on-chain) e controles de privacidade</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
-              {connected ? (
-                <a href="/dashboard" className="text-sm text-gray-700 hover:text-gray-900">
-                  Meu dashboard
-                </a>
-              ) : null}
+              <a href="/journal" className="text-sm text-gray-700 hover:text-gray-900">
+                Journal
+              </a>
               <a href="/editor" className="text-sm text-gray-700 hover:text-gray-900">
                 Editor
               </a>
@@ -117,14 +107,21 @@ export default function JournalPage() {
 
       <main className="w-full px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-4xl mx-auto space-y-6">
-          <SearchFilter value={filters} onChange={setFilters} authors={authors} />
+          <div className="border border-gray-200 rounded-lg p-4 bg-white">
+            <div className="text-sm font-semibold text-gray-900">Privado (em breve)</div>
+            <p className="mt-1 text-sm text-gray-600">
+              Aqui você vai conceder acesso por wallet (24h/7d/30d/ilimitado) e revogar quando quiser.
+            </p>
+          </div>
+
+          <SearchFilter value={filters} onChange={setFilters} authors={[]} />
 
           {isLoading ? (
-            <div className="text-sm text-gray-600">Carregando artigos…</div>
+            <div className="text-sm text-gray-600">Carregando seus artigos…</div>
           ) : error ? (
             <div className="border border-red-200 bg-red-50 text-red-800 rounded-lg px-4 py-3 text-sm">{error}</div>
           ) : filtered.length === 0 ? (
-            <div className="text-sm text-gray-600">Nenhum artigo público encontrado.</div>
+            <div className="text-sm text-gray-600">Nenhum artigo público encontrado para sua wallet.</div>
           ) : (
             <div className="space-y-3">
               {filtered.map((a) => (
@@ -135,7 +132,7 @@ export default function JournalPage() {
                   timestamp={a.timestamp}
                   contentHash={a.contentHash}
                   arweaveId={a.arweaveId}
-                  onVerify={() => alert('Verificação ainda é placeholder no backend.')}
+                  onVerify={() => toast({ type: 'info', title: 'Verificação', message: 'Verificação ainda é placeholder no backend.' })}
                 />
               ))}
             </div>
@@ -145,6 +142,5 @@ export default function JournalPage() {
     </div>
   );
 }
-
 
 
