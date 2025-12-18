@@ -178,26 +178,60 @@ function looksLikeFinalText(answer: string) {
   return explicitlyWrites || longParagraph || hasManySentences;
 }
 
-function enforceAntiGhostwriting(answer: string) {
-  const a = answer.trim();
-  if (!a) return a;
+type GhostwritingGate = {
+  blocked: boolean;
+  level: 'none' | 'warn' | 'block';
+  reasons: string[];
+  safeAnswer: string;
+};
 
-  // Hard caps: avoid producing paste-ready content.
-  if (a.length > 1600 || looksLikeFinalText(a)) {
-    return [
-      'Eu não posso escrever o texto final por você.',
-      '',
-      'Posso, porém, te orientar com um checklist e perguntas-guia:',
-      '- Qual é a tese central em 1 frase (com suas próprias palavras)?',
-      '- Quais 2–3 conceitos você precisa definir logo no início?',
-      '- Que evidência (dos seus sources) sustenta cada afirmação?',
-      '- Que contra-argumento você vai antecipar?',
-      '',
-      'Se você colar aqui o seu rascunho (mesmo incompleto), eu te ajudo a melhorar clareza, estrutura e coerência sem escrever por você.',
-    ].join('\n');
+function detectGhostwriting(answer: string): GhostwritingGate {
+  const a = String(answer || '').trim();
+  if (!a) return { blocked: false, level: 'none', reasons: [], safeAnswer: '' };
+
+  const reasons: string[] = [];
+
+  // Signals of "final deliverable" writing.
+  if (looksLikeFinalText(a)) reasons.push('parece texto final (parágrafos longos / muitas frases)');
+  if (/^(\s*)(introdução|conclus(ão|ao)|resumo|abstract|metodologia|refer(ê|e)ncias)\b/i.test(a)) {
+    reasons.push('estrutura típica de seção final (introdução/conclusão/etc)');
+  }
+  if (/^\s*(#|##|\d+\.)\s+\w+/m.test(a) && a.length > 900) {
+    reasons.push('formatação de documento + tamanho alto');
+  }
+  if ((a.match(/\n/g) || []).length >= 12 && a.length > 1200) {
+    reasons.push('muitas linhas + tamanho alto');
+  }
+  if (/```[\s\S]*?```/.test(a) && a.length > 700) {
+    reasons.push('bloco de texto/código longo');
   }
 
-  return a;
+  // Explicit "I wrote it" phrasing.
+  if (/(aqui está|segue( abaixo)?|vou escrever|eu escrevi|here is|i wrote)/i.test(a)) {
+    reasons.push('frase sugere entrega de texto pronto');
+  }
+
+  // Hard caps.
+  if (a.length > 1600) reasons.push('resposta muito longa');
+
+  const shouldBlock = reasons.length > 0;
+  if (!shouldBlock) return { blocked: false, level: 'none', reasons: [], safeAnswer: a };
+
+  const safe = [
+    'Eu não posso escrever o texto final por você.',
+    '',
+    'Posso, porém, te ajudar sem ghostwriting:',
+    '- Checklist de estrutura (em tópicos)',
+    '- Perguntas-guia para você escrever com suas palavras',
+    '- Sugestões de clareza/coerência e pontos a citar com base nas fontes',
+    '',
+    'Para eu te orientar melhor, me diga:',
+    '1) Qual é a tese em 1 frase?',
+    '2) Qual seção você está escrevendo (introdução/metodologia/etc)?',
+    '3) Cole um parágrafo SEU (mesmo rascunho) e eu aponto melhorias sem reescrever.',
+  ].join('\n');
+
+  return { blocked: true, level: 'block', reasons, safeAnswer: safe };
 }
 
 function safeJsonParse(text: string) {
@@ -255,10 +289,27 @@ Draft:
     })),
   };
 
+  // Extra hardening: ensure analysis output never contains paste-ready chunks.
+  const combinedText = JSON.stringify(safeData);
+  const gate = detectGhostwriting(combinedText);
+  const hardened = gate.blocked
+    ? {
+        ...safeData,
+        authenticityAlerts: Array.from(new Set([...(safeData.authenticityAlerts || []), 'Resposta do modelo parecia texto final; foi bloqueada automaticamente.'])),
+        suggestions: [],
+        warnings: Array.from(new Set([...(safeData.warnings || []), `Anti-ghostwriting: ${gate.reasons.join('; ')}`])),
+      }
+    : safeData;
+
   res.json({
     success: true,
     data: {
-      ...safeData,
+      ...hardened,
+      antiGhostwriting: {
+        blocked: gate.blocked,
+        level: gate.level,
+        reasons: gate.reasons,
+      },
       timestamp: Date.now(),
     },
   });
@@ -294,10 +345,17 @@ Return your answer as plain text.`;
     maxOutputTokens: 1024,
   });
 
+  const gate = detectGhostwriting(answer);
+
   res.json({
     success: true,
     data: {
-      answer: enforceAntiGhostwriting(answer),
+      answer: gate.safeAnswer,
+      antiGhostwriting: {
+        blocked: gate.blocked,
+        level: gate.level,
+        reasons: gate.reasons,
+      },
       suggestions: [],
       references: [],
       timestamp: Date.now(),
