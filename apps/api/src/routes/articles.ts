@@ -5,6 +5,7 @@ import {
   createArticle,
   publishArticle,
   verifyArticle,
+  preparePublish,
 } from '../controllers/articles.controller';
 
 export const articlesRouter: Router = Router();
@@ -92,6 +93,39 @@ articlesRouter.get('/:id', getArticleById);
  *         description: Article created
  */
 articlesRouter.post('/', createArticle);
+
+/**
+ * @swagger
+ * /api/articles/publish/prepare:
+ *   post:
+ *     summary: Upload article to Arweave (via Irys) and return hashes for on-chain publish
+ *     tags: [Articles]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - title
+ *               - content
+ *               - declaredIntuition
+ *             properties:
+ *               title:
+ *                 type: string
+ *               content:
+ *                 type: string
+ *               declaredIntuition:
+ *                 type: string
+ *               aiScope:
+ *                 type: string
+ *               isPublic:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Prepared publish payload
+ */
+articlesRouter.post('/publish/prepare', preparePublish);
 
 /**
  * @swagger

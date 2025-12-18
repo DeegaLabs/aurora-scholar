@@ -1,10 +1,11 @@
 import { Request, Response } from 'express';
 import { asyncHandler, createError } from '../middleware/error-handler';
 import { blockchainService } from '../services/blockchain.service';
+import { storageService } from '../services/storage.service';
+import { createHash } from 'crypto';
 
 // TODO: Import Prisma client and services
 // import { prisma } from '../config/database';
-// import { storageService } from '../services/storage.service';
 
 export const getArticles = asyncHandler(async (req: Request, res: Response) => {
   const { page = 1, limit = 20, author } = req.query;
@@ -38,6 +39,54 @@ export const getArticles = asyncHandler(async (req: Request, res: Response) => {
       page: pageNum,
       pageSize,
       totalPages,
+    },
+  });
+});
+
+function sha256Hex(input: string) {
+  return createHash('sha256').update(input).digest('hex');
+}
+
+/**
+ * MVP: upload article payload to Arweave (via Irys) and return hashes + arweaveId
+ * so the frontend wallet can submit the on-chain transaction.
+ */
+export const preparePublish = asyncHandler(async (req: Request, res: Response) => {
+  const { title, content, declaredIntuition, aiScope, isPublic } = req.body as {
+    title?: string;
+    content?: string;
+    declaredIntuition?: string;
+    aiScope?: string;
+    isPublic?: boolean;
+  };
+
+  if (!title || !content || !declaredIntuition) {
+    throw createError('title, content, and declaredIntuition are required', 400);
+  }
+
+  const arweaveId = await storageService.uploadArticle({
+    title,
+    content,
+    declaredIntuition,
+    metadata: {
+      aiScope: aiScope || '',
+      isPublic: Boolean(isPublic),
+    },
+  });
+
+  const contentHash = sha256Hex(content);
+  const intuitionHash = sha256Hex(declaredIntuition);
+
+  res.json({
+    success: true,
+    data: {
+      arweaveId,
+      arweaveUrl: storageService.getArweaveUrl(arweaveId),
+      contentHash,
+      intuitionHash,
+      title,
+      aiScope: aiScope || '',
+      isPublic: Boolean(isPublic),
     },
   });
 });

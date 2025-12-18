@@ -21,7 +21,8 @@ export class StorageService {
   private privateKey: string | null = null;
 
   constructor() {
-    this.nodeUrl = process.env.IRYS_NODE_URL || 'https://devnet.irys.xyz';
+    // Support both IRYS_NODE_URL (code) and IRYS_NODE (existing env files)
+    this.nodeUrl = process.env.IRYS_NODE_URL || process.env.IRYS_NODE || 'https://devnet.irys.xyz';
     this.privateKey = process.env.IRYS_PRIVATE_KEY || null;
   }
 
