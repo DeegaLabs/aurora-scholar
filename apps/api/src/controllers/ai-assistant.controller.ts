@@ -90,15 +90,18 @@ Draft:
 export const chat = asyncHandler(async (req: Request, res: Response) => {
   const { question, text } = req.body;
 
-  if (!question || !text) {
-    throw createError('Question and text are required', 400);
+  if (!question) {
+    throw createError('Question is required', 400);
   }
+
+  // Allow empty text for early-stage guidance (e.g. user hasn't written yet).
+  const safeText = typeof text === 'string' ? text : '';
 
   const userPrompt = `User question:
 ${question}
 
 Context (draft excerpt):
-"""${text}"""
+"""${safeText}"""
 
 Respond ethically per rules. Provide guidance, not final writing.
 Return your answer as plain text.`;
