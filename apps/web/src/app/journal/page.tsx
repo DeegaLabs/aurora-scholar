@@ -5,6 +5,7 @@ import { SearchFilter, type JournalFilters } from '@/components/journal/SearchFi
 import { ArticleCard } from '@/components/journal/ArticleCard';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { useWallet } from '@solana/wallet-adapter-react';
+import { useToast } from '@/components/ui/toast';
 
 type ApiListResponse = {
   items: Array<{
@@ -34,6 +35,7 @@ function getApiBaseUrl() {
 
 export default function JournalPage() {
   const { connected } = useWallet();
+  const { toast } = useToast();
   const [data, setData] = useState<ApiListResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -135,7 +137,29 @@ export default function JournalPage() {
                   timestamp={a.timestamp}
                   contentHash={a.contentHash}
                   arweaveId={a.arweaveId}
-                  onVerify={() => alert('Verificação ainda é placeholder no backend.')}
+                  onVerify={async () => {
+                    try {
+                      const res = await fetch(`${getApiBaseUrl()}/api/articles/${encodeURIComponent(a.arweaveId)}/verify`, {
+                        method: 'POST',
+                      });
+                      const json = await res.json();
+                      if (!res.ok) throw new Error(json?.message || json?.error || `HTTP ${res.status}`);
+                      const verified = Boolean(json?.data?.verified);
+                      toast({
+                        type: verified ? 'success' : 'error',
+                        title: verified ? 'Verificado' : 'Não verificado',
+                        message: String(json?.data?.message || (verified ? 'OK' : 'Falha')),
+                        durationMs: 8000,
+                      });
+                    } catch (e: any) {
+                      toast({
+                        type: 'error',
+                        title: 'Verificação',
+                        message: e?.message || 'Falha ao verificar artigo.',
+                        durationMs: 8000,
+                      });
+                    }
+                  }}
                 />
               ))}
             </div>

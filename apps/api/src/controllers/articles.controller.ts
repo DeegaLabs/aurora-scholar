@@ -319,23 +319,115 @@ export const publishArticle = asyncHandler(
 
 export const verifyArticle = asyncHandler(
   async (req: Request, res: Response) => {
-    const { id: _id } = req.params;
+    const { id } = req.params; // arweaveId (journal) OR DB id (fallback)
 
-    // TODO: Implement verification
-    // 1. Get article from database
-    // 2. Fetch content from Arweave
-    // 3. Recalculate hash
-    // 4. Compare with on-chain hash
-    // 5. Return verification result
+    // 1) Resolve arweaveId (prefer param as arweaveId; fallback to DB lookup)
+    let arweaveId = id;
+    let dbArticle: { id: string; arweaveId: string | null; authorWallet: string | null; isPublic: boolean | null } | null = null;
+    try {
+      dbArticle = await prisma.article.findFirst({
+        where: {
+          OR: [{ id }, { arweaveId: id }],
+        },
+        select: { id: true, arweaveId: true, authorWallet: true, isPublic: true },
+      });
+      if (dbArticle?.arweaveId) arweaveId = dbArticle.arweaveId;
+    } catch {
+      // DB is optional for public on-chain verification; ignore.
+    }
+
+    // 2) Fetch article JSON from Arweave
+    const ar = await storageService.getContent(arweaveId);
+    if (!ar || typeof ar !== 'object') throw createError('Invalid Arweave payload', 400);
+
+    // Expected payload shape from our uploader:
+    // { content, title, declaredIntuition, timestamp, version, author, contentHash, intuitionHash, aiScope, isPublic, encrypted }
+    const content = String((ar as any).content || '');
+    const declaredIntuition = String((ar as any).declaredIntuition || '');
+    const title = String((ar as any).title || '');
+    const author = String((ar as any).author || dbArticle?.authorWallet || '');
+    const aiScope = String((ar as any).aiScope || '');
+    const isPublic = Boolean((ar as any).isPublic ?? dbArticle?.isPublic ?? true);
+
+    if (!author) throw createError('Missing author in Arweave payload', 400);
+    if (!content) throw createError('Missing content in Arweave payload', 400);
+    if (!declaredIntuition) throw createError('Missing declaredIntuition in Arweave payload', 400);
+
+    // 3) Recalculate hashes from Arweave content
+    const calculatedContentHashHex = sha256Hex(content);
+    const calculatedIntuitionHashHex = sha256Hex(declaredIntuition);
+
+    const arweaveContentHash = (ar as any).contentHash ? String((ar as any).contentHash) : null;
+    const arweaveIntuitionHash = (ar as any).intuitionHash ? String((ar as any).intuitionHash) : null;
+
+    const contentHashMatchesArweave = arweaveContentHash ? arweaveContentHash === calculatedContentHashHex : null;
+    const intuitionHashMatchesArweave = arweaveIntuitionHash ? arweaveIntuitionHash === calculatedIntuitionHashHex : null;
+
+    // 4) Compare against on-chain record (source of truth)
+    const onChain = await blockchainService.getArticle(
+      new PublicKey(author),
+      Buffer.from(calculatedContentHashHex, 'hex')
+    );
+
+    const onChainFound = Boolean(onChain);
+    const contentHashMatchesOnChain = onChainFound ? onChain!.contentHash.toString('hex') === calculatedContentHashHex : false;
+    const intuitionHashMatchesOnChain = onChainFound ? onChain!.intuitionHash.toString('hex') === calculatedIntuitionHashHex : false;
+    const arweaveIdMatchesOnChain = onChainFound ? String(onChain!.arweaveId) === arweaveId : false;
+    const titleMatchesOnChain = onChainFound ? String(onChain!.title || '') === title : false;
+    const aiScopeMatchesOnChain = onChainFound ? String(onChain!.aiScope || '') === (aiScope || '') : false;
+    const isPublicMatchesOnChain = onChainFound ? Boolean(onChain!.isPublic) === Boolean(isPublic) : false;
+
+    const verified =
+      onChainFound &&
+      contentHashMatchesOnChain &&
+      intuitionHashMatchesOnChain &&
+      arweaveIdMatchesOnChain &&
+      isPublicMatchesOnChain;
+
+    const message = verified
+      ? 'Verificado: conteúdo do Arweave bate com o registro on-chain.'
+      : !onChainFound
+        ? 'Não verificado: registro on-chain não encontrado (programa/cluster incorreto ou artigo não registrado).'
+        : 'Não verificado: divergência entre Arweave e on-chain.';
 
     res.json({
       success: true,
       data: {
-        verified: true,
-        message: 'Article is authentic',
-        onChainHash: 'placeholder-hash',
-        calculatedHash: 'placeholder-hash',
-        explorerUrl: 'https://explorer.solana.com/tx/placeholder',
+        verified,
+        message,
+        arweaveId,
+        author,
+        declaredAiScope: aiScope || '',
+        // Hashes
+        calculated: {
+          contentHash: calculatedContentHashHex,
+          intuitionHash: calculatedIntuitionHashHex,
+        },
+        arweave: {
+          contentHash: arweaveContentHash,
+          intuitionHash: arweaveIntuitionHash,
+          contentHashMatches: contentHashMatchesArweave,
+          intuitionHashMatches: intuitionHashMatchesArweave,
+        },
+        onChain: onChainFound
+          ? {
+              contentHash: onChain!.contentHash.toString('hex'),
+              intuitionHash: onChain!.intuitionHash.toString('hex'),
+              arweaveId: onChain!.arweaveId,
+              title: onChain!.title,
+              aiScope: onChain!.aiScope,
+              isPublic: onChain!.isPublic,
+              timestamp: onChain!.timestamp,
+              matches: {
+                contentHash: contentHashMatchesOnChain,
+                intuitionHash: intuitionHashMatchesOnChain,
+                arweaveId: arweaveIdMatchesOnChain,
+                title: titleMatchesOnChain,
+                aiScope: aiScopeMatchesOnChain,
+                isPublic: isPublicMatchesOnChain,
+              },
+            }
+          : null,
       },
     });
   }

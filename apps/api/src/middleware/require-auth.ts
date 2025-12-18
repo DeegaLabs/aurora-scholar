@@ -32,6 +32,10 @@ export function requireAuth(req: Request, _res: Response, next: NextFunction) {
   if (req.method === 'GET' && req.path === '/articles') {
     return next();
   }
+  // Public verification for journal cards (no wallet required).
+  if (req.method === 'POST' && /^\/articles\/[^/]+\/verify$/.test(req.path)) {
+    return next();
+  }
 
   const header = req.headers.authorization || '';
   const m = header.match(/^Bearer\s+(.+)$/i);
