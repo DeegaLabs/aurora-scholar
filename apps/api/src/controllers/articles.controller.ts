@@ -3,6 +3,8 @@ import { asyncHandler, createError } from '../middleware/error-handler';
 import { blockchainService } from '../services/blockchain.service';
 import { storageService } from '../services/storage.service';
 import { createHash } from 'crypto';
+import nacl from 'tweetnacl';
+import { PublicKey } from '@solana/web3.js';
 
 // TODO: Import Prisma client and services
 // import { prisma } from '../config/database';
@@ -47,22 +49,63 @@ function sha256Hex(input: string) {
   return createHash('sha256').update(input).digest('hex');
 }
 
+function stableStringify(obj: any): string {
+  if (obj === null || typeof obj !== 'object') return JSON.stringify(obj);
+  if (Array.isArray(obj)) return `[${obj.map((x) => stableStringify(x)).join(',')}]`;
+  const keys = Object.keys(obj).sort();
+  return `{${keys.map((k) => `${JSON.stringify(k)}:${stableStringify(obj[k])}`).join(',')}}`;
+}
+
+function verifySignature(params: { author: string; message: string; signatureB64: string }) {
+  const pubkey = new PublicKey(params.author);
+  const msgBytes = new TextEncoder().encode(params.message);
+  const sigBytes = Buffer.from(params.signatureB64, 'base64');
+  if (sigBytes.length !== 64) return false;
+  return nacl.sign.detached.verify(msgBytes, sigBytes, pubkey.toBytes());
+}
+
 /**
  * MVP: upload article payload to Arweave (via Irys) and return hashes + arweaveId
  * so the frontend wallet can submit the on-chain transaction.
  */
 export const preparePublish = asyncHandler(async (req: Request, res: Response) => {
-  const { title, content, declaredIntuition, aiScope, isPublic } = req.body as {
+  const { title, content, declaredIntuition, aiScope, isPublic, author, signature, signedPayload } = req.body as {
     title?: string;
     content?: string;
     declaredIntuition?: string;
     aiScope?: string;
     isPublic?: boolean;
+    author?: string;
+    signature?: string; // base64
+    signedPayload?: any;
   };
 
-  if (!title || !content || !declaredIntuition) {
-    throw createError('title, content, and declaredIntuition are required', 400);
+  if (!title || !content || !declaredIntuition || !author || !signature || !signedPayload) {
+    throw createError('title, content, declaredIntuition, author, signature, and signedPayload are required', 400);
   }
+
+  // Verify user approval over a deterministic payload (anti-tampering).
+  const contentHash = sha256Hex(content);
+  const intuitionHash = sha256Hex(declaredIntuition);
+
+  const expectedPayload = {
+    author,
+    title,
+    contentHash,
+    intuitionHash,
+    aiScope: aiScope || '',
+    isPublic: Boolean(isPublic),
+    createdAt: signedPayload?.createdAt,
+  };
+
+  const createdAtMs = Date.parse(String(expectedPayload.createdAt || ''));
+  if (!Number.isFinite(createdAtMs)) throw createError('signedPayload.createdAt is required (ISO string)', 400);
+  // 5 min window to reduce replay risk (MVP).
+  if (Math.abs(Date.now() - createdAtMs) > 5 * 60 * 1000) throw createError('signedPayload expired', 400);
+
+  const canonical = stableStringify(expectedPayload);
+  const ok = verifySignature({ author, message: canonical, signatureB64: signature });
+  if (!ok) throw createError('Invalid signature', 401);
 
   const arweaveId = await storageService.uploadArticle({
     title,
@@ -71,11 +114,11 @@ export const preparePublish = asyncHandler(async (req: Request, res: Response) =
     metadata: {
       aiScope: aiScope || '',
       isPublic: Boolean(isPublic),
+      author,
+      contentHash,
+      intuitionHash,
     },
   });
-
-  const contentHash = sha256Hex(content);
-  const intuitionHash = sha256Hex(declaredIntuition);
 
   res.json({
     success: true,
@@ -87,6 +130,7 @@ export const preparePublish = asyncHandler(async (req: Request, res: Response) =
       title,
       aiScope: aiScope || '',
       isPublic: Boolean(isPublic),
+      author,
     },
   });
 });

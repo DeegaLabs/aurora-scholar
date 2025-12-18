@@ -56,6 +56,9 @@ importers:
       swagger-ui-express:
         specifier: ^5.0.0
         version: 5.0.1(express@4.22.1)
+      tweetnacl:
+        specifier: ^1.0.3
+        version: 1.0.3
       ws:
         specifier: ^8.14.0
         version: 8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)

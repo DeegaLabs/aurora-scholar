@@ -14,6 +14,27 @@ function hexToBytes(hex: string) {
   return out;
 }
 
+async function sha256HexBrowser(input: string) {
+  const bytes = new TextEncoder().encode(input);
+  const hash = await crypto.subtle.digest('SHA-256', bytes);
+  return Array.from(new Uint8Array(hash))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+function stableStringify(obj: any): string {
+  if (obj === null || typeof obj !== 'object') return JSON.stringify(obj);
+  if (Array.isArray(obj)) return `[${obj.map((x) => stableStringify(x)).join(',')}]`;
+  const keys = Object.keys(obj).sort();
+  return `{${keys.map((k) => `${JSON.stringify(k)}:${stableStringify(obj[k])}`).join(',')}}`;
+}
+
+function bytesToBase64(bytes: Uint8Array) {
+  let bin = '';
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin);
+}
+
 interface PublishModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -30,7 +51,7 @@ export function PublishModal({
   onSuccess,
 }: PublishModalProps) {
   const { connection } = useConnection();
-  const { publicKey, wallet, signTransaction, signAllTransactions } = useWallet();
+  const { publicKey, wallet, signTransaction, signAllTransactions, signMessage } = useWallet();
   const [title, setTitle] = useState('');
   const [isPublic, setIsPublic] = useState(true);
   const [aiScope, setAiScope] = useState('Grammar checking and style suggestions only');
@@ -47,6 +68,10 @@ export function PublishModal({
     }
     if (!wallet || !signTransaction || !signAllTransactions) {
       alert('Wallet does not support signing');
+      return;
+    }
+    if (!signMessage) {
+      alert('Wallet does not support message signing (signMessage).');
       return;
     }
     if (!title.trim()) {
@@ -66,16 +91,37 @@ export function PublishModal({
     setStep('uploading');
 
     try {
+      const createdAt = new Date().toISOString();
+      const contentHash = await sha256HexBrowser(content);
+      const intuitionHash = await sha256HexBrowser(declaredIntuition);
+
+      const author = publicKey.toBase58();
+      const canonicalPayload = stableStringify({
+        author,
+        title,
+        contentHash,
+        intuitionHash,
+        aiScope: aiScope || '',
+        isPublic: Boolean(isPublic),
+        createdAt,
+      });
+
+      const signatureBytes = await signMessage(new TextEncoder().encode(canonicalPayload));
+      const signature = bytesToBase64(signatureBytes);
+
       // Step 1: Upload to Arweave via API (Irys)
       const uploadResponse = await fetch('http://localhost:3001/api/articles/publish/prepare', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          author,
           title,
           content,
           declaredIntuition,
           aiScope,
           isPublic,
+          signedPayload: { createdAt },
+          signature,
         }),
       });
 

@@ -26,6 +26,7 @@
     "openai": "^4.20.0",
     "swagger-jsdoc": "^6.2.0",
     "swagger-ui-express": "^5.0.0",
+    "tweetnacl": "^1.0.3",
     "ws": "^8.14.0",
     "zod": "^3.22.0"
   },
