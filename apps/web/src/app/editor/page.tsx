@@ -13,14 +13,12 @@ import { HelpWriteModal } from '@/components/editor/HelpWriteModal';
 import { SuggestStructureModal } from '@/components/editor/SuggestStructureModal';
 import { CheckCoherenceModal } from '@/components/editor/CheckCoherenceModal';
 import { RefinementMenu } from '@/components/editor/RefinementMenu';
-// Wallet integration will be added in Task 10
-// import { useWallet } from '@solana/wallet-adapter-react';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 
 export default function EditorPage() {
   const t = useTranslations('editor');
-  // TODO: Add wallet integration in Task 10
-  const publicKey = null;
-  const connected = false;
+  const { publicKey, connected } = useWallet();
   const [content, setContent] = useState<string>('');
   const [declaredIntuition, setDeclaredIntuition] = useState<string>('');
   const [sources, setSources] = useState<Source[]>([]);
@@ -147,6 +145,7 @@ export default function EditorPage() {
               />
             </div>
             <div className="flex items-center gap-4">
+              <WalletMultiButton />
               <LanguageSwitcher />
             </div>
           </div>

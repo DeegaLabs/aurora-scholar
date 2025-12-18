@@ -1,9 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-// Wallet integration will be added in Task 10
-// import { useWallet } from '@solana/wallet-adapter-react';
-// import { PublicKey } from '@solana/web3.js';
+import { useWallet } from '@solana/wallet-adapter-react';
 
 interface PublishModalProps {
   isOpen: boolean;
@@ -20,8 +18,7 @@ export function PublishModal({
   declaredIntuition,
   onSuccess,
 }: PublishModalProps) {
-  // TODO: Add wallet integration in Task 10
-  const publicKey = null;
+  const { publicKey } = useWallet();
   const [title, setTitle] = useState('');
   const [isPublic, setIsPublic] = useState(true);
   const [aiScope, setAiScope] = useState('Grammar checking and style suggestions only');
