@@ -5,6 +5,7 @@ import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { Transaction, TransactionMessage, VersionedTransaction } from '@solana/web3.js';
 import { buildPublishArticleIx, deriveArticlePda } from '@/lib/solana/auroraProgram';
 import { useToast } from '@/components/ui/toast';
+import { getAuthHeader } from '@/lib/auth/api';
 
 function formatUnknownError(err: any): string {
   if (!err) return 'Erro desconhecido';
@@ -130,7 +131,7 @@ export function PublishModal({
       // Step 1: Upload to Arweave via API (Irys)
       const uploadResponse = await fetch('http://localhost:3001/api/articles/publish/prepare', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
         body: JSON.stringify({
           author,
           title,

@@ -1,5 +1,6 @@
 type ApiSuccess<T> = { success: true; data: T };
 type ApiError = { success?: false; error?: string; message?: string };
+import { getAuthHeader } from '@/lib/auth/api';
 
 function getApiBaseUrl() {
   // For local dev, docker-compose sets NEXT_PUBLIC_API_URL=http://localhost:3001
@@ -23,7 +24,7 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
 
   const res = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
     body: JSON.stringify(body),
   });
 
