@@ -4,6 +4,11 @@ import {
   updateToken,
   revokeToken,
   validateToken,
+  createGrant,
+  listGrants,
+  revokeGrant,
+  keyChallenge,
+  keyClaim,
 } from '../controllers/access-control.controller';
 
 export const accessControlRouter: Router = Router();
@@ -104,3 +109,12 @@ accessControlRouter.post('/revoke', revokeToken);
  *         description: Token is invalid or expired
  */
 accessControlRouter.get('/validate', validateToken);
+
+// ---- Wallet-grants (Private B) ----
+accessControlRouter.post('/grants', createGrant);
+accessControlRouter.get('/grants', listGrants);
+accessControlRouter.post('/grants/revoke', revokeGrant);
+
+// Key delivery (Private B): viewer signs a challenge to claim the article key.
+accessControlRouter.post('/key/challenge', keyChallenge);
+accessControlRouter.post('/key/claim', keyClaim);

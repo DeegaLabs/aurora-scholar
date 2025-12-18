@@ -29,7 +29,7 @@ export function requireAuth(req: Request, _res: Response, next: NextFunction) {
   // Public allowlist (MVP):
   // - Journal needs to list public articles without wallet.
   // Note: this middleware is mounted at `/api`, so req.path starts with `/articles`, etc.
-  if (req.method === 'GET' && (req.path === '/articles' || req.path.startsWith('/articles/'))) {
+  if (req.method === 'GET' && req.path === '/articles') {
     return next();
   }
 

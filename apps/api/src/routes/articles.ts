@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
   getArticles,
+  getMyArticles,
   getArticleById,
   createArticle,
   publishArticle,
@@ -9,6 +10,9 @@ import {
 } from '../controllers/articles.controller';
 
 export const articlesRouter: Router = Router();
+
+// Authenticated: list articles for the connected wallet (includes private).
+articlesRouter.get('/mine', getMyArticles);
 
 /**
  * @swagger

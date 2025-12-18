@@ -5,6 +5,9 @@ import { storageService } from '../services/storage.service';
 import { createHash } from 'crypto';
 import nacl from 'tweetnacl';
 import { PublicKey } from '@solana/web3.js';
+import { prisma } from '../config/database';
+import crypto from 'crypto';
+import { encryptArticleKey } from '../services/article-secrets.service';
 
 // TODO: Import Prisma client and services
 // import { prisma } from '../config/database';
@@ -42,6 +45,33 @@ export const getArticles = asyncHandler(async (req: Request, res: Response) => {
       pageSize,
       totalPages,
     },
+  });
+});
+
+// Authenticated: list articles from DB for the connected wallet (includes private).
+export const getMyArticles = asyncHandler(async (req: Request, res: Response) => {
+  const wallet = req.auth?.wallet;
+  if (!wallet) throw createError('Unauthorized', 401);
+
+  const items = await prisma.article.findMany({
+    where: { authorWallet: wallet },
+    orderBy: { createdAt: 'desc' },
+    take: 200,
+    select: {
+      id: true,
+      title: true,
+      contentHash: true,
+      arweaveId: true,
+      isPublic: true,
+      status: true,
+      createdAt: true,
+      publishedAt: true,
+    },
+  });
+
+  res.json({
+    success: true,
+    data: { items },
   });
 });
 
@@ -120,9 +150,46 @@ export const preparePublish = asyncHandler(async (req: Request, res: Response) =
     },
   });
 
+  // Persist minimal metadata in DB so we can manage private grants by articleId (UUID).
+  const article = await prisma.article.upsert({
+    where: { arweaveId },
+    create: {
+      title,
+      content, // NOTE: will become ciphertext for private mode in next step.
+      contentHash,
+      authorWallet: author,
+      arweaveId,
+      isPublic: Boolean(isPublic),
+      status: 'PUBLISHED',
+      publishedAt: new Date(),
+    },
+    update: {
+      title,
+      content,
+      contentHash,
+      authorWallet: author,
+      isPublic: Boolean(isPublic),
+      status: 'PUBLISHED',
+      publishedAt: new Date(),
+    },
+  });
+
+  // For private articles, create/store an encryption key (encrypted at rest).
+  // Next step will use this key to encrypt the content before uploading.
+  if (!isPublic) {
+    const keyBytes = crypto.randomBytes(32);
+    const encryptedKey = encryptArticleKey(keyBytes);
+    await prisma.articleSecret.upsert({
+      where: { articleId: article.id },
+      create: { articleId: article.id, encryptedKey },
+      update: { encryptedKey },
+    });
+  }
+
   res.json({
     success: true,
     data: {
+      articleId: article.id,
       arweaveId,
       arweaveUrl: storageService.getArweaveUrl(arweaveId),
       contentHash,

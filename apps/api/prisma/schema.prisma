@@ -29,7 +29,9 @@ model Article {
   // Relations
   versions     ArticleVersion[]
   accessTokens AccessToken[]
+  accessGrants AccessGrant[]
   sources      ArticleSource[]
+  secret       ArticleSecret?
 
   @@index([authorWallet])
   @@index([status])
@@ -68,6 +70,38 @@ model AccessToken {
 
   @@index([token])
   @@index([expiresAt])
+}
+
+// Wallet-scoped access grants (MVP "Private B"): author grants a viewer wallet access until expiresAt or revokes.
+model AccessGrant {
+  id          String    @id @default(uuid())
+  articleId   String
+  ownerWallet String
+  viewerWallet String
+  expiresAt   DateTime?
+  revokedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@unique([articleId, viewerWallet])
+  @@index([ownerWallet])
+  @@index([viewerWallet])
+  @@index([expiresAt])
+  @@index([revokedAt])
+}
+
+// Stores per-article encryption key material (encrypted at rest with server secret).
+model ArticleSecret {
+  id           String   @id @default(uuid())
+  articleId    String   @unique
+  encryptedKey String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
 }
 
 // ===========================================
