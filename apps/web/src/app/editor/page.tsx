@@ -301,6 +301,7 @@ export default function EditorPage() {
           isOpen={isSuggestStructureModalOpen}
           onClose={() => setIsSuggestStructureModalOpen(false)}
           content={content}
+          sources={sources}
         />
       )}
 
@@ -311,6 +312,7 @@ export default function EditorPage() {
           onClose={() => setIsCheckCoherenceModalOpen(false)}
           content={content}
           declaredIntuition={declaredIntuition}
+          sources={sources}
         />
       )}
 

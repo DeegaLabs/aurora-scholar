@@ -32,6 +32,93 @@ const AnalyzeResponseSchema = z.object({
   authenticityAlerts: z.array(z.string()).default([]),
 });
 
+type ChatHistoryItem = { role?: string; content?: string };
+
+function truncate(s: string, max: number) {
+  if (!s) return '';
+  return s.length > max ? `${s.slice(0, max)}…` : s;
+}
+
+function normalizeSources(raw: unknown): Array<{ type?: string; name?: string; url?: string; text?: string }> {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((s) => {
+      if (!s || typeof s !== 'object') return null;
+      const o = s as any;
+      return {
+        type: typeof o.type === 'string' ? o.type : undefined,
+        name: typeof o.name === 'string' ? o.name : undefined,
+        url: typeof o.url === 'string' ? o.url : undefined,
+        text: typeof o.text === 'string' ? o.text : undefined,
+      };
+    })
+    .filter(Boolean) as any;
+}
+
+function buildSourcesContext(sources: unknown) {
+  const list = normalizeSources(sources).slice(0, 12);
+  if (list.length === 0) return '';
+
+  const lines = list.map((s, idx) => {
+    const head = `[${idx + 1}] ${s.type || 'source'}: ${s.name || s.url || '(unnamed)'}`;
+    const url = s.url ? `URL: ${s.url}` : '';
+    const text = s.text ? `EXCERPT: ${truncate(s.text.trim(), 1200)}` : '';
+    const note = s.type === 'pdf' ? 'NOTE: PDF content not parsed yet; only metadata provided.' : '';
+    return [head, url, text, note].filter(Boolean).join('\n');
+  });
+
+  return `\n\nSOURCES PROVIDED BY USER (use ONLY these; do not invent citations):\n${lines.join('\n\n')}\n`;
+}
+
+function buildChatHistoryContext(chatHistory: unknown) {
+  if (!Array.isArray(chatHistory)) return '';
+  const items = (chatHistory as ChatHistoryItem[])
+    .filter((m) => m && typeof m.content === 'string' && typeof m.role === 'string')
+    .slice(-8);
+  if (items.length === 0) return '';
+  const rendered = items
+    .map((m) => {
+      const role = m.role === 'assistant' ? 'assistant' : 'user';
+      return `${role}: ${truncate(String(m.content).trim(), 500)}`;
+    })
+    .join('\n');
+  return `\n\nCHAT HISTORY (most recent last):\n${rendered}\n`;
+}
+
+function looksLikeFinalText(answer: string) {
+  const a = answer.trim();
+  if (!a) return false;
+  const paragraphs = a.split(/\n\s*\n/).filter(Boolean);
+  const longParagraph = paragraphs.some((p) => p.length > 450);
+  const hasManySentences = (a.match(/[.!?]\s/g) || []).length >= 6;
+  const explicitlyWrites = /aqui (está|está um)|here( is|’s) (a|the) (paragraph|introduction|section)|segue (uma|o) (introdução|parágrafo)/i.test(
+    a
+  );
+  return explicitlyWrites || longParagraph || hasManySentences;
+}
+
+function enforceAntiGhostwriting(answer: string) {
+  const a = answer.trim();
+  if (!a) return a;
+
+  // Hard caps: avoid producing paste-ready content.
+  if (a.length > 1600 || looksLikeFinalText(a)) {
+    return [
+      'Eu não posso escrever o texto final por você.',
+      '',
+      'Posso, porém, te orientar com um checklist e perguntas-guia:',
+      '- Qual é a tese central em 1 frase (com suas próprias palavras)?',
+      '- Quais 2–3 conceitos você precisa definir logo no início?',
+      '- Que evidência (dos seus sources) sustenta cada afirmação?',
+      '- Que contra-argumento você vai antecipar?',
+      '',
+      'Se você colar aqui o seu rascunho (mesmo incompleto), eu te ajudo a melhorar clareza, estrutura e coerência sem escrever por você.',
+    ].join('\n');
+  }
+
+  return a;
+}
+
 function safeJsonParse(text: string) {
   try {
     return JSON.parse(text);
@@ -47,12 +134,13 @@ function safeJsonParse(text: string) {
 }
 
 export const analyzeText = asyncHandler(async (req: Request, res: Response) => {
-  const { text } = req.body;
+  const { text, sources } = req.body;
 
   if (!text) {
     throw createError('Text is required', 400);
   }
 
+  const sourcesContext = buildSourcesContext(sources);
   const userPrompt = `Analyze the following academic draft and provide ethical guidance ONLY.
 
 Return STRICT JSON with this shape:
@@ -65,7 +153,7 @@ Return STRICT JSON with this shape:
 }
 
 Draft:
-"""${text}"""`;
+"""${text}"""${sourcesContext}`;
 
   const raw = await geminiGenerateText({
     system: ETHICAL_SYSTEM_PROMPT,
@@ -77,18 +165,26 @@ Draft:
 
   const parsed = safeJsonParse(raw);
   const data = AnalyzeResponseSchema.parse(parsed);
+  // Hardening: prevent extremely long suggestion texts.
+  const safeData = {
+    ...data,
+    suggestions: (data.suggestions || []).map((s) => ({
+      ...s,
+      text: truncate(String(s.text), 500),
+    })),
+  };
 
   res.json({
     success: true,
     data: {
-      ...data,
+      ...safeData,
       timestamp: Date.now(),
     },
   });
 });
 
 export const chat = asyncHandler(async (req: Request, res: Response) => {
-  const { question, text } = req.body;
+  const { question, text, sources, chatHistory } = req.body;
 
   if (!question) {
     throw createError('Question is required', 400);
@@ -96,12 +192,15 @@ export const chat = asyncHandler(async (req: Request, res: Response) => {
 
   // Allow empty text for early-stage guidance (e.g. user hasn't written yet).
   const safeText = typeof text === 'string' ? text : '';
+  const sourcesContext = buildSourcesContext(sources);
+  const historyContext = buildChatHistoryContext(chatHistory);
 
   const userPrompt = `User question:
 ${question}
 
 Context (draft excerpt):
 """${safeText}"""
+${sourcesContext}${historyContext}
 
 Respond ethically per rules. Provide guidance, not final writing.
 Return your answer as plain text.`;
@@ -116,7 +215,7 @@ Return your answer as plain text.`;
   res.json({
     success: true,
     data: {
-      answer,
+      answer: enforceAntiGhostwriting(answer),
       suggestions: [],
       references: [],
       timestamp: Date.now(),

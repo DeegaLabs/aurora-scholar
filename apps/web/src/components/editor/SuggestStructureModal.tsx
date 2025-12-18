@@ -7,9 +7,10 @@ interface SuggestStructureModalProps {
   isOpen: boolean;
   onClose: () => void;
   content: string;
+  sources?: unknown[];
 }
 
-export function SuggestStructureModal({ isOpen, onClose, content }: SuggestStructureModalProps) {
+export function SuggestStructureModal({ isOpen, onClose, content, sources }: SuggestStructureModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +30,7 @@ export function SuggestStructureModal({ isOpen, onClose, content }: SuggestStruc
 
     (async () => {
       try {
-        const data = await aiAssistantAnalyze({ text: content });
+        const data = await aiAssistantAnalyze({ text: content, sources });
         const s = (data.suggestions || []).map((x) => x.text).filter(Boolean);
         if (!cancelled) setSuggestions(s.length ? s : ['Nenhuma sugestão encontrada.']);
       } catch (e: any) {

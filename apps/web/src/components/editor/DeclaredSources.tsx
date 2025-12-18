@@ -7,6 +7,7 @@ export interface Source {
   type: 'pdf' | 'link' | 'video' | 'audio' | 'text';
   name: string;
   url?: string;
+  text?: string;
   file?: File;
   uploaded: boolean;
 }
@@ -91,6 +92,7 @@ export function DeclaredSources({ sources, onAddSource, onRemoveSource }: Declar
       id: Date.now().toString(),
       type: 'text',
       name: `Text: ${pastedText.substring(0, 50)}${pastedText.length > 50 ? '...' : ''}`,
+      text: pastedText,
       uploaded: false,
     };
 

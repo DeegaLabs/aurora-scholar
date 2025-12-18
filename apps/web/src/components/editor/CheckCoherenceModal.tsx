@@ -8,9 +8,10 @@ interface CheckCoherenceModalProps {
   onClose: () => void;
   content: string;
   declaredIntuition: string;
+  sources?: unknown[];
 }
 
-export function CheckCoherenceModal({ isOpen, onClose, content, declaredIntuition }: CheckCoherenceModalProps) {
+export function CheckCoherenceModal({ isOpen, onClose, content, declaredIntuition, sources }: CheckCoherenceModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<{ aligned: boolean; alerts: string[] } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -47,7 +48,7 @@ export function CheckCoherenceModal({ isOpen, onClose, content, declaredIntuitio
       try {
         // O backend ainda não tem um endpoint dedicado de coerência.
         // Por enquanto, usamos /analyze e apresentamos as sugestões como alertas.
-        const data = await aiAssistantAnalyze({ text: content });
+        const data = await aiAssistantAnalyze({ text: content, sources });
         const alerts = (data.suggestions || []).map((x) => x.text).filter(Boolean);
         if (!cancelled) {
           setResults({
