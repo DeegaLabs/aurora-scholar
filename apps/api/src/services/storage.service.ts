@@ -17,13 +17,13 @@ export interface UploadFileParams {
 
 export class StorageService {
   private irys: Irys | null = null;
-  private nodeUrl: string;
+  private nodeUrl: string | null = null;
   private privateKey: string | null = null;
 
   constructor() {
-    // Support both IRYS_NODE_URL (code) and IRYS_NODE (existing env files)
-    this.nodeUrl = process.env.IRYS_NODE_URL || process.env.IRYS_NODE || 'https://devnet.irys.xyz';
-    this.privateKey = process.env.IRYS_PRIVATE_KEY || null;
+    // Load lazily in getIrys() so runtime env changes / dotenv timing cannot break initialization.
+    this.nodeUrl = null;
+    this.privateKey = null;
   }
 
   /**
@@ -33,6 +33,11 @@ export class StorageService {
     if (this.irys) {
       return this.irys;
     }
+
+    // Refresh env-backed config at initialization time.
+    // Support both IRYS_NODE_URL (code) and IRYS_NODE (existing env files)
+    this.nodeUrl = process.env.IRYS_NODE_URL || process.env.IRYS_NODE || 'https://devnet.irys.xyz';
+    this.privateKey = process.env.IRYS_PRIVATE_KEY || null;
 
     if (!this.privateKey) {
       throw new Error('IRYS_PRIVATE_KEY environment variable is required');
@@ -56,7 +61,7 @@ export class StorageService {
       }
 
       this.irys = new Irys({
-        url: this.nodeUrl,
+        url: this.nodeUrl!,
         token: 'solana',
         key: bs58.encode(keypair.secretKey),
         config: {
