@@ -7,7 +7,9 @@ import swaggerUi from 'swagger-ui-express';
 import { articlesRouter } from './routes/articles';
 import { aiAssistantRouter } from './routes/ai-assistant';
 import { accessControlRouter } from './routes/access-control';
+import { authRouter } from './routes/auth';
 import { errorHandler } from './middleware/error-handler';
+import { requireAuth } from './middleware/require-auth';
 
 // Load environment variables
 dotenv.config();
@@ -59,6 +61,12 @@ app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
+
+// Public auth routes (no auth required)
+app.use('/api/auth', authRouter);
+
+// All other API endpoints require wallet-auth
+app.use('/api', requireAuth);
 
 // Routes
 app.use('/api/articles', articlesRouter);
