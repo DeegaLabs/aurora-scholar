@@ -55,6 +55,24 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<JournalFilters>({ query: '', author: '', sort: 'newest' });
 
+  const selectedArticle = useMemo(
+    () => dbArticles.find((a) => a.id === selectedArticleId) || null,
+    [dbArticles, selectedArticleId]
+  );
+
+  async function copyPrivateLink() {
+    if (!selectedArticleId) return;
+    const url = `${window.location.origin}/private/${selectedArticleId}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast({ type: 'success', title: 'Link', message: 'Link copiado.' });
+    } catch {
+      // Fallback
+      const ok = window.prompt('Copie o link:', url);
+      if (ok !== null) toast({ type: 'info', title: 'Link', message: 'Copie o link manualmente.' });
+    }
+  }
+
   useEffect(() => {
     let cancelled = false;
     if (!publicKey) return;
@@ -230,6 +248,23 @@ export default function DashboardPage() {
                 </select>
               </div>
             </div>
+
+            {selectedArticle && !selectedArticle.isPublic ? (
+              <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-xs font-semibold text-gray-700">Link privado (viewer)</div>
+                  <div className="mt-0.5 text-xs text-gray-600 font-mono truncate">
+                    {typeof window !== 'undefined' ? `${window.location.origin}/private/${selectedArticleId}` : `/private/${selectedArticleId}`}
+                  </div>
+                </div>
+                <button
+                  onClick={copyPrivateLink}
+                  className="px-3 py-1.5 text-xs font-medium border border-gray-300 rounded-md hover:bg-white"
+                >
+                  Copiar
+                </button>
+              </div>
+            ) : null}
 
             <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 items-end">
               <div>
