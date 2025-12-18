@@ -1,7 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useConnection, useWallet } from '@solana/wallet-adapter-react';
+import { getAuroraProgram, deriveArticlePda, SYSTEM_PROGRAM_ID } from '@/lib/solana/auroraProgram';
+
+function hexToBytes(hex: string) {
+  const normalized = hex.startsWith('0x') ? hex.slice(2) : hex;
+  if (normalized.length !== 64) throw new Error('Invalid hash length (expected 32 bytes hex)');
+  const out = new Uint8Array(32);
+  for (let i = 0; i < 32; i++) {
+    out[i] = parseInt(normalized.slice(i * 2, i * 2 + 2), 16);
+  }
+  return out;
+}
 
 interface PublishModalProps {
   isOpen: boolean;
@@ -18,18 +29,24 @@ export function PublishModal({
   declaredIntuition,
   onSuccess,
 }: PublishModalProps) {
-  const { publicKey } = useWallet();
+  const { connection } = useConnection();
+  const { publicKey, wallet, signTransaction, signAllTransactions } = useWallet();
   const [title, setTitle] = useState('');
   const [isPublic, setIsPublic] = useState(true);
   const [aiScope, setAiScope] = useState('Grammar checking and style suggestions only');
   const [isPublishing, setIsPublishing] = useState(false);
   const [step, setStep] = useState<'form' | 'uploading' | 'publishing' | 'success'>('form');
+  const [successInfo, setSuccessInfo] = useState<{ arweaveUrl: string; explorerUrl: string } | null>(null);
 
   if (!isOpen) return null;
 
   const handlePublish = async () => {
     if (!publicKey) {
       alert('Please connect your wallet to publish');
+      return;
+    }
+    if (!wallet || !signTransaction || !signAllTransactions) {
+      alert('Wallet does not support signing');
       return;
     }
     if (!title.trim()) {
@@ -40,50 +57,66 @@ export function PublishModal({
       alert('Please add content to your article');
       return;
     }
+    if (!declaredIntuition.trim()) {
+      alert('Please add your declared intuition before publishing');
+      return;
+    }
 
     setIsPublishing(true);
     setStep('uploading');
 
     try {
-      // Step 1: Upload to Arweave
-      const uploadResponse = await fetch('/api/storage/upload', {
+      // Step 1: Upload to Arweave via API (Irys)
+      const uploadResponse = await fetch('http://localhost:3001/api/articles/publish/prepare', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          content,
           title,
-          declaredIntuition,
-        }),
-      });
-
-      if (!uploadResponse.ok) {
-        throw new Error('Failed to upload to Arweave');
-      }
-
-      const { arweaveId } = await uploadResponse.json();
-      setStep('publishing');
-
-      // Step 2: Publish to Solana
-      // TODO: This will be implemented when wallet integration is added (Task 10)
-      const publishResponse = await fetch('/api/blockchain/publish', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          author: publicKey ? String(publicKey) : '',
           content,
           declaredIntuition,
-          arweaveId,
-          title,
           aiScope,
           isPublic,
         }),
       });
 
-      if (!publishResponse.ok) {
-        throw new Error('Failed to publish to blockchain');
+      if (!uploadResponse.ok) {
+        const text = await uploadResponse.text();
+        throw new Error(text || 'Failed to upload to Arweave');
       }
 
-      const { transactionId: _transactionId } = await publishResponse.json();
+      const prep = await uploadResponse.json();
+      const arweaveId = prep?.data?.arweaveId || prep?.arweaveId;
+      const arweaveUrl = prep?.data?.arweaveUrl || prep?.arweaveUrl;
+      const contentHashHex = prep?.data?.contentHash || prep?.contentHash;
+      const intuitionHashHex = prep?.data?.intuitionHash || prep?.intuitionHash;
+      if (!arweaveId || !contentHashHex || !intuitionHashHex) throw new Error('Invalid prepare response');
+
+      setStep('publishing');
+
+      // Step 2: Publish to Solana on-chain (wallet signs)
+      // wallet-adapter wallet implements the minimal Anchor wallet interface (publicKey + signTransaction + signAllTransactions)
+      const anchorWallet = {
+        publicKey,
+        signTransaction: signTransaction as any,
+        signAllTransactions: signAllTransactions as any,
+      } as any;
+
+      const program = getAuroraProgram(connection as any, anchorWallet);
+      const contentHashBytes = hexToBytes(contentHashHex);
+      const intuitionHashBytes = hexToBytes(intuitionHashHex);
+      const [articlePda] = deriveArticlePda(publicKey, contentHashBytes);
+
+      const sig = await program.methods
+        .publishArticle(Array.from(contentHashBytes), Array.from(intuitionHashBytes), arweaveId, title, aiScope, isPublic)
+        .accounts({
+          article: articlePda,
+          author: publicKey,
+          systemProgram: SYSTEM_PROGRAM_ID,
+        })
+        .rpc();
+
+      const explorerUrl = `https://explorer.solana.com/tx/${sig}?cluster=devnet`;
+      setSuccessInfo({ arweaveUrl: arweaveUrl || `https://arweave.net/${arweaveId}`, explorerUrl });
       setStep('success');
 
       // Clear localStorage
@@ -212,6 +245,20 @@ export function PublishModal({
                 </svg>
               </div>
               <p className="text-gray-700 font-medium">Article published successfully!</p>
+              {successInfo?.explorerUrl ? (
+                <div className="mt-3 text-sm">
+                  <a className="text-blue-600 hover:underline" href={successInfo.explorerUrl} target="_blank" rel="noreferrer">
+                    Ver no Solana Explorer
+                  </a>
+                </div>
+              ) : null}
+              {successInfo?.arweaveUrl ? (
+                <div className="mt-1 text-sm">
+                  <a className="text-blue-600 hover:underline" href={successInfo.arweaveUrl} target="_blank" rel="noreferrer">
+                    Ver no Arweave
+                  </a>
+                </div>
+              ) : null}
               <p className="text-sm text-gray-500 mt-2">Redirecting...</p>
             </div>
           )}
