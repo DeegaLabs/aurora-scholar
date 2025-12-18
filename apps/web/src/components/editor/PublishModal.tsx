@@ -2,8 +2,23 @@
 
 import { useState } from 'react';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
-import { Transaction } from '@solana/web3.js';
-import { getAuroraProgram, deriveArticlePda, SYSTEM_PROGRAM_ID } from '@/lib/solana/auroraProgram';
+import { Transaction, TransactionMessage, VersionedTransaction } from '@solana/web3.js';
+import { buildPublishArticleIx, deriveArticlePda } from '@/lib/solana/auroraProgram';
+import { useToast } from '@/components/ui/toast';
+
+function formatUnknownError(err: any): string {
+  if (!err) return 'Erro desconhecido';
+  if (typeof err === 'string') return err;
+  if (err instanceof Error) return err.message || 'Erro';
+  if (typeof err?.message === 'string') return err.message;
+  if (typeof err?.error?.message === 'string') return err.error.message;
+  if (typeof err?.cause?.message === 'string') return err.cause.message;
+  try {
+    return JSON.stringify(err, null, 2);
+  } catch {
+    return String(err);
+  }
+}
 
 function hexToBytes(hex: string) {
   const normalized = hex.startsWith('0x') ? hex.slice(2) : hex;
@@ -53,6 +68,7 @@ export function PublishModal({
 }: PublishModalProps) {
   const { connection } = useConnection();
   const { publicKey, wallet, signMessage, sendTransaction } = useWallet();
+  const { toast } = useToast();
   const [title, setTitle] = useState('');
   const [isPublic, setIsPublic] = useState(true);
   const [aiScope, setAiScope] = useState('Grammar checking and style suggestions only');
@@ -64,27 +80,27 @@ export function PublishModal({
 
   const handlePublish = async () => {
     if (!publicKey) {
-      alert('Please connect your wallet to publish');
+      toast({ type: 'error', title: 'Wallet', message: 'Conecte sua wallet para publicar.' });
       return;
     }
     if (!wallet || !sendTransaction) {
-      alert('Wallet does not support sending transactions');
+      toast({ type: 'error', title: 'Wallet', message: 'Sua wallet não suporta envio de transações.' });
       return;
     }
     if (!signMessage) {
-      alert('Wallet does not support message signing (signMessage).');
+      toast({ type: 'error', title: 'Wallet', message: 'Sua wallet não suporta assinatura de mensagem (signMessage).' });
       return;
     }
     if (!title.trim()) {
-      alert('Please provide a title for your article');
+      toast({ type: 'error', title: 'Validação', message: 'Informe um título para o artigo.' });
       return;
     }
     if (!content.trim()) {
-      alert('Please add content to your article');
+      toast({ type: 'error', title: 'Validação', message: 'Adicione conteúdo antes de publicar.' });
       return;
     }
     if (!declaredIntuition.trim()) {
-      alert('Please add your declared intuition before publishing');
+      toast({ type: 'error', title: 'Validação', message: 'Preencha a Declared Intuition antes de publicar.' });
       return;
     }
 
@@ -107,6 +123,7 @@ export function PublishModal({
         createdAt,
       });
 
+      // If the user rejects, we stop here (no API call with missing signature).
       const signatureBytes = await signMessage(new TextEncoder().encode(canonicalPayload));
       const signature = bytesToBase64(signatureBytes);
 
@@ -121,8 +138,11 @@ export function PublishModal({
           declaredIntuition,
           aiScope,
           isPublic,
-          signedPayload: { createdAt },
+          // Backend currently requires signature at top-level + signedPayload.createdAt (MVP).
           signature,
+          signedPayload: { createdAt },
+          // Also include signature inside signedPayload for forward-compat (harmless extra field).
+          signedPayloadSignature: signature,
         }),
       });
 
@@ -141,32 +161,110 @@ export function PublishModal({
       setStep('publishing');
 
       // Step 2: Publish to Solana on-chain (wallet signs)
-      // Build instruction via Anchor, then send via wallet-adapter (most stable in browser).
-      const dummyWallet = {
-        publicKey,
-        signTransaction: async (tx: any) => tx,
-        signAllTransactions: async (txs: any[]) => txs,
-      } as any;
-      const program = getAuroraProgram(connection as any, dummyWallet);
       const contentHashBytes = hexToBytes(contentHashHex);
       const intuitionHashBytes = hexToBytes(intuitionHashHex);
       const [articlePda] = deriveArticlePda(publicKey, contentHashBytes);
 
-      const ix = await program.methods
-        .publishArticle(Array.from(contentHashBytes), Array.from(intuitionHashBytes), arweaveId, title, aiScope, isPublic)
-        .accounts({
-          article: articlePda,
-          author: publicKey,
-          systemProgram: SYSTEM_PROGRAM_ID,
-        })
-        .instruction();
+      const ix = buildPublishArticleIx({
+        article: articlePda,
+        author: publicKey,
+        contentHash: contentHashBytes,
+        intuitionHash: intuitionHashBytes,
+        arweaveId,
+        title,
+        aiScope: aiScope || '',
+        isPublic: Boolean(isPublic),
+      });
 
       const tx = new Transaction().add(ix);
-      const sig = await sendTransaction(tx, connection, { skipPreflight: false });
+      // Make the transaction explicit/stable before handing to wallet-adapter.
+      tx.feePayer = publicKey;
+      const latestBlockhash = await connection.getLatestBlockhash('confirmed');
+      tx.recentBlockhash = latestBlockhash.blockhash;
+
+      // Validate message compilation early to surface actionable errors.
+      // If this throws, the issue is with instruction encoding / accounts, not wallet-adapter.
+      tx.compileMessage();
+
+      // Preflight simulation (no signature verification) to extract useful logs instead of "Unexpected error".
+      try {
+        // Use VersionedTransaction for simulation (web3.js stable overload).
+        const v0msg = new TransactionMessage({
+          payerKey: publicKey,
+          recentBlockhash: latestBlockhash.blockhash,
+          instructions: tx.instructions,
+        }).compileToV0Message();
+        const vtx = new VersionedTransaction(v0msg);
+
+        // Optional: fee/rent sanity check to avoid opaque wallet errors.
+        const [balance, feeInfo, rentExempt] = await Promise.all([
+          connection.getBalance(publicKey, 'processed'),
+          connection.getFeeForMessage(v0msg, 'processed'),
+          connection.getMinimumBalanceForRentExemption(574, 'processed'), // Article::SPACE ~= 574 bytes
+        ]);
+        const feeLamports = feeInfo.value ?? 0;
+        const estimatedNeed = rentExempt + feeLamports;
+        if (balance < estimatedNeed) {
+          toast({
+            type: 'error',
+            title: 'Saldo insuficiente (devnet)',
+            message:
+              `Sua wallet tem ${(balance / 1e9).toFixed(4)} SOL.\n` +
+              `Estimativa mínima: ${(estimatedNeed / 1e9).toFixed(4)} SOL (rent + fee).\n\n` +
+              `Faça airdrop e tente novamente.`,
+            durationMs: 12000,
+          });
+          setIsPublishing(false);
+          setStep('form');
+          return;
+        }
+
+        const sim = await connection.simulateTransaction(vtx, {
+          sigVerify: false,
+          commitment: 'processed',
+        });
+        if (sim.value.err) {
+          // eslint-disable-next-line no-console
+          console.error('Publish simulation failed', sim.value.err, sim.value.logs);
+          toast({
+            type: 'error',
+            title: 'Simulação falhou',
+            message:
+              `Erro: ${JSON.stringify(sim.value.err)}\n\n` +
+              `Logs:\n${(sim.value.logs || []).slice(-30).join('\n')}`,
+            durationMs: 12000,
+          });
+          setIsPublishing(false);
+          setStep('form');
+          return;
+        }
+      } catch (e: any) {
+        // eslint-disable-next-line no-console
+        console.error('Simulation threw', e);
+        // Continue; some RPCs/extensions can block simulation.
+      }
+
+      let sig: string;
+      try {
+        sig = await sendTransaction(tx, connection, { skipPreflight: false, maxRetries: 3 });
+      } catch (e: any) {
+        // eslint-disable-next-line no-console
+        console.error('sendTransaction threw', e, { keys: e ? Object.keys(e) : [] });
+        throw e;
+      }
+      await connection.confirmTransaction(
+        {
+          signature: sig,
+          blockhash: latestBlockhash.blockhash,
+          lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
+        },
+        'confirmed'
+      );
 
       const explorerUrl = `https://explorer.solana.com/tx/${sig}?cluster=devnet`;
       setSuccessInfo({ arweaveUrl: arweaveUrl || `https://arweave.net/${arweaveId}`, explorerUrl });
       setStep('success');
+      toast({ type: 'success', title: 'Publicado', message: 'Artigo publicado com sucesso.' });
 
       // Clear localStorage
       localStorage.removeItem('aurora-editor-content');
@@ -183,7 +281,15 @@ export function PublishModal({
         window.location.href = isPublic ? '/journal' : '/dashboard';
       }, 2000);
     } catch (error: any) {
-      alert(`Publishing failed: ${error.message}`);
+      // Surface more context in dev; keep alert concise.
+      // eslint-disable-next-line no-console
+      console.error('Publish failed', error);
+      toast({
+        type: 'error',
+        title: 'Falha ao publicar',
+        message: formatUnknownError(error),
+        durationMs: 8000,
+      });
       setIsPublishing(false);
       setStep('form');
     }

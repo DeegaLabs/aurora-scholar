@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
+import dynamic from 'next/dynamic';
 import { Editor } from '@/components/editor/Editor';
 import { AiGuidancePanel } from '@/components/editor/AiGuidancePanel';
 import { PublishModal } from '@/components/editor/PublishModal';
@@ -14,7 +15,12 @@ import { SuggestStructureModal } from '@/components/editor/SuggestStructureModal
 import { CheckCoherenceModal } from '@/components/editor/CheckCoherenceModal';
 import { RefinementMenu } from '@/components/editor/RefinementMenu';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+
+// wallet-adapter-react-ui is not SSR-safe (its markup differs server vs client), so render it client-only.
+const WalletMultiButton = dynamic(
+  () => import('@solana/wallet-adapter-react-ui').then((m) => m.WalletMultiButton),
+  { ssr: false }
+);
 
 export default function EditorPage() {
   const t = useTranslations('editor');
