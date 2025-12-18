@@ -1,34 +1,43 @@
 import { Request, Response } from 'express';
 import { asyncHandler, createError } from '../middleware/error-handler';
+import { blockchainService } from '../services/blockchain.service';
 
 // TODO: Import Prisma client and services
 // import { prisma } from '../config/database';
 // import { storageService } from '../services/storage.service';
-// import { blockchainService } from '../services/blockchain.service';
 
 export const getArticles = asyncHandler(async (req: Request, res: Response) => {
-  const { page = 1, limit = 20, author: _author } = req.query;
+  const { page = 1, limit = 20, author } = req.query;
+  const pageNum = Math.max(1, Number(page) || 1);
+  const pageSize = Math.max(1, Math.min(Number(limit) || 20, 100));
 
-  // TODO: Implement with Prisma
-  // const articles = await prisma.article.findMany({
-  //   where: {
-  //     isPublic: true,
-  //     status: 'PUBLISHED',
-  //     ...(author && { authorWallet: author as string }),
-  //   },
-  //   skip: (Number(page) - 1) * Number(limit),
-  //   take: Number(limit),
-  //   orderBy: { publishedAt: 'desc' },
-  // });
+  // MVP: list public articles directly from on-chain program accounts.
+  // Future: replace with Prisma + indexer/cache for scale.
+  const all = await blockchainService.getPublicArticles(500);
+  const filtered = author
+    ? all.filter((a) => String(a.author) === String(author))
+    : all;
+
+  const total = filtered.length;
+  const totalPages = Math.ceil(total / pageSize);
+  const start = (pageNum - 1) * pageSize;
+  const pageItems = filtered.slice(start, start + pageSize);
 
   res.json({
     success: true,
     data: {
-      items: [],
-      total: 0,
-      page: Number(page),
-      pageSize: Number(limit),
-      totalPages: 0,
+      items: pageItems.map((a) => ({
+        title: a.title,
+        author: String(a.author),
+        timestamp: a.timestamp,
+        contentHash: a.contentHash.toString('hex'),
+        arweaveId: a.arweaveId,
+        aiScope: a.aiScope,
+      })),
+      total,
+      page: pageNum,
+      pageSize,
+      totalPages,
     },
   });
 });

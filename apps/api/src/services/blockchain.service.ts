@@ -168,14 +168,31 @@ export class BlockchainService {
    * Note: This is a simplified version. In production, you'd use an indexer
    */
   async getPublicArticles(_limit: number = 100): Promise<ArticleData[]> {
-    // This is a placeholder. In production, you'd:
-    // 1. Use an indexer (e.g., Helius, QuickNode)
-    // 2. Parse events from the blockchain
-    // 3. Maintain a database cache of public articles
-    
-    // For now, return empty array
-    // TODO: Implement proper indexing
-    return [];
+    // MVP approach: fetch all program accounts and filter by isPublic.
+    // NOTE: This may be slow on mainnet; for production use an indexer/cache.
+    const limit = Math.max(1, Math.min(Number(_limit) || 100, 500));
+
+    const accounts = await (this.program.account as any).article.all();
+    const items: ArticleData[] = accounts
+      .map((acc: any) => {
+        const a = acc.account;
+        return {
+          author: a.author as PublicKey,
+          contentHash: Buffer.from(a.contentHash),
+          intuitionHash: Buffer.from(a.intuitionHash),
+          arweaveId: a.arweaveId as string,
+          title: a.title as string,
+          aiScope: a.aiScope as string,
+          isPublic: Boolean(a.isPublic),
+          timestamp: a.timestamp?.toNumber ? a.timestamp.toNumber() : Number(a.timestamp) || 0,
+          bump: a.bump ?? 0,
+        } satisfies ArticleData;
+      })
+      .filter((a: ArticleData) => a.isPublic)
+      .sort((a: ArticleData, b: ArticleData) => b.timestamp - a.timestamp)
+      .slice(0, limit);
+
+    return items;
   }
 
   /**
