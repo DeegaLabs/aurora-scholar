@@ -1,21 +1,50 @@
 import { Request, Response } from 'express';
 import { asyncHandler, createError } from '../middleware/error-handler';
+import { z } from 'zod';
+import { geminiGenerateText } from '../services/gemini.service';
 
-// TODO: Import OpenAI or Anthropic client
-// import OpenAI from 'openai';
+const ETHICAL_SYSTEM_PROMPT = `You are Aurora Scholar's ethical academic assistant.
 
-// TODO: Use this prompt when implementing AI integration
-// const ETHICAL_SYSTEM_PROMPT = `You are an ethical AI academic assistant for Aurora Scholar.
-//
-// IMPORTANT RULES:
-// 1. NEVER write complete text for the user
-// 2. ONLY provide guidance, explanations, and suggestions
-// 3. If you detect text that seems AI-generated or pasted, alert the user
-// 4. Base suggestions ONLY on sources provided by the user
-// 5. Help with structure, grammar, methodology, and references
-// 6. Maintain academic standards and integrity
-//
-// Your role is to GUIDE, not to WRITE.`;
+NON-NEGOTIABLE RULES:
+- NEVER write full paragraphs/sections for the user.
+- NEVER produce "final text" that could be pasted as-is.
+- You may ONLY provide: critiques, checklists, structure suggestions, questions, and small examples (<= 2 sentences) clearly marked as examples.
+- If the user asks you to write content, refuse and instead guide them with steps/questions.
+- Keep advice grounded in the user's provided text; do not invent facts or citations.
+
+OUTPUT FORMAT:
+- For analysis endpoints: return STRICT JSON only (no markdown, no prose outside JSON).`;
+
+const AnalyzeResponseSchema = z.object({
+  suggestions: z
+    .array(
+      z.object({
+        id: z.string().min(1),
+        type: z.enum(['structure', 'clarity', 'coherence', 'style', 'references', 'methodology', 'ethics']).default('clarity'),
+        text: z.string().min(1),
+        priority: z.enum(['low', 'medium', 'high']).default('medium'),
+      })
+    )
+    .default([]),
+  corrections: z.array(z.any()).default([]),
+  references: z.array(z.any()).default([]),
+  warnings: z.array(z.string()).default([]),
+  authenticityAlerts: z.array(z.string()).default([]),
+});
+
+function safeJsonParse(text: string) {
+  try {
+    return JSON.parse(text);
+  } catch {
+    // Try to extract a JSON object if the model wrapped it with extra text.
+    const start = text.indexOf('{');
+    const end = text.lastIndexOf('}');
+    if (start >= 0 && end > start) {
+      return JSON.parse(text.slice(start, end + 1));
+    }
+    throw new Error('Invalid JSON');
+  }
+}
 
 export const analyzeText = asyncHandler(async (req: Request, res: Response) => {
   const { text, sources: _sources, cursorPosition: _cursorPosition, agentConfig: _agentConfig } = req.body;
@@ -24,29 +53,34 @@ export const analyzeText = asyncHandler(async (req: Request, res: Response) => {
     throw createError('Text is required', 400);
   }
 
-  // TODO: Implement with OpenAI/Anthropic
-  // 1. Process sources (extract text from PDFs, etc.)
-  // 2. Build context with ethical prompt
-  // 3. Send to LLM
-  // 4. Validate response (ensure it didn't write complete text)
-  // 5. Detect authenticity issues
+  const userPrompt = `Analyze the following academic draft and provide ethical guidance ONLY.
 
-  // Placeholder response
+Return STRICT JSON with this shape:
+{
+  "suggestions": [{"id":"1","type":"structure|clarity|coherence|style|references|methodology|ethics","text":"...","priority":"low|medium|high"}],
+  "corrections": [],
+  "references": [],
+  "warnings": ["..."],
+  "authenticityAlerts": ["..."]
+}
+
+Draft:
+"""${text}"""`;
+
+  const raw = await geminiGenerateText({
+    system: ETHICAL_SYSTEM_PROMPT,
+    user: userPrompt,
+    temperature: 0.2,
+    maxOutputTokens: 1200,
+  });
+
+  const parsed = safeJsonParse(raw);
+  const data = AnalyzeResponseSchema.parse(parsed);
+
   res.json({
     success: true,
     data: {
-      suggestions: [
-        {
-          id: '1',
-          type: 'structure',
-          text: 'Consider adding an abstract section at the beginning of your article.',
-          priority: 'medium',
-        },
-      ],
-      corrections: [],
-      references: [],
-      warnings: [],
-      authenticityAlerts: [],
+      ...data,
       timestamp: Date.now(),
     },
   });
@@ -60,22 +94,27 @@ export const chat = asyncHandler(async (req: Request, res: Response) => {
     throw createError('Question and text are required', 400);
   }
 
-  // TODO: Implement with OpenAI/Anthropic
-  // 1. Build context with document and sources
-  // 2. Include chat history for continuity
-  // 3. Send to LLM with ethical prompt
-  // 4. Validate response
+  const userPrompt = `User question:
+${question}
 
-  // Placeholder response
+Context (draft excerpt):
+"""${text}"""
+
+Respond ethically per rules. Provide guidance, not final writing.
+Return your answer as plain text.`;
+
+  const answer = await geminiGenerateText({
+    system: ETHICAL_SYSTEM_PROMPT,
+    user: userPrompt,
+    temperature: 0.4,
+    maxOutputTokens: 700,
+  });
+
   res.json({
     success: true,
     data: {
-      answer:
-        'Based on your document and the sources provided, I suggest focusing on clarifying your methodology section. Consider explaining the research design in more detail.',
-      suggestions: [
-        'Add a clear research question',
-        'Explain your data collection methods',
-      ],
+      answer,
+      suggestions: [],
       references: [],
       timestamp: Date.now(),
     },
