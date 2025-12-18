@@ -47,7 +47,7 @@ function safeJsonParse(text: string) {
 }
 
 export const analyzeText = asyncHandler(async (req: Request, res: Response) => {
-  const { text, sources: _sources, cursorPosition: _cursorPosition, agentConfig: _agentConfig } = req.body;
+  const { text } = req.body;
 
   if (!text) {
     throw createError('Text is required', 400);
@@ -71,7 +71,8 @@ Draft:
     system: ETHICAL_SYSTEM_PROMPT,
     user: userPrompt,
     temperature: 0.2,
-    maxOutputTokens: 1200,
+    maxOutputTokens: 2048,
+    responseMimeType: 'application/json',
   });
 
   const parsed = safeJsonParse(raw);
@@ -87,8 +88,7 @@ Draft:
 });
 
 export const chat = asyncHandler(async (req: Request, res: Response) => {
-  const { question, text, cursorPosition: _cursorPosition, sources: _sources, chatHistory: _chatHistory, agentConfig: _agentConfig } =
-    req.body;
+  const { question, text } = req.body;
 
   if (!question || !text) {
     throw createError('Question and text are required', 400);
@@ -106,8 +106,8 @@ Return your answer as plain text.`;
   const answer = await geminiGenerateText({
     system: ETHICAL_SYSTEM_PROMPT,
     user: userPrompt,
-    temperature: 0.4,
-    maxOutputTokens: 700,
+    temperature: 0.3,
+    maxOutputTokens: 1024,
   });
 
   res.json({
