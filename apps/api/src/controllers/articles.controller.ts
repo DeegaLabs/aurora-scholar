@@ -6,7 +6,6 @@ import { createHash } from 'crypto';
 import nacl from 'tweetnacl';
 import { PublicKey } from '@solana/web3.js';
 import { prisma } from '../config/database';
-import crypto from 'crypto';
 import { encryptArticleKey } from '../services/article-secrets.service';
 
 // TODO: Import Prisma client and services
@@ -99,7 +98,7 @@ function verifySignature(params: { author: string; message: string; signatureB64
  * so the frontend wallet can submit the on-chain transaction.
  */
 export const preparePublish = asyncHandler(async (req: Request, res: Response) => {
-  const { title, content, declaredIntuition, aiScope, isPublic, author, signature, signedPayload } = req.body as {
+  const { title, content, declaredIntuition, aiScope, isPublic, author, signature, signedPayload, articleKey, encryptedPayload } = req.body as {
     title?: string;
     content?: string;
     declaredIntuition?: string;
@@ -108,6 +107,8 @@ export const preparePublish = asyncHandler(async (req: Request, res: Response) =
     author?: string;
     signature?: string; // base64
     signedPayload?: any;
+    articleKey?: string; // base64, required for private
+    encryptedPayload?: { ivB64: string; ciphertextB64: string; alg?: string; v?: number };
   };
 
   if (!title || !content || !declaredIntuition || !author || !signature || !signedPayload) {
@@ -124,7 +125,7 @@ export const preparePublish = asyncHandler(async (req: Request, res: Response) =
     contentHash,
     intuitionHash,
     aiScope: aiScope || '',
-    isPublic: Boolean(isPublic),
+    isPublic: !!isPublic,
     createdAt: signedPayload?.createdAt,
   };
 
@@ -137,16 +138,39 @@ export const preparePublish = asyncHandler(async (req: Request, res: Response) =
   const ok = verifySignature({ author, message: canonical, signatureB64: signature });
   if (!ok) throw createError('Invalid signature', 401);
 
+  // If private, require client-side encryption payload + key.
+  const isPrivate = !isPublic;
+  if (isPrivate) {
+    if (!articleKey || !encryptedPayload?.ivB64 || !encryptedPayload?.ciphertextB64) {
+      throw createError('articleKey and encryptedPayload are required for private publish', 400);
+    }
+  }
+
+  const uploadBody = isPrivate
+    ? {
+        // Store ciphertext only (confidential).
+        content: JSON.stringify({
+          encrypted: true,
+          ...encryptedPayload,
+        }),
+        title,
+        declaredIntuition: '', // do not upload plaintext
+      }
+    : {
+        content,
+        title,
+        declaredIntuition,
+      };
+
   const arweaveId = await storageService.uploadArticle({
-    title,
-    content,
-    declaredIntuition,
+    ...uploadBody,
     metadata: {
       aiScope: aiScope || '',
       isPublic: Boolean(isPublic),
       author,
       contentHash,
       intuitionHash,
+      encrypted: isPrivate,
     },
   });
 
@@ -155,7 +179,7 @@ export const preparePublish = asyncHandler(async (req: Request, res: Response) =
     where: { arweaveId },
     create: {
       title,
-      content, // NOTE: will become ciphertext for private mode in next step.
+      content: isPrivate ? JSON.stringify({ encrypted: true, ...encryptedPayload }) : content,
       contentHash,
       authorWallet: author,
       arweaveId,
@@ -165,7 +189,7 @@ export const preparePublish = asyncHandler(async (req: Request, res: Response) =
     },
     update: {
       title,
-      content,
+      content: isPrivate ? JSON.stringify({ encrypted: true, ...encryptedPayload }) : content,
       contentHash,
       authorWallet: author,
       isPublic: Boolean(isPublic),
@@ -174,10 +198,10 @@ export const preparePublish = asyncHandler(async (req: Request, res: Response) =
     },
   });
 
-  // For private articles, create/store an encryption key (encrypted at rest).
-  // Next step will use this key to encrypt the content before uploading.
-  if (!isPublic) {
-    const keyBytes = crypto.randomBytes(32);
+  // For private articles, store encryption key from client (encrypted at rest).
+  if (isPrivate) {
+    const keyBytes = Buffer.from(articleKey!, 'base64');
+    if (keyBytes.length !== 32) throw createError('articleKey must be 32 bytes (base64)', 400);
     const encryptedKey = encryptArticleKey(keyBytes);
     await prisma.articleSecret.upsert({
       where: { articleId: article.id },
@@ -204,17 +228,39 @@ export const preparePublish = asyncHandler(async (req: Request, res: Response) =
 
 export const getArticleById = asyncHandler(
   async (req: Request, res: Response) => {
-    const { id: _id } = req.params;
-    const { token: _token } = req.query;
+    const { id } = req.params;
+    const wallet = req.auth?.wallet;
+    if (!wallet) throw createError('Unauthorized', 401);
 
-    // TODO: Implement with Prisma
-    // Check if article exists
-    // If private, validate access token
-
-    res.json({
-      success: true,
-      data: null,
+    const article = await prisma.article.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        title: true,
+        authorWallet: true,
+        arweaveId: true,
+        isPublic: true,
+        publishedAt: true,
+      },
     });
+    if (!article) throw createError('Article not found', 404);
+
+    if (article.isPublic) {
+      return res.json({ success: true, data: article });
+    }
+
+    // Private: author or an active grant can access metadata.
+    if (article.authorWallet === wallet) {
+      return res.json({ success: true, data: article });
+    }
+
+    const grant = await prisma.accessGrant.findUnique({
+      where: { articleId_viewerWallet: { articleId: id, viewerWallet: wallet } },
+    });
+    const active = grant && !grant.revokedAt && (!grant.expiresAt || grant.expiresAt.getTime() > Date.now());
+    if (!active) throw createError('Access denied', 403);
+
+    return res.json({ success: true, data: article });
   }
 );
 
