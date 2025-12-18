@@ -2,6 +2,11 @@ use anchor_lang::prelude::*;
 
 declare_id!("HoRNS4q7T69m6YHYx8Qsg4kAffwNNu8R25XpReZnvWAe");
 
+// Keep these in sync with Article::SPACE allocations (string max lengths).
+const MAX_ARWEAVE_ID_LEN: usize = 64;
+const MAX_TITLE_LEN: usize = 128;
+const MAX_AI_SCOPE_LEN: usize = 256;
+
 #[program]
 pub mod aurora_scholar {
     use super::*;
@@ -17,6 +22,21 @@ pub mod aurora_scholar {
     ) -> Result<()> {
         let article = &mut ctx.accounts.article;
         let clock = Clock::get()?;
+
+        // ---- Safety / invariants (prevent data overflow + clearer errors) ----
+        require!(content_hash != [0u8; 32], AuroraError::InvalidContentHash);
+        require!(
+            arweave_id.as_bytes().len() <= MAX_ARWEAVE_ID_LEN,
+            AuroraError::ArweaveIdTooLong
+        );
+        require!(
+            title.as_bytes().len() <= MAX_TITLE_LEN,
+            AuroraError::TitleTooLong
+        );
+        require!(
+            ai_scope.as_bytes().len() <= MAX_AI_SCOPE_LEN,
+            AuroraError::AiScopeTooLong
+        );
 
         article.author = ctx.accounts.author.key();
         article.content_hash = content_hash;
@@ -132,6 +152,8 @@ pub enum AuroraError {
     Unauthorized,
     #[msg("Invalid content hash")]
     InvalidContentHash,
+    #[msg("Arweave ID too long (max 64 chars)")]
+    ArweaveIdTooLong,
     #[msg("Title too long (max 128 chars)")]
     TitleTooLong,
     #[msg("AI scope too long (max 256 chars)")]
