@@ -15,6 +15,13 @@ const WalletMultiButton = dynamic(
 
 const PUBLIC_PATHS = new Set<string>(['/', '/journal']);
 
+function stableStringify(obj: any): string {
+  if (obj === null || typeof obj !== 'object') return JSON.stringify(obj);
+  if (Array.isArray(obj)) return `[${obj.map((x) => stableStringify(x)).join(',')}]`;
+  const keys = Object.keys(obj).sort();
+  return `{${keys.map((k) => `${JSON.stringify(k)}:${stableStringify(obj[k])}`).join(',')}}`;
+}
+
 export function AuthGate({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() || '/';
   const { publicKey, connected, signMessage } = useWallet();
@@ -61,7 +68,8 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
       try {
         const wallet = publicKey.toBase58();
         const ch = await authChallenge(wallet);
-        const message = JSON.stringify({
+        // Must match backend canonicalization (stableStringify) or signature will fail.
+        const message = stableStringify({
           domain: 'aurora-scholar',
           action: 'auth',
           wallet,
