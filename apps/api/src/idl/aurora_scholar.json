@@ -1,28 +1,80 @@
 {
+  "accounts": [
+    {
+      "discriminator": [
+        190,
+        223,
+        81,
+        111,
+        130,
+        251,
+        187,
+        202
+      ],
+      "name": "Article"
+    }
+  ],
   "address": "HoRNS4q7T69m6YHYx8Qsg4kAffwNNu8R25XpReZnvWAe",
-  "metadata": {
-    "name": "aurora_scholar",
-    "version": "0.1.0",
-    "spec": "0.1.0",
-    "description": "Decentralized academic publishing on Solana"
-  },
+  "errors": [
+    {
+      "code": 6000,
+      "msg": "You are not authorized to perform this action",
+      "name": "Unauthorized"
+    },
+    {
+      "code": 6001,
+      "msg": "Invalid content hash",
+      "name": "InvalidContentHash"
+    },
+    {
+      "code": 6002,
+      "msg": "Arweave ID too long (max 64 chars)",
+      "name": "ArweaveIdTooLong"
+    },
+    {
+      "code": 6003,
+      "msg": "Title too long (max 128 chars)",
+      "name": "TitleTooLong"
+    },
+    {
+      "code": 6004,
+      "msg": "AI scope too long (max 256 chars)",
+      "name": "AiScopeTooLong"
+    }
+  ],
+  "events": [
+    {
+      "discriminator": [
+        238,
+        179,
+        87,
+        158,
+        6,
+        100,
+        27,
+        216
+      ],
+      "name": "ArticlePublished"
+    },
+    {
+      "discriminator": [
+        67,
+        74,
+        163,
+        161,
+        188,
+        229,
+        136,
+        114
+      ],
+      "name": "VisibilityUpdated"
+    }
+  ],
   "instructions": [
     {
-      "name": "publish_article",
-      "discriminator": [
-        151,
-        40,
-        172,
-        108,
-        86,
-        138,
-        159,
-        171
-      ],
       "accounts": [
         {
           "name": "article",
-          "writable": true,
           "pda": {
             "seeds": [
               {
@@ -46,16 +98,17 @@
                 "path": "content_hash"
               }
             ]
-          }
+          },
+          "writable": true
         },
         {
           "name": "author",
-          "writable": true,
-          "signer": true
+          "signer": true,
+          "writable": true
         },
         {
-          "name": "system_program",
-          "address": "11111111111111111111111111111111"
+          "address": "11111111111111111111111111111111",
+          "name": "system_program"
         }
       ],
       "args": [
@@ -93,20 +146,20 @@
           "name": "is_public",
           "type": "bool"
         }
-      ]
+      ],
+      "discriminator": [
+        151,
+        40,
+        172,
+        108,
+        86,
+        138,
+        159,
+        171
+      ],
+      "name": "publish_article"
     },
     {
-      "name": "update_visibility",
-      "discriminator": [
-        164,
-        181,
-        36,
-        151,
-        250,
-        65,
-        206,
-        17
-      ],
       "accounts": [
         {
           "name": "article",
@@ -122,79 +175,30 @@
           "name": "is_public",
           "type": "bool"
         }
-      ]
-    }
-  ],
-  "accounts": [
-    {
-      "name": "Article",
+      ],
       "discriminator": [
-        190,
-        223,
-        81,
-        111,
-        130,
-        251,
-        187,
-        202
-      ]
+        164,
+        181,
+        36,
+        151,
+        250,
+        65,
+        206,
+        17
+      ],
+      "name": "update_visibility"
     }
   ],
-  "events": [
-    {
-      "name": "ArticlePublished",
-      "discriminator": [
-        238,
-        179,
-        87,
-        158,
-        6,
-        100,
-        27,
-        216
-      ]
-    },
-    {
-      "name": "VisibilityUpdated",
-      "discriminator": [
-        67,
-        74,
-        163,
-        161,
-        188,
-        229,
-        136,
-        114
-      ]
-    }
-  ],
-  "errors": [
-    {
-      "code": 6000,
-      "name": "Unauthorized",
-      "msg": "You are not authorized to perform this action"
-    },
-    {
-      "code": 6001,
-      "name": "InvalidContentHash",
-      "msg": "Invalid content hash"
-    },
-    {
-      "code": 6002,
-      "name": "TitleTooLong",
-      "msg": "Title too long (max 128 chars)"
-    },
-    {
-      "code": 6003,
-      "name": "AiScopeTooLong",
-      "msg": "AI scope too long (max 256 chars)"
-    }
-  ],
+  "metadata": {
+    "description": "Decentralized academic publishing on Solana",
+    "name": "aurora_scholar",
+    "spec": "0.1.0",
+    "version": "0.1.0"
+  },
   "types": [
     {
       "name": "Article",
       "type": {
-        "kind": "struct",
         "fields": [
           {
             "name": "author",
@@ -242,13 +246,13 @@
             "name": "bump",
             "type": "u8"
           }
-        ]
+        ],
+        "kind": "struct"
       }
     },
     {
       "name": "ArticlePublished",
       "type": {
-        "kind": "struct",
         "fields": [
           {
             "name": "author",
@@ -271,13 +275,13 @@
             "name": "is_public",
             "type": "bool"
           }
-        ]
+        ],
+        "kind": "struct"
       }
     },
     {
       "name": "VisibilityUpdated",
       "type": {
-        "kind": "struct",
         "fields": [
           {
             "name": "article",
@@ -287,7 +291,8 @@
             "name": "is_public",
             "type": "bool"
           }
-        ]
+        ],
+        "kind": "struct"
       }
     }
   ]
