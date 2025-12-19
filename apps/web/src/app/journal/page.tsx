@@ -22,16 +22,7 @@ type ApiListResponse = {
   totalPages: number;
 };
 
-function getApiBaseUrl() {
-  const envUrl = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/+$/, '');
-  if (envUrl) return envUrl;
-
-  // Dev fallback: API usually runs on 3001; avoid calling the Next server (e.g. 3002).
-  if (process.env.NODE_ENV !== 'production') return 'http://localhost:3001';
-
-  // Prod fallback: assume same-origin (e.g. behind a reverse proxy)
-  return '';
-}
+import { getApiBaseUrl } from '@/lib/api/baseUrl';
 
 export default function JournalPage() {
   const { connected } = useWallet();

@@ -7,12 +7,7 @@ import { getAuthHeader } from '@/lib/auth/api';
 import { base64ToBytes, aesGcmDecrypt, bytesToBase64 } from '@/lib/crypto/aesGcm';
 import { useToast } from '@/components/ui/toast';
 
-function getApiBaseUrl() {
-  const envUrl = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/+$/, '');
-  if (envUrl) return envUrl;
-  if (process.env.NODE_ENV !== 'production') return 'http://localhost:3001';
-  return '';
-}
+import { getApiBaseUrl } from '@/lib/api/baseUrl';
 
 function stableStringify(obj: any): string {
   if (obj === null || typeof obj !== 'object') return JSON.stringify(obj);

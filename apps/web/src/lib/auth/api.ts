@@ -1,11 +1,6 @@
 import { getAuthToken, setAuthToken } from './token';
 
-function getApiBaseUrl() {
-  const envUrl = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/+$/, '');
-  if (envUrl) return envUrl;
-  if (process.env.NODE_ENV !== 'production') return 'http://localhost:3001';
-  return '';
-}
+import { getApiBaseUrl } from '../api/baseUrl';
 
 function bytesToBase64(bytes: Uint8Array) {
   let bin = '';

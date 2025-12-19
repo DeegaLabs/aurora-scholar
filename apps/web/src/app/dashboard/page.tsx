@@ -34,12 +34,7 @@ type MyDbArticle = {
   publishedAt: string | null;
 };
 
-function getApiBaseUrl() {
-  const envUrl = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/+$/, '');
-  if (envUrl) return envUrl;
-  if (process.env.NODE_ENV !== 'production') return 'http://localhost:3001';
-  return '';
-}
+import { getApiBaseUrl } from '@/lib/api/baseUrl';
 
 export default function DashboardPage() {
   const { publicKey } = useWallet();

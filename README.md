@@ -67,15 +67,20 @@ cd aurora-scholar
 pnpm install
 
 # Configure environment variables
-cp .env.example .env
-# Edit .env with your settings
+# See docs/ENV_SETUP.md for detailed instructions
+# 
+# Quick setup:
+# 1. Create apps/api/.env with required variables (see docs/ENV_SETUP.md)
+# 2. Create apps/web/.env.local (optional for dev, required for prod)
 
 # Start the database
 pnpm db:setup
 
-# Start development
+# Start development (runs both web and api)
 pnpm dev
 ```
+
+**Important:** See [docs/ENV_SETUP.md](./docs/ENV_SETUP.md) for complete environment variable configuration.
 
 ## 📁 Project Structure
 

@@ -1,18 +1,7 @@
 type ApiSuccess<T> = { success: true; data: T };
 type ApiError = { success?: false; error?: string; message?: string };
 import { getAuthHeader } from '@/lib/auth/api';
-
-function getApiBaseUrl() {
-  // For local dev, docker-compose sets NEXT_PUBLIC_API_URL=http://localhost:3001
-  // For Vercel, it's configured via `apps/web/vercel.json`.
-  const envUrl = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/+$/, '');
-  if (envUrl) return envUrl;
-
-  // Dev fallback: default API runs on 3001. Avoid calling the Next server origin.
-  if (process.env.NODE_ENV !== 'production') return 'http://localhost:3001';
-
-  return '';
-}
+import { getApiBaseUrl } from './baseUrl';
 
 async function postJson<T>(path: string, body: unknown): Promise<T> {
   const baseUrl = getApiBaseUrl();

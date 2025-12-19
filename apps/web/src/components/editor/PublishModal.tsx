@@ -7,6 +7,7 @@ import { buildPublishArticleIx, deriveArticlePda } from '@/lib/solana/auroraProg
 import { useToast } from '@/components/ui/toast';
 import { getAuthHeader } from '@/lib/auth/api';
 import { aesGcmEncrypt, bytesToBase64 as bytesToBase64Local } from '@/lib/crypto/aesGcm';
+import { getApiBaseUrl } from '@/lib/api/baseUrl';
 
 function formatUnknownError(err: any): string {
   if (!err) return 'Erro desconhecido';
@@ -142,7 +143,7 @@ export function PublishModal({
       }
 
       // Step 1: Upload to Arweave via API (Irys)
-      const uploadResponse = await fetch('http://localhost:3001/api/articles/publish/prepare', {
+      const uploadResponse = await fetch(`${getApiBaseUrl()}/api/articles/publish/prepare`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
         body: JSON.stringify({
