@@ -225,7 +225,9 @@ export const keyChallenge = asyncHandler(async (req: Request, res: Response) => 
   const grant = await prisma.accessGrant.findUnique({
     where: { articleId_viewerWallet: { articleId, viewerWallet } },
   });
-  if (!grant || !isGrantActive(grant)) throw createError('Access denied', 403);
+  if (!grant) throw createError('Access denied (no grant)', 403);
+  if (grant.revokedAt) throw createError('Access revoked', 403);
+  if (grant.expiresAt && grant.expiresAt.getTime() <= Date.now()) throw createError('Access expired', 403);
 
   const nonce = crypto.randomBytes(16).toString('hex');
   const expiresAt = Date.now() + 5 * 60 * 1000;
@@ -274,7 +276,9 @@ export const keyClaim = asyncHandler(async (req: Request, res: Response) => {
   const grant = await prisma.accessGrant.findUnique({
     where: { articleId_viewerWallet: { articleId, viewerWallet } },
   });
-  if (!grant || !isGrantActive(grant)) throw createError('Access denied', 403);
+  if (!grant) throw createError('Access denied (no grant)', 403);
+  if (grant.revokedAt) throw createError('Access revoked', 403);
+  if (grant.expiresAt && grant.expiresAt.getTime() <= Date.now()) throw createError('Access expired', 403);
 
   const secret = await prisma.articleSecret.findUnique({ where: { articleId } });
   if (!secret) throw createError('Article key not found', 404);

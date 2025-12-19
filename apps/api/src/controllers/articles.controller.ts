@@ -259,8 +259,9 @@ export const getArticleById = asyncHandler(
     const grant = await prisma.accessGrant.findUnique({
       where: { articleId_viewerWallet: { articleId: id, viewerWallet: wallet } },
     });
-    const active = grant && !grant.revokedAt && (!grant.expiresAt || grant.expiresAt.getTime() > Date.now());
-    if (!active) throw createError('Access denied', 403);
+    if (!grant) throw createError('Access denied (no grant)', 403);
+    if (grant.revokedAt) throw createError('Access revoked', 403);
+    if (grant.expiresAt && grant.expiresAt.getTime() <= Date.now()) throw createError('Access expired', 403);
 
     res.json({ success: true, data: article });
     return;

@@ -32,6 +32,25 @@ export default function PrivateArticlePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [content, setContent] = useState<string>('');
   const [intuition, setIntuition] = useState<string>('');
+  const [uiError, setUiError] = useState<{ kind: 'none' | 'access' | 'notfound' | 'unknown'; message: string } | null>(null);
+
+  async function copyAccessRequest() {
+    if (!publicKey) return;
+    const viewerWallet = publicKey.toBase58();
+    const link = `${window.location.origin}/private/${articleId}`;
+    const msg =
+      `Aurora Scholar — solicitação de acesso\n\n` +
+      `ArticleId: ${articleId}\n` +
+      `Viewer wallet: ${viewerWallet}\n` +
+      `Link: ${link}\n\n` +
+      `Pode conceder acesso (Privado B) para essa wallet?`;
+    try {
+      await navigator.clipboard.writeText(msg);
+      toast({ type: 'success', title: 'Solicitação', message: 'Mensagem copiada.' });
+    } catch {
+      window.prompt('Copie a mensagem:', msg);
+    }
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -40,6 +59,7 @@ export default function PrivateArticlePage() {
       if (!articleId) return;
       if (!publicKey || !signMessage) return;
       setIsLoading(true);
+      setUiError(null);
 
       try {
         // 1) Fetch metadata (requires auth and grant/author)
@@ -47,7 +67,15 @@ export default function PrivateArticlePage() {
           headers: { ...getAuthHeader() },
         });
         const metaJson = await metaRes.json();
-        if (!metaRes.ok) throw new Error(metaJson?.error || metaJson?.message || `HTTP ${metaRes.status}`);
+        if (!metaRes.ok) {
+          const msg = metaJson?.error || metaJson?.message || `HTTP ${metaRes.status}`;
+          if (!cancelled) {
+            if (metaRes.status === 404) setUiError({ kind: 'notfound', message: msg });
+            else if (metaRes.status === 403) setUiError({ kind: 'access', message: msg });
+            else setUiError({ kind: 'unknown', message: msg });
+          }
+          return;
+        }
         const meta = metaJson?.data;
         if (!meta?.arweaveId) throw new Error('Artigo sem arweaveId');
         if (!cancelled) {
@@ -62,7 +90,14 @@ export default function PrivateArticlePage() {
           body: JSON.stringify({ articleId }),
         });
         const chJson = await chRes.json();
-        if (!chRes.ok) throw new Error(chJson?.error || chJson?.message || `HTTP ${chRes.status}`);
+        if (!chRes.ok) {
+          const msg = chJson?.error || chJson?.message || `HTTP ${chRes.status}`;
+          if (!cancelled) {
+            if (chRes.status === 403) setUiError({ kind: 'access', message: msg });
+            else setUiError({ kind: 'unknown', message: msg });
+          }
+          return;
+        }
         const nonce = chJson?.data?.nonce as string;
         if (!nonce) throw new Error('Challenge inválido');
 
@@ -85,7 +120,14 @@ export default function PrivateArticlePage() {
           body: JSON.stringify({ articleId, nonce, signature }),
         });
         const claimJson = await claimRes.json();
-        if (!claimRes.ok) throw new Error(claimJson?.error || claimJson?.message || `HTTP ${claimRes.status}`);
+        if (!claimRes.ok) {
+          const msg = claimJson?.error || claimJson?.message || `HTTP ${claimRes.status}`;
+          if (!cancelled) {
+            if (claimRes.status === 403) setUiError({ kind: 'access', message: msg });
+            else setUiError({ kind: 'unknown', message: msg });
+          }
+          return;
+        }
         const keyB64 = claimJson?.data?.key as string;
         if (!keyB64) throw new Error('Key ausente');
         const keyBytes = base64ToBytes(keyB64);
@@ -110,7 +152,7 @@ export default function PrivateArticlePage() {
           setIntuition(String(plain?.declaredIntuition || ''));
         }
       } catch (e: any) {
-        toast({ type: 'error', title: 'Privado', message: e?.message || 'Falha ao abrir artigo privado.' });
+        if (!cancelled) setUiError({ kind: 'unknown', message: e?.message || 'Falha ao abrir artigo privado.' });
       } finally {
         if (!cancelled) setIsLoading(false);
       }
@@ -149,6 +191,41 @@ export default function PrivateArticlePage() {
         <div className="max-w-3xl mx-auto space-y-6">
           {isLoading ? (
             <div className="text-sm text-gray-600">Descriptografando…</div>
+          ) : uiError && uiError.kind !== 'none' ? (
+            <div className="border border-gray-200 rounded-lg bg-white p-5 space-y-3">
+              <div className="text-sm font-semibold text-gray-900">
+                {uiError.kind === 'access' ? 'Sem acesso' : uiError.kind === 'notfound' ? 'Não encontrado' : 'Erro'}
+              </div>
+              <div className="text-sm text-gray-700">
+                {uiError.kind === 'access'
+                  ? 'Você não tem permissão para abrir este artigo. Peça ao autor para conceder acesso à sua wallet.'
+                  : uiError.kind === 'notfound'
+                    ? 'Este artigo não existe (ou o link está incorreto).'
+                    : 'Falha ao carregar o artigo.'}
+              </div>
+              <div className="text-xs text-gray-500 font-mono">{uiError.message}</div>
+
+              {uiError.kind === 'access' && publicKey ? (
+                <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2">
+                  <div className="text-xs font-semibold text-gray-700">Sua wallet (viewer)</div>
+                  <div className="mt-1 text-xs text-gray-600 font-mono break-all">{publicKey.toBase58()}</div>
+                </div>
+              ) : null}
+
+              <div className="flex items-center justify-end gap-2">
+                <a href="/dashboard" className="px-3 py-2 text-sm font-medium border border-gray-300 rounded-md hover:bg-gray-50">
+                  Ir para Dashboard
+                </a>
+                {uiError.kind === 'access' && publicKey ? (
+                  <button
+                    onClick={copyAccessRequest}
+                    className="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-800"
+                  >
+                    Solicitar acesso
+                  </button>
+                ) : null}
+              </div>
+            </div>
           ) : (
             <>
               <div className="border border-gray-200 rounded-lg p-4 bg-white">
