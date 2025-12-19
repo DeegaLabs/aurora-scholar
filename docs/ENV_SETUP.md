@@ -91,3 +91,4 @@ solana airdrop 1 <IRYS_PUBKEY> --url devnet
 - Use different secrets for dev/staging/production.
 - Ensure `IRYS_PRIVATE_KEY` has sufficient SOL balance for uploads.
 
+
