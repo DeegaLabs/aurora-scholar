@@ -55,7 +55,8 @@
   "editor": {
     "title": "Editor de Artigos",
     "placeholder": "Comece a escrever seu artigo...",
-    "titlePlaceholder": "Título do Artigo",
+    "editorPlaceholder": "Comece a escrever seu artigo...",
+    "titlePlaceholder": "Artigo sem título",
     "abstractPlaceholder": "Resumo (opcional)",
     "addSource": "Adicionar Fonte",
     "sources": "Fontes",
@@ -65,6 +66,99 @@
     "publishPrivate": "Publicar Privativamente",
     "saveDraft": "Salvar Rascunho",
     "preview": "Visualizar",
+    "saving": "Salvando...",
+    "saved": "Salvo",
+    "words": "palavras",
+    "dashboard": "Dashboard",
+    "journal": "Revista",
+    "walletRequired": "Por favor, conecte sua carteira para publicar",
+    "settings": {
+      "title": "Configurações",
+      "language": "Idioma"
+    },
+    "studio": {
+      "title": "Estúdio",
+      "chat": {
+        "title": "Orientação",
+        "description": "Obtenha orientação sobre como começar a escrever com base no seu conteúdo e intuição declarada.",
+        "openChat": "Abrir Chat"
+      },
+      "suggestStructure": {
+        "title": "Sugerir Estrutura",
+        "emptyContent": "Comece a escrever para receber sugestões de estrutura.",
+        "noSuggestions": "Nenhuma sugestão encontrada.",
+        "error": "Falha ao analisar estrutura."
+      },
+      "checkCoherence": {
+        "title": "Verificar Coerência",
+        "noIntuition": "Nenhuma intenção declarada encontrada. Preencha no painel \"Camadas Éticas\".",
+        "noContent": "Nenhum conteúdo encontrado. Comece a escrever para verificar coerência.",
+        "resultPrefix": "Verificação de coerência:",
+        "noAlerts": "Nenhum alerta encontrado. O conteúdo está alinhado com sua intenção declarada.",
+        "error": "Falha ao checar coerência."
+      },
+      "ethicalLayers": {
+        "title": "Camadas Éticas",
+        "layer1": {
+          "title": "Camada 1: Intuição Declarada",
+          "description": "Declare sua ideia inicial ou hipótese de pesquisa. Isso será registrado on-chain.",
+          "placeholder": "Qual é sua ideia inicial ou hipótese de pesquisa?",
+          "onChainNote": "Esta declaração será registrada on-chain quando você publicar seu artigo.",
+          "characters": "caracteres"
+        },
+        "layer2": {
+          "title": "Camada 2: Mediação Linguística",
+          "description": "Orientação de IA sem geração de conteúdo. A IA auxilia com estrutura, tradução e verificações de coerência, mas não gera texto final.",
+          "autoApplied": "Esta camada é aplicada automaticamente quando você usa os recursos de IA no Estúdio (Chat, Sugerir Estrutura, Verificar Coerência)."
+        },
+        "layer3": {
+          "title": "Camada 3: Monitoramento de Coerência",
+          "description": "Verificação de alinhamento entre sua intuição declarada (Camada 1) e o conteúdo que você escreve.",
+          "howToUse": "Use \"Verificar Coerência\" no Estúdio para verificar se seu conteúdo está alinhado com sua intuição declarada."
+        },
+        "done": "Concluído"
+      }
+    },
+    "sources": {
+      "title": "Fontes",
+      "addSources": "Adicionar Fontes",
+      "noSources": "Nenhuma fonte salva",
+      "savedSources": "As fontes salvas aparecerão aqui",
+      "clickToAdd": "Clique em \"Adicionar Fontes\" para incluir PDFs, sites, texto, vídeo ou arquivos de áudio",
+      "processed": "Processado",
+      "remove": "Remover fonte",
+      "modal": {
+        "title": "Adicionar Fontes",
+        "siteUrls": "URLs de Sites",
+        "youtubeUrl": "URL do YouTube",
+        "pasteText": "Colar Texto",
+        "intro": "As fontes permitem que a IA baseie suas respostas nas informações mais importantes para você. (Por exemplo, artigos de pesquisa, leituras de curso, notas, transcrições de reuniões, etc.)",
+        "uploadSources": "Enviar Fontes",
+        "dragDrop": "Arraste e solte ou",
+        "selectFile": "selecione arquivo",
+        "toUpload": "para enviar",
+        "supportedTypes": "Tipos de arquivo suportados: PDF, .txt, Markdown, Áudio (mp3, wav), .docx, Imagens (png, jpg, webp)",
+        "googleDrive": "Google Drive",
+        "site": "Site",
+        "youtube": "YouTube",
+        "pasteTextLabel": "Colar Texto",
+        "urlsLabel": "URLs *",
+        "urlsPlaceholder": "Cole as URLs aqui*",
+        "urlsNotes": "Notas:",
+        "urlsNote1": "Para adicionar várias URLs, separe cada uma com um espaço ou nova linha.",
+        "urlsNote2": "Atualmente, apenas o texto visível no site será importado.",
+        "urlsNote3": "Artigos pagos não são aceitos.",
+        "youtubeLabel": "URL do YouTube *",
+        "youtubePlaceholder": "Cole a URL do YouTube aqui*",
+        "youtubeNote1": "Atualmente, apenas a transcrição de texto será importada.",
+        "youtubeNote2": "Apenas vídeos públicos do YouTube são compatíveis.",
+        "youtubeNote3": "Vídeos recém-enviados podem não estar disponíveis para importação.",
+        "textLabel": "Texto *",
+        "textPlaceholder": "Cole o texto aqui*",
+        "insert": "Inserir",
+        "sourceLimit": "Limite de fontes"
+      }
+    },
     "ai": {
       "title": "Assistente IA",
       "status": {
@@ -76,6 +170,12 @@
       "noSuggestions": "Ainda não há sugestões",
       "askGuidance": "Pedir Orientação da IA",
       "chatPlaceholder": "Faça uma pergunta sobre seu artigo..."
+    },
+    "errors": {
+      "walletRequired": "Por favor, conecte sua carteira para continuar",
+      "publishFailed": "Falha ao publicar artigo",
+      "networkError": "Erro de rede. Por favor, tente novamente",
+      "invalidContent": "Por favor, adicione conteúdo ao seu artigo"
     }
   },
   "publish": {

@@ -12,10 +12,8 @@ import { AiChatModal } from '@/components/editor/AiChatModal';
 import { DeclaredSources, Source } from '@/components/editor/DeclaredSources';
 import { ExpandableSideCard } from '@/components/editor/ExpandableSideCard';
 import { WalletInfo } from '@/components/wallet/WalletInfo';
-import { HelpWriteModal } from '@/components/editor/HelpWriteModal';
-import { SuggestStructureModal } from '@/components/editor/SuggestStructureModal';
-import { CheckCoherenceModal } from '@/components/editor/CheckCoherenceModal';
 import { RefinementMenu } from '@/components/editor/RefinementMenu';
+import { SettingsButton } from '@/components/editor/SettingsButton';
 import { useWallet } from '@solana/wallet-adapter-react';
 
 export default function EditorPage() {
@@ -28,13 +26,9 @@ export default function EditorPage() {
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [isAiChatModalOpen, setIsAiChatModalOpen] = useState(false);
-  const [isHelpWriteModalOpen, setIsHelpWriteModalOpen] = useState(false);
-  const [isSuggestStructureModalOpen, setIsSuggestStructureModalOpen] = useState(false);
-  const [isCheckCoherenceModalOpen, setIsCheckCoherenceModalOpen] = useState(false);
   const [isRefinementMenuOpen, setIsRefinementMenuOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const [floatingButtonsEnabled, setFloatingButtonsEnabled] = useState(true);
   const [sourcesExpanded, setSourcesExpanded] = useState(true);
   const [studioExpanded, setStudioExpanded] = useState(true);
   const titleInputRef = useRef<HTMLInputElement>(null);
@@ -47,7 +41,6 @@ export default function EditorPage() {
     const savedIntuition = localStorage.getItem('aurora-editor-intuition');
     const savedSources = localStorage.getItem('aurora-editor-sources');
     const savedTitle = localStorage.getItem('aurora-editor-title');
-    const savedFloatingButtons = localStorage.getItem('aurora-editor-floating-buttons');
     
     if (savedContent) setContent(savedContent);
     if (savedIntuition) setDeclaredIntuition(savedIntuition);
@@ -58,9 +51,6 @@ export default function EditorPage() {
       } catch {
         // Ignore parse errors
       }
-    }
-    if (savedFloatingButtons !== null) {
-      setFloatingButtonsEnabled(savedFloatingButtons === 'true');
     }
   }, []);
 
@@ -95,9 +85,6 @@ export default function EditorPage() {
     }
   }, [articleTitle]);
 
-  useEffect(() => {
-    localStorage.setItem('aurora-editor-floating-buttons', String(floatingButtonsEnabled));
-  }, [floatingButtonsEnabled]);
 
   // Measure title width
   useEffect(() => {
@@ -121,7 +108,7 @@ export default function EditorPage() {
       return;
     }
     if (!content.trim()) {
-      alert('Please add content to your article');
+      alert(t('errors.invalidContent'));
       return;
     }
     setIsPublishModalOpen(true);
@@ -158,14 +145,14 @@ export default function EditorPage() {
                   className="invisible absolute whitespace-pre text-lg font-medium px-2 py-1 pointer-events-none"
                   aria-hidden="true"
                 >
-                  {articleTitle || 'Untitled article'}
+                  {articleTitle || t('titlePlaceholder')}
                 </span>
                 <input
                   ref={titleInputRef}
                   type="text"
                   value={articleTitle || ''}
                   onChange={(e) => setArticleTitle(e.target.value)}
-                  placeholder="Untitled article"
+                  placeholder={t('titlePlaceholder')}
                   className="px-2 py-1 text-lg font-medium text-gray-900 bg-transparent border-none outline-none focus:bg-gray-50 rounded focus:ring-1 focus:ring-gray-300"
                   style={{
                     width: `${titleWidth}px`,
@@ -179,14 +166,15 @@ export default function EditorPage() {
                 href="/dashboard"
                 className="px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition"
               >
-                Dashboard
+                {t('dashboard')}
               </Link>
               <Link
                 href="/journal"
                 className="px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition"
               >
-                Journal
+                {t('journal')}
               </Link>
+              <SettingsButton />
               <WalletInfo />
             </div>
           </div>
@@ -197,7 +185,7 @@ export default function EditorPage() {
       <div className="flex-1 flex gap-4 p-4 overflow-hidden">
         {/* Left Card - Sources */}
         <ExpandableSideCard
-          title="Fontes"
+          title={t('sources.title')}
           icon={
             <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -225,17 +213,13 @@ export default function EditorPage() {
                   content={content}
                   onChange={setContent}
                   placeholder={t('editorPlaceholder')}
-                  floatingButtonsEnabled={floatingButtonsEnabled}
-                  onHelpWrite={() => setIsHelpWriteModalOpen(true)}
-                  onSuggestStructure={() => setIsSuggestStructureModalOpen(true)}
-                  onCheckCoherence={() => setIsCheckCoherenceModalOpen(true)}
                   onMoreOptions={() => setIsRefinementMenuOpen(true)}
                 />
               </div>
               {/* Word count */}
               {content && (
                 <div className="border-t border-gray-200 px-6 py-2 text-xs text-gray-500">
-                  {getWordCount(content)} words
+                  {getWordCount(content)} {t('words')}
                 </div>
               )}
               {/* Footer - Save status and actions */}
@@ -245,12 +229,12 @@ export default function EditorPage() {
                   {isSaving ? (
                     <>
                       <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                      <span>Saving...</span>
+                      <span>{t('saving')}</span>
                     </>
                   ) : lastSaved ? (
                     <>
                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span>Saved {lastSaved.toLocaleTimeString()}</span>
+                      <span>{t('saved')} {lastSaved.toLocaleTimeString()}</span>
                     </>
                   ) : null}
                 </div>
@@ -265,7 +249,7 @@ export default function EditorPage() {
                   onClick={handlePublish}
                   disabled={!connected || !content.trim()}
                   className="px-6 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
-                  title={!content.trim() ? 'Add content to publish' : !connected ? t('walletRequired') : ''}
+                  title={!content.trim() ? t('errors.invalidContent') : !connected ? t('walletRequired') : ''}
                 >
                   {t('publish')}
                 </button>
@@ -276,7 +260,7 @@ export default function EditorPage() {
 
         {/* Right Card - Estúdio */}
         <ExpandableSideCard
-          title="Estúdio"
+          title={t('studio.title')}
           icon={
             <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
@@ -291,8 +275,7 @@ export default function EditorPage() {
             declaredIntuition={declaredIntuition}
             onDeclaredIntuitionChange={setDeclaredIntuition}
             onOpenChat={() => setIsAiChatModalOpen(true)}
-            floatingButtonsEnabled={floatingButtonsEnabled}
-            onFloatingButtonsEnabledChange={setFloatingButtonsEnabled}
+            sources={sources}
           />
         </ExpandableSideCard>
       </div>
@@ -319,7 +302,7 @@ export default function EditorPage() {
         <PreviewModal
           isOpen={isPreviewModalOpen}
           onClose={() => setIsPreviewModalOpen(false)}
-          title={articleTitle || 'Untitled Article'}
+          title={articleTitle || t('titlePlaceholder')}
           content={content}
           declaredIntuition={declaredIntuition}
         />
@@ -330,40 +313,6 @@ export default function EditorPage() {
         <AiChatModal
           isOpen={isAiChatModalOpen}
           onClose={() => setIsAiChatModalOpen(false)}
-          content={content}
-          declaredIntuition={declaredIntuition}
-          sources={sources}
-        />
-      )}
-
-      {/* Help Write Modal */}
-      {isHelpWriteModalOpen && (
-        <HelpWriteModal
-          isOpen={isHelpWriteModalOpen}
-          onClose={() => {
-            setIsHelpWriteModalOpen(false);
-          }}
-          content={content}
-          declaredIntuition={declaredIntuition}
-          sources={sources}
-        />
-      )}
-
-      {/* Suggest Structure Modal */}
-      {isSuggestStructureModalOpen && (
-        <SuggestStructureModal
-          isOpen={isSuggestStructureModalOpen}
-          onClose={() => setIsSuggestStructureModalOpen(false)}
-          content={content}
-          sources={sources}
-        />
-      )}
-
-      {/* Check Coherence Modal */}
-      {isCheckCoherenceModalOpen && (
-        <CheckCoherenceModal
-          isOpen={isCheckCoherenceModalOpen}
-          onClose={() => setIsCheckCoherenceModalOpen(false)}
           content={content}
           declaredIntuition={declaredIntuition}
           sources={sources}

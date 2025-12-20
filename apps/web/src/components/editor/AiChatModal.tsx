@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { useLocale } from 'next-intl';
 import { aiAssistantChat } from '@/lib/api/aiAssistant';
 
 interface Message {
@@ -25,6 +26,7 @@ export function AiChatModal({
   declaredIntuition,
   sources,
 }: AiChatModalProps) {
+  const locale = useLocale();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -71,6 +73,7 @@ export function AiChatModal({
         sources,
         chatHistory: messages.map((m) => ({ role: m.role, content: m.content })),
         agentConfig: declaredIntuition ? { declaredIntuition } : undefined,
+        locale,
       });
 
       const assistantMessage: Message = {

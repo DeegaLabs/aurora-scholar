@@ -249,29 +249,82 @@ function safeJsonParse(text: string) {
 }
 
 export const analyzeText = asyncHandler(async (req: Request, res: Response) => {
-  const { text, sources } = req.body;
+  const { text, sources, locale } = req.body;
+  
+  // Detect language from Accept-Language header or body
+  const userLocale = locale || req.headers['accept-language']?.split(',')[0]?.split('-')[0] || 'en';
+  const isPortuguese = userLocale === 'pt' || userLocale.startsWith('pt');
 
   if (!text) {
     throw createError('Text is required', 400);
   }
 
   const sourcesContext = await buildSourcesContext(sources);
-  const userPrompt = `Analyze the following academic draft and provide ethical guidance ONLY.
+  
+  // Check if this is a structure-focused request (can be inferred from context or made explicit)
+  // For now, we'll always provide structure suggestions when analyzing
+  const languageInstruction = isPortuguese 
+    ? 'IMPORTANTE: Responda TODAS as sugestões, avisos e mensagens em PORTUGUÊS BRASILEIRO. Use termos acadêmicos em português.'
+    : 'IMPORTANT: Respond in ENGLISH. Use academic terms in English.';
+  
+  const userPrompt = `Analyze the following academic draft and provide ethical guidance.
+
+${languageInstruction}
+
+LANGUAGE: ${isPortuguese ? 'PORTUGUÊS BRASILEIRO' : 'ENGLISH'}
+
+FOCUS AREAS (prioritize these):
+1. STRUCTURE: Suggest how to organize sections, paragraphs, and arguments. Include suggestions for:
+   - Logical flow and order of ideas
+   - Section organization (introduction, methodology, results, discussion, conclusion)
+   - Paragraph transitions
+   - Hierarchy and subordination of concepts
+2. CLARITY: Point out unclear sentences or concepts that need explanation
+3. COHERENCE: Identify gaps, contradictions, or missing connections between ideas
+4. REFERENCES: Suggest where to cite sources (if sources provided)
+5. METHODOLOGY: If applicable, suggest methodological improvements
+6. ETHICS: Flag any ethical concerns
 
 Return STRICT JSON with this shape:
 {
-  "suggestions": [{"id":"1","type":"structure|clarity|coherence|style|references|methodology|ethics","text":"...","priority":"low|medium|high"}],
+  "suggestions": [
+    {"id":"1","type":"structure","text":"Suggestion about organization/structure...","priority":"high"},
+    {"id":"2","type":"clarity","text":"Suggestion about clarity...","priority":"medium"},
+    {"id":"3","type":"coherence","text":"Suggestion about coherence...","priority":"medium"}
+  ],
   "corrections": [],
   "references": [{"sourceIndex":1,"quote":"...","note":"..."}],
   "warnings": ["..."],
   "authenticityAlerts": ["..."]
 }
 
+IMPORTANT: Always include at least 1-2 structure suggestions if the text has any content. Structure suggestions should be actionable.
+
+${isPortuguese 
+  ? 'Exemplo de sugestão de estrutura: "Considere organizar esta seção em: 1) Contexto, 2) Argumento principal, 3) Evidências de apoio"'
+  : 'Example structure suggestion: "Consider organizing this section into: 1) Context, 2) Main argument, 3) Supporting evidence"'}
+
 Draft:
-"""${text}"""${sourcesContext}`;
+"""${stripHtmlToText(text)}"""${sourcesContext}`;
+
+  // Adjust system prompt based on language
+  const systemPrompt = isPortuguese
+    ? `Você é o assistente acadêmico ético da Aurora Scholar.
+
+REGRAS NÃO NEGOCIÁVEIS:
+- NUNCA escreva parágrafos/seções completas para o usuário.
+- NUNCA produza "texto final" que possa ser colado como está.
+- Você pode APENAS fornecer: críticas, checklists, sugestões de estrutura, perguntas e pequenos exemplos (<= 2 frases) claramente marcados como exemplos.
+- Se o usuário pedir para escrever conteúdo, recuse e oriente com passos/perguntas.
+- Mantenha conselhos fundamentados no texto fornecido pelo usuário; não invente fatos ou citações.
+
+FORMATO DE SAÍDA:
+- Para endpoints de análise: retorne APENAS JSON ESTRITO (sem markdown, sem prosa fora do JSON).
+- TODAS as respostas devem estar em PORTUGUÊS BRASILEIRO.`
+    : ETHICAL_SYSTEM_PROMPT;
 
   const raw = await geminiGenerateText({
-    system: ETHICAL_SYSTEM_PROMPT,
+    system: systemPrompt,
     user: userPrompt,
     temperature: 0.2,
     maxOutputTokens: 2048,
@@ -316,7 +369,11 @@ Draft:
 });
 
 export const chat = asyncHandler(async (req: Request, res: Response) => {
-  const { question, text, sources, chatHistory } = req.body;
+  const { question, text, sources, chatHistory, locale } = req.body;
+  
+  // Detect language from Accept-Language header or body
+  const userLocale = locale || req.headers['accept-language']?.split(',')[0]?.split('-')[0] || 'en';
+  const isPortuguese = userLocale === 'pt' || userLocale.startsWith('pt');
 
   if (!question) {
     throw createError('Question is required', 400);
@@ -327,7 +384,15 @@ export const chat = asyncHandler(async (req: Request, res: Response) => {
   const sourcesContext = await buildSourcesContext(sources);
   const historyContext = buildChatHistoryContext(chatHistory);
 
-  const userPrompt = `User question:
+  const languageInstruction = isPortuguese 
+    ? 'IMPORTANTE: Responda em PORTUGUÊS BRASILEIRO. Use termos acadêmicos em português.'
+    : 'IMPORTANT: Respond in ENGLISH. Use academic terms in English.';
+
+  const userPrompt = `${languageInstruction}
+
+LANGUAGE: ${isPortuguese ? 'PORTUGUÊS BRASILEIRO' : 'ENGLISH'}
+
+User question:
 ${question}
 
 Context (draft excerpt):
@@ -338,8 +403,22 @@ Respond ethically per rules. Provide guidance, not final writing.
 When making factual claims, cite sources inline using [1], [2], etc (only if supported by provided sources).
 Return your answer as plain text.`;
 
+  // Adjust system prompt based on language
+  const systemPrompt = isPortuguese
+    ? `Você é o assistente acadêmico ético da Aurora Scholar.
+
+REGRAS NÃO NEGOCIÁVEIS:
+- NUNCA escreva parágrafos/seções completas para o usuário.
+- NUNCA produza "texto final" que possa ser colado como está.
+- Você pode APENAS fornecer: críticas, checklists, sugestões de estrutura, perguntas e pequenos exemplos (<= 2 frases) claramente marcados como exemplos.
+- Se o usuário pedir para escrever conteúdo, recuse e oriente com passos/perguntas.
+- Mantenha conselhos fundamentados no texto fornecido pelo usuário; não invente fatos ou citações.
+
+TODAS as respostas devem estar em PORTUGUÊS BRASILEIRO.`
+    : ETHICAL_SYSTEM_PROMPT;
+
   const answer = await geminiGenerateText({
-    system: ETHICAL_SYSTEM_PROMPT,
+    system: systemPrompt,
     user: userPrompt,
     temperature: 0.3,
     maxOutputTokens: 1024,

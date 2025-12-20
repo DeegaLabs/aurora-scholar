@@ -1,9 +1,9 @@
 type ApiSuccess<T> = { success: true; data: T };
 type ApiError = { success?: false; error?: string; message?: string };
-import { getAuthHeader } from '@/lib/auth/api';
+import { getAuthHeader, refreshAuthToken } from '@/lib/auth/api';
 import { getApiBaseUrl } from './baseUrl';
 
-async function postJson<T>(path: string, body: unknown): Promise<T> {
+async function postJson<T>(path: string, body: unknown, retryOnAuth = true): Promise<T> {
   const baseUrl = getApiBaseUrl();
   // If baseUrl is set (or defaulted), call API directly.
   // If baseUrl is empty (prod behind proxy), fall back to same-origin.
@@ -11,10 +11,24 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
     ? `${baseUrl}${path.startsWith('/') ? '' : '/'}${path}`
     : `${path.startsWith('/') ? '' : '/'}${path}`;
 
+  // Get locale from cookie (client-side only)
+  let locale = 'en';
+  if (typeof document !== 'undefined') {
+    const cookieLocale = document.cookie
+      .split('; ')
+      .find(row => row.startsWith('NEXT_LOCALE='))
+      ?.split('=')[1];
+    locale = cookieLocale || 'en';
+  }
+
   const res = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
-    body: JSON.stringify(body),
+    headers: { 
+      'Content-Type': 'application/json',
+      'Accept-Language': locale === 'pt' ? 'pt-BR,pt' : 'en',
+      ...getAuthHeader() 
+    },
+    body: JSON.stringify({ ...body, locale }),
   });
 
   const text = await res.text();
@@ -30,6 +44,20 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
       (json as ApiError | null)?.message ||
       (json as ApiError | null)?.error ||
       `HTTP ${res.status}`;
+    
+    // Check if it's a JWT expired error and retry after refreshing token
+    if (retryOnAuth && (res.status === 401 || msg.toLowerCase().includes('jwt') || msg.toLowerCase().includes('token') || msg.toLowerCase().includes('expired'))) {
+      try {
+        await refreshAuthToken();
+        // Retry the request once after refreshing token
+        return postJson<T>(path, body, false);
+      } catch (refreshError: any) {
+        // If refresh fails, show a user-friendly error and throw
+        const refreshMsg = refreshError?.message || 'Falha ao renovar autenticação';
+        throw new Error(`${refreshMsg}. Por favor, reconecte sua wallet.`);
+      }
+    }
+    
     throw new Error(msg);
   }
 
@@ -48,6 +76,7 @@ export interface AiAssistantChatRequest {
   sources?: unknown[];
   chatHistory?: unknown[];
   agentConfig?: unknown;
+  locale?: string;
 }
 
 export interface AiAssistantChatResponse {

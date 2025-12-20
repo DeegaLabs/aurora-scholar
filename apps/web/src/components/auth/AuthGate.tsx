@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { authChallenge, authVerify } from '@/lib/auth/api';
 import { getAuthToken } from '@/lib/auth/token';
@@ -30,6 +30,50 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
 
   const requiresAuth = useMemo(() => !PUBLIC_PATHS.has(pathname), [pathname]);
+  
+  // Use refs to access latest values without causing dependency issues
+  const connectedRef = useRef(connected);
+  const publicKeyRef = useRef(publicKey);
+  const signMessageRef = useRef(signMessage);
+  const isSigningInRef = useRef(isSigningIn);
+  const toastRef = useRef(toast);
+
+  useEffect(() => {
+    connectedRef.current = connected;
+    publicKeyRef.current = publicKey;
+    signMessageRef.current = signMessage;
+    isSigningInRef.current = isSigningIn;
+    toastRef.current = toast;
+  }, [connected, publicKey, signMessage, isSigningIn, toast]);
+
+  const authenticate = async () => {
+    if (!connectedRef.current || !publicKeyRef.current || !signMessageRef.current) {
+      return false;
+    }
+
+    if (isSigningInRef.current) return false;
+    setIsSigningIn(true);
+
+    try {
+      const wallet = publicKeyRef.current.toBase58();
+      const ch = await authChallenge(wallet);
+      // Must match backend canonicalization (stableStringify) or signature will fail.
+      const message = stableStringify({
+        domain: 'aurora-scholar',
+        action: 'auth',
+        wallet,
+        nonce: ch.nonce,
+      });
+      const sigBytes = await signMessageRef.current(new TextEncoder().encode(message));
+      await authVerify({ wallet, nonce: ch.nonce, signatureBytes: sigBytes });
+      return true;
+    } catch (e: any) {
+      toastRef.current({ type: 'error', title: 'Auth', message: e?.message || 'Falha no login por wallet.' });
+      return false;
+    } finally {
+      setIsSigningIn(false);
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -62,35 +106,42 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      if (isSigningIn) return;
-      setIsSigningIn(true);
-
-      try {
-        const wallet = publicKey.toBase58();
-        const ch = await authChallenge(wallet);
-        // Must match backend canonicalization (stableStringify) or signature will fail.
-        const message = stableStringify({
-          domain: 'aurora-scholar',
-          action: 'auth',
-          wallet,
-          nonce: ch.nonce,
-        });
-        const sigBytes = await signMessage(new TextEncoder().encode(message));
-        await authVerify({ wallet, nonce: ch.nonce, signatureBytes: sigBytes });
-        if (!cancelled) setReady(true);
-      } catch (e: any) {
-        toast({ type: 'error', title: 'Auth', message: e?.message || 'Falha no login por wallet.' });
-        if (!cancelled) setReady(false);
-      } finally {
-        if (!cancelled) setIsSigningIn(false);
-      }
+      const success = await authenticate();
+      if (!cancelled) setReady(success);
     }
 
     run();
     return () => {
       cancelled = true;
     };
-  }, [requiresAuth, connected, publicKey, signMessage, toast, isSigningIn]);
+  }, [requiresAuth, connected, publicKey, signMessage, toast]);
+
+  // Listen for refresh auth events (when JWT expires)
+  useEffect(() => {
+    const handleRefreshAuth = async () => {
+      if (!connectedRef.current || !publicKeyRef.current || !signMessageRef.current) {
+        return;
+      }
+
+      // Clear old token and re-authenticate
+      const { clearAuthToken } = await import('@/lib/auth/token');
+      clearAuthToken();
+      
+      const success = await authenticate();
+      if (success) {
+        toastRef.current({
+          type: 'success',
+          title: 'Autenticação',
+          message: 'Token renovado com sucesso.',
+        });
+      }
+    };
+
+    window.addEventListener('aurora:refresh-auth', handleRefreshAuth);
+    return () => {
+      window.removeEventListener('aurora:refresh-auth', handleRefreshAuth);
+    };
+  }, []);
 
   if (!requiresAuth) return <>{children}</>;
 

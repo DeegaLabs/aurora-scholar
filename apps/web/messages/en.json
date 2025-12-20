@@ -123,7 +123,7 @@
     "placeholder": "Start writing your article...",
     "editorPlaceholder": "Start writing your article...",
     "intuitionPlaceholder": "What is your initial idea or research hypothesis?",
-    "titlePlaceholder": "Article Title",
+    "titlePlaceholder": "Untitled article",
     "abstractPlaceholder": "Abstract (optional)",
     "addSource": "Add Source",
     "sources": "Sources",
@@ -133,9 +133,101 @@
     "publishPrivate": "Publish Private",
     "saveDraft": "Save Draft",
     "preview": "Preview",
+    "saving": "Saving...",
+    "saved": "Saved",
+    "words": "words",
+    "dashboard": "Dashboard",
+    "journal": "Journal",
     "showAi": "Show AI",
     "hideAi": "Hide AI",
     "walletRequired": "Please connect your wallet to publish",
+    "settings": {
+      "title": "Settings",
+      "language": "Language"
+    },
+    "studio": {
+      "title": "Studio",
+      "chat": {
+        "title": "Orientation",
+        "description": "Get guidance on how to start writing based on your content and declared intuition.",
+        "openChat": "Open Chat"
+      },
+      "suggestStructure": {
+        "title": "Suggest Structure",
+        "emptyContent": "Start writing to receive structure suggestions.",
+        "noSuggestions": "No suggestions found.",
+        "error": "Failed to analyze structure."
+      },
+      "checkCoherence": {
+        "title": "Check Coherence",
+        "noIntuition": "No declared intention found. Fill in the \"Ethical Layers\" panel.",
+        "noContent": "No content found. Start writing to check coherence.",
+        "resultPrefix": "Coherence check:",
+        "noAlerts": "No alerts found. The content is aligned with your declared intention.",
+        "error": "Failed to check coherence."
+      },
+      "ethicalLayers": {
+        "title": "Ethical Layers",
+        "layer1": {
+          "title": "Layer 1: Declared Intuition",
+          "description": "State your initial idea or research hypothesis. This will be registered on-chain.",
+          "placeholder": "What is your initial idea or research hypothesis?",
+          "onChainNote": "This declaration will be registered on-chain when you publish your article.",
+          "characters": "characters"
+        },
+        "layer2": {
+          "title": "Layer 2: Linguistic Mediation",
+          "description": "AI guidance without content generation. The AI assists with structure, translation, and coherence checks, but does not generate final text.",
+          "autoApplied": "This layer is automatically applied when you use the AI features in the Studio (Chat, Suggest Structure, Check Coherence)."
+        },
+        "layer3": {
+          "title": "Layer 3: Coherence Monitoring",
+          "description": "Alignment verification between your declared intuition (Layer 1) and the content you write.",
+          "howToUse": "Use \"Check Coherence\" in the Studio to verify that your content aligns with your declared intuition."
+        },
+        "done": "Done"
+      }
+    },
+    "sources": {
+      "title": "Sources",
+      "addSources": "Add Sources",
+      "noSources": "No saved sources",
+      "savedSources": "Saved sources will appear here",
+      "clickToAdd": "Click \"Add Sources\" to include PDFs, websites, text, video or audio files",
+      "processed": "Processed",
+      "remove": "Remove source",
+      "modal": {
+        "title": "Add Sources",
+        "siteUrls": "Site URLs",
+        "youtubeUrl": "YouTube URL",
+        "pasteText": "Paste Text",
+        "intro": "Sources allow the AI to base its responses on the most important information for you. (For example, research papers, course readings, notes, meeting transcripts, etc.)",
+        "uploadSources": "Upload Sources",
+        "dragDrop": "Drag and drop or",
+        "selectFile": "select file",
+        "toUpload": "to upload",
+        "supportedTypes": "Supported file types: PDF, .txt, Markdown, Audio (mp3, wav), .docx, Images (png, jpg, webp)",
+        "googleDrive": "Google Drive",
+        "site": "Site",
+        "youtube": "YouTube",
+        "pasteTextLabel": "Paste Text",
+        "urlsLabel": "URLs *",
+        "urlsPlaceholder": "Paste URLs here*",
+        "urlsNotes": "Notes:",
+        "urlsNote1": "To add multiple URLs, separate each one with a space or new line.",
+        "urlsNote2": "Currently, only visible text on the site will be imported.",
+        "urlsNote3": "Paid articles are not accepted.",
+        "youtubeLabel": "YouTube URL *",
+        "youtubePlaceholder": "Paste YouTube URL here*",
+        "youtubeNote1": "Currently, only the text transcript will be imported.",
+        "youtubeNote2": "Only public YouTube videos are compatible.",
+        "youtubeNote3": "Recently uploaded videos may not be available for import.",
+        "textLabel": "Text *",
+        "textPlaceholder": "Paste text here*",
+        "insert": "Insert",
+        "sourceLimit": "Source limit"
+      }
+    },
     "ai": {
       "title": "AI Assistant",
       "status": {

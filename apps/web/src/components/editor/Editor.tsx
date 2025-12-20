@@ -11,16 +11,11 @@ import TableCell from '@tiptap/extension-table-cell';
 import TableHeader from '@tiptap/extension-table-header';
 import TextAlign from '@tiptap/extension-text-align';
 import { useEffect, useState } from 'react';
-import { FloatingAiButtons } from './FloatingAiButtons';
 
 interface EditorProps {
   content: string;
   onChange: (content: string) => void;
   placeholder?: string;
-  floatingButtonsEnabled?: boolean;
-  onHelpWrite?: () => void;
-  onSuggestStructure?: () => void;
-  onCheckCoherence?: () => void;
   onMoreOptions?: () => void;
 }
 
@@ -28,10 +23,6 @@ export function Editor({
   content, 
   onChange, 
   placeholder = 'Start writing...', 
-  floatingButtonsEnabled = true,
-  onHelpWrite,
-  onSuggestStructure,
-  onCheckCoherence,
   onMoreOptions,
 }: EditorProps) {
   const [showLinkModal, setShowLinkModal] = useState(false);
@@ -555,15 +546,6 @@ export function Editor({
       {/* Editor Content */}
       <div className="relative overflow-visible">
         <EditorContent editor={editor} />
-        {/* Floating AI Buttons */}
-        <FloatingAiButtons
-          editor={editor}
-          enabled={floatingButtonsEnabled}
-          onHelpWrite={onHelpWrite}
-          onSuggestStructure={onSuggestStructure}
-          onCheckCoherence={onCheckCoherence}
-          onMoreOptions={onMoreOptions}
-        />
       </div>
 
       {/* Link Modal */}
