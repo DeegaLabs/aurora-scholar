@@ -76,6 +76,9 @@ export default function EditorPage() {
   useEffect(() => {
     if (sources.length > 0) {
       localStorage.setItem('aurora-editor-sources', JSON.stringify(sources));
+    } else {
+      // Clear localStorage when all sources are removed
+      localStorage.removeItem('aurora-editor-sources');
     }
   }, [sources]);
 
