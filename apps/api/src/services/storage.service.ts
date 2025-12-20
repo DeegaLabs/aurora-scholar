@@ -197,18 +197,56 @@ export class StorageService {
             }
 
             const text = await response.text();
+            
+            // Check if the response is an HTML error page from Arweave
+            if (text.includes('This page cannot be found') || 
+                text.includes('might have to wait for it to be mined') ||
+                text.includes('<!DOCTYPE html>') ||
+                text.includes('<html') ||
+                (text.includes('expired domains') && text.includes('GoDaddy'))) {
+              // This is likely an error page or placeholder, not the actual content
+              throw new Error(
+                `Article not found on Arweave. The transaction may still be processing. ` +
+                `Transaction ID: ${transactionId}. ` +
+                `Check status at: https://viewblock.io/arweave/tx/${transactionId} or https://arweave.net/${transactionId}`
+              );
+            }
+            
             // Try to parse as JSON if it looks like JSON
             if (text.trim().startsWith('{') || text.trim().startsWith('[')) {
               try {
-                return JSON.parse(text);
-              } catch (parseError) {
-                // If parsing fails but it looks like JSON, return as object with content
-                return { content: text, raw: text };
+                const parsed = JSON.parse(text);
+                // Validate that it's actually our article structure
+                if (parsed && typeof parsed === 'object' && (parsed.content !== undefined || parsed.title !== undefined)) {
+                  return parsed;
+                }
+                // If it doesn't have expected fields, might be wrong content
+                throw new Error('Invalid article structure in Arweave response');
+              } catch (parseError: any) {
+                // If parsing fails or structure is wrong, check if it's an error
+                if (parseError.message?.includes('Invalid article structure')) {
+                  throw new Error(
+                    `Article content structure is invalid. The transaction may still be processing. ` +
+                    `Transaction ID: ${transactionId}. ` +
+                    `Check status at: https://arweave.net/${transactionId}`
+                  );
+                }
+                // If it's a JSON parse error but looks like JSON, might be malformed
+                throw new Error(
+                  `Failed to parse article content. The transaction may still be processing. ` +
+                  `Transaction ID: ${transactionId}`
+                );
               }
             }
 
-            // If it's not JSON, return as object with content field
-            return { content: text };
+            // If it's not JSON and not HTML error, it might be plain text content
+            // But we expect JSON, so this is likely an error
+            throw new Error(
+              `Article content format is invalid. Expected JSON but received text. ` +
+              `The transaction may still be processing. ` +
+              `Transaction ID: ${transactionId}. ` +
+              `Check status at: https://arweave.net/${transactionId}`
+            );
           } catch (fetchError: any) {
             clearTimeout(timeoutId);
             throw fetchError;

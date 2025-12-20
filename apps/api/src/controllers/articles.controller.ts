@@ -330,21 +330,47 @@ export const getArticleContent = asyncHandler(
 
     try {
       // Fetch article JSON from Arweave
+      // The storageService.getContent will throw an error if the content is HTML or not available
       const ar = await storageService.getContent(id);
       
-      // Handle case where Arweave returns a string that might be JSON
+      // At this point, ar should be a valid object (not a string)
+      // If storageService returns a string, it means something went wrong
       let articleData: any = ar;
       if (typeof ar === 'string') {
+        // Check if it's HTML error page
+        if (ar.includes('<!DOCTYPE html>') || ar.includes('<html') || 
+            ar.includes('This page cannot be found') || 
+            ar.includes('expired domains')) {
+          throw createError(
+            'Article not found on Arweave. The transaction may still be processing. ' +
+            `Transaction ID: ${id}. ` +
+            `Check status at: https://arweave.net/${id}`,
+            404
+          );
+        }
+        // Try to parse as JSON
         try {
           articleData = JSON.parse(ar);
         } catch {
-          // If it's not JSON, treat as plain text content
-          articleData = { content: ar };
+          throw createError(
+            'Invalid article content format. The transaction may still be processing. ' +
+            `Transaction ID: ${id}`,
+            404
+          );
         }
       }
       
       if (!articleData || typeof articleData !== 'object') {
         throw createError('Invalid Arweave payload: expected JSON object', 400);
+      }
+      
+      // Validate that it has at least some expected fields
+      if (!articleData.content && !articleData.title) {
+        throw createError(
+          'Article content structure is invalid. The transaction may still be processing. ' +
+          `Transaction ID: ${id}`,
+          404
+        );
       }
 
       // Expected payload shape from our uploader:
