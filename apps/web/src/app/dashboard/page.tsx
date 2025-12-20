@@ -192,13 +192,15 @@ export default function DashboardPage() {
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
-              <Image
-                src="/logo-mini.png"
-                alt="Aurora Scholar"
-                width={32}
-                height={32}
-                className="object-contain flex-shrink-0"
-              />
+              <Link href="/" className="flex-shrink-0">
+                <Image
+                  src="/logo-mini.png"
+                  alt="Aurora Scholar"
+                  width={32}
+                  height={32}
+                  className="object-contain cursor-pointer hover:opacity-80 transition-opacity"
+                />
+              </Link>
               <div>
                 <h1 className="text-sm font-semibold text-gray-900">{t('title')}</h1>
                 <p className="text-xs text-gray-500">{t('subtitle')}</p>

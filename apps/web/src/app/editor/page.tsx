@@ -134,13 +134,15 @@ export default function EditorPage() {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
               {/* Logo */}
-              <Image
-                src="/logo-mini.png"
-                alt="Aurora Scholar"
-                width={32}
-                height={32}
-                className="object-contain flex-shrink-0"
-              />
+              <Link href="/" className="flex-shrink-0">
+                <Image
+                  src="/logo-mini.png"
+                  alt="Aurora Scholar"
+                  width={32}
+                  height={32}
+                  className="object-contain cursor-pointer hover:opacity-80 transition-opacity"
+                />
+              </Link>
               {/* Title Input - Expands with text */}
               <div className="relative inline-block">
                 <span
