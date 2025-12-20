@@ -144,46 +144,97 @@ export class StorageService {
 
   /**
    * Get content from Arweave by transaction ID
+   * Tries multiple gateways and retries for better reliability
    */
   async getContent(transactionId: string): Promise<any> {
-    try {
-      // Fetch data from Arweave gateway
-      const response = await fetch(`${this.getGatewayUrl()}/${transactionId}`, {
-        headers: {
-          'Accept': 'application/json, text/plain, */*',
-        },
-      });
-      
-      if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error(`Article not found on Arweave. It may still be processing. Transaction ID: ${transactionId}`);
-        }
-        throw new Error(`Failed to fetch content: ${response.status} ${response.statusText}`);
-      }
+    // List of Arweave gateways to try (some may index faster than others)
+    const gateways = [
+      this.getGatewayUrl(), // Primary gateway (from env or default)
+      'https://arweave.net',
+      'https://ar-io.net',
+      'https://arweave.live',
+    ];
 
-      const contentType = response.headers.get('content-type');
-      
-      if (contentType?.includes('application/json')) {
-        return await response.json();
-      }
+    const maxRetries = 2;
+    let lastError: Error | null = null;
 
-      const text = await response.text();
-      // Try to parse as JSON if it looks like JSON
-      if (text.trim().startsWith('{') || text.trim().startsWith('[')) {
+    for (const gateway of gateways) {
+      for (let attempt = 0; attempt <= maxRetries; attempt++) {
         try {
-          return JSON.parse(text);
-        } catch {
-          // If parsing fails, return as text
+          // Add small delay between retries
+          if (attempt > 0) {
+            await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
+          }
+
+          // Create abort controller for timeout
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+          try {
+            const response = await fetch(`${gateway}/${transactionId}`, {
+              headers: {
+                'Accept': 'application/json, text/plain, */*',
+              },
+              signal: controller.signal,
+            });
+
+            clearTimeout(timeoutId);
+            
+            if (!response.ok) {
+              if (response.status === 404) {
+                // Try next gateway or retry
+                if (attempt < maxRetries) continue;
+                lastError = new Error(`Article not found on Arweave. It may still be processing. Transaction ID: ${transactionId}. You can check it at: https://viewblock.io/arweave/tx/${transactionId}`);
+                continue; // Try next gateway
+              }
+              throw new Error(`Failed to fetch content: ${response.status} ${response.statusText}`);
+            }
+
+            const contentType = response.headers.get('content-type');
+            
+            if (contentType?.includes('application/json')) {
+              return await response.json();
+            }
+
+            const text = await response.text();
+            // Try to parse as JSON if it looks like JSON
+            if (text.trim().startsWith('{') || text.trim().startsWith('[')) {
+              try {
+                return JSON.parse(text);
+              } catch {
+                // If parsing fails, return as text
+              }
+            }
+
+            return text;
+          } catch (fetchError: any) {
+            clearTimeout(timeoutId);
+            throw fetchError;
+          }
+        } catch (error: any) {
+          // If it's a timeout or network error, try next gateway
+          if (error.name === 'AbortError' || error.name === 'TypeError') {
+            if (attempt < maxRetries) continue;
+            lastError = error;
+            continue; // Try next gateway
+          }
+          // For other errors, throw immediately
+          throw error;
         }
       }
-
-      return text;
-    } catch (error: any) {
-      if (error.message?.includes('not found') || error.message?.includes('404')) {
-        throw error; // Re-throw with original message
-      }
-      throw new Error(`Failed to get content: ${error.message}`);
     }
+
+    // If all gateways failed, throw the last error with helpful message
+    if (lastError) {
+      throw new Error(
+        `Article not found on Arweave after trying multiple gateways. ` +
+        `It may still be processing (can take a few minutes). ` +
+        `Transaction ID: ${transactionId}. ` +
+        `Check status at: https://viewblock.io/arweave/tx/${transactionId} or https://arweave.net/${transactionId}`
+      );
+    }
+
+    throw new Error(`Failed to get content: Unknown error`);
   }
 
   /**

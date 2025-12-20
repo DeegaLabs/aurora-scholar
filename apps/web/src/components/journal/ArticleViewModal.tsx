@@ -51,6 +51,7 @@ export function ArticleViewModal({
   const [content, setContent] = useState<ArticleContent | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     if (!isOpen || !arweaveId) return;
@@ -66,6 +67,7 @@ export function ArticleViewModal({
         if (!res.ok) throw new Error(json?.message || json?.error || `HTTP ${res.status}`);
         if (!cancelled) {
           setContent(json?.data || null);
+          setRetryCount(0); // Reset retry count on success
         }
       } catch (e: any) {
         if (!cancelled) {
@@ -81,7 +83,8 @@ export function ArticleViewModal({
     return () => {
       cancelled = true;
     };
-  }, [isOpen, arweaveId, t]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, arweaveId, retryCount]);
 
   const handleDownload = () => {
     if (!content) return;
@@ -137,8 +140,45 @@ export function ArticleViewModal({
               <p className="text-sm text-gray-600">{t('loading')}</p>
             </div>
           ) : error ? (
-            <div className="border border-red-200 bg-red-50 text-red-800 rounded-lg px-4 py-3 text-sm">
-              {error}
+            <div className="border border-yellow-200 bg-yellow-50 text-yellow-800 rounded-lg px-4 py-3 text-sm space-y-3">
+              <div>
+                <p className="font-medium mb-1">{t('processingTitle')}</p>
+                <p className="text-xs text-yellow-700">
+                  {t('processingNote')}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2 items-center">
+                <button
+                  onClick={() => {
+                    setRetryCount((prev) => prev + 1);
+                  }}
+                  disabled={isLoading}
+                  className="px-3 py-1.5 text-xs font-medium text-white bg-yellow-600 rounded-md hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {t('retry')}
+                </button>
+                <a
+                  href={`https://viewblock.io/arweave/tx/${arweaveId}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-3 py-1.5 text-xs font-medium text-yellow-800 border border-yellow-300 rounded-md hover:bg-yellow-100"
+                >
+                  {t('checkStatus')}
+                </a>
+                <a
+                  href={`https://arweave.net/${arweaveId}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-3 py-1.5 text-xs font-medium text-yellow-800 border border-yellow-300 rounded-md hover:bg-yellow-100"
+                >
+                  {t('viewOnArweave')}
+                </a>
+              </div>
+              {retryCount > 0 && (
+                <p className="text-xs text-yellow-600 italic">
+                  {t('retryNote', { count: retryCount })}
+                </p>
+              )}
             </div>
           ) : content ? (
             <div className="space-y-6">
