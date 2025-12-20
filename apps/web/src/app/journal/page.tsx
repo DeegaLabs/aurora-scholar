@@ -30,7 +30,7 @@ type ApiListResponse = {
 import { getApiBaseUrl } from '@/lib/api/baseUrl';
 
 export default function JournalPage() {
-  const { connected } = useWallet();
+  const { connected: _connected } = useWallet();
   const { toast } = useToast();
   const t = useTranslations('journal');
   const tEditor = useTranslations('editor');

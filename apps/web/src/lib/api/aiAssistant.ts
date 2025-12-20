@@ -28,7 +28,7 @@ async function postJson<T>(path: string, body: unknown, retryOnAuth = true): Pro
       'Accept-Language': locale === 'pt' ? 'pt-BR,pt' : 'en',
       ...getAuthHeader() 
     },
-    body: JSON.stringify({ ...body, locale }),
+    body: JSON.stringify({ ...(body as Record<string, unknown>), locale }),
   });
 
   const text = await res.text();
@@ -95,6 +95,7 @@ export interface AiAssistantAnalyzeRequest {
   sources?: unknown[];
   cursorPosition?: number;
   agentConfig?: unknown;
+  locale?: string;
 }
 
 export interface AiAssistantAnalyzeResponse {

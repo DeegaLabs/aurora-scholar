@@ -23,7 +23,7 @@ export function Editor({
   content, 
   onChange, 
   placeholder = 'Start writing...', 
-  onMoreOptions,
+  onMoreOptions: _onMoreOptions,
 }: EditorProps) {
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
