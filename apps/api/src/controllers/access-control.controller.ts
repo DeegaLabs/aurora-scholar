@@ -210,12 +210,6 @@ export const revokeGrant = asyncHandler(async (req: Request, res: Response) => {
   res.json({ success: true, data: updated });
 });
 
-function isGrantActive(grant: { expiresAt: Date | null; revokedAt: Date | null }) {
-  if (grant.revokedAt) return false;
-  if (grant.expiresAt && grant.expiresAt.getTime() <= Date.now()) return false;
-  return true;
-}
-
 export const keyChallenge = asyncHandler(async (req: Request, res: Response) => {
   const viewerWallet = req.auth?.wallet;
   if (!viewerWallet) throw createError('Unauthorized', 401);
