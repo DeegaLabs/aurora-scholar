@@ -271,6 +271,9 @@
     "title": "On-Chain Journal",
     "subtitle": "Public articles registered on Solana blockchain",
     "search": "Search articles...",
+    "loading": "Loading articles…",
+    "loadError": "Failed to load articles.",
+    "noPublicArticles": "No public articles found.",
     "filters": {
       "all": "All",
       "date": "Date",
@@ -285,8 +288,15 @@
     "viewArticle": "View Article",
     "verifyHash": "Verify Hash",
     "verified": "Verified",
+    "notVerified": "Not verified",
     "author": "Author",
-    "publishedAt": "Published"
+    "publishedAt": "Published",
+    "verification": {
+      "title": "Verification",
+      "ok": "OK",
+      "failed": "Failed",
+      "verifyError": "Failed to verify article."
+    }
   },
   "article": {
     "by": "by",

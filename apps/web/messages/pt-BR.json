@@ -271,6 +271,9 @@
     "title": "Revista On-Chain",
     "subtitle": "Artigos públicos registrados na blockchain Solana",
     "search": "Buscar artigos...",
+    "loading": "Carregando artigos…",
+    "loadError": "Falha ao carregar artigos.",
+    "noPublicArticles": "Nenhum artigo público encontrado.",
     "filters": {
       "all": "Todos",
       "date": "Data",
@@ -285,8 +288,15 @@
     "viewArticle": "Ver Artigo",
     "verifyHash": "Verificar Hash",
     "verified": "Verificado",
+    "notVerified": "Não verificado",
     "author": "Autor",
-    "publishedAt": "Publicado"
+    "publishedAt": "Publicado",
+    "verification": {
+      "title": "Verificação",
+      "ok": "OK",
+      "failed": "Falha",
+      "verifyError": "Falha ao verificar artigo."
+    }
   },
   "article": {
     "by": "por",

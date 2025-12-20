@@ -2,9 +2,12 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { SearchFilter, type JournalFilters } from '@/components/journal/SearchFilter';
 import { ArticleCard } from '@/components/journal/ArticleCard';
 import { WalletInfo } from '@/components/wallet/WalletInfo';
+import { SettingsButton } from '@/components/editor/SettingsButton';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useToast } from '@/components/ui/toast';
 
@@ -28,6 +31,8 @@ import { getApiBaseUrl } from '@/lib/api/baseUrl';
 export default function JournalPage() {
   const { connected } = useWallet();
   const { toast } = useToast();
+  const t = useTranslations('journal');
+  const tEditor = useTranslations('editor');
   const [data, setData] = useState<ApiListResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -47,7 +52,7 @@ export default function JournalPage() {
         const payload = json?.data as ApiListResponse;
         if (!cancelled) setData(payload);
       } catch (e: any) {
-        if (!cancelled) setError(e?.message || 'Falha ao carregar artigos.');
+        if (!cancelled) setError(e?.message || t('loadError'));
       } finally {
         if (!cancelled) setIsLoading(false);
       }
@@ -94,11 +99,24 @@ export default function JournalPage() {
                 className="object-contain flex-shrink-0"
               />
               <div>
-                <h1 className="text-sm font-semibold text-gray-900">On-Chain Journal</h1>
-                <p className="text-xs text-gray-500">Artigos públicos publicados no Solana + Arweave</p>
+                <h1 className="text-sm font-semibold text-gray-900">{t('title')}</h1>
+                <p className="text-xs text-gray-500">{t('subtitle')}</p>
               </div>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 flex-shrink-0">
+              <Link
+                href="/editor"
+                className="px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition"
+              >
+                {tEditor('title')}
+              </Link>
+              <Link
+                href="/dashboard"
+                className="px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition"
+              >
+                {tEditor('dashboard')}
+              </Link>
+              <SettingsButton />
               <WalletInfo />
             </div>
           </div>
@@ -110,11 +128,11 @@ export default function JournalPage() {
           <SearchFilter value={filters} onChange={setFilters} authors={authors} />
 
           {isLoading ? (
-            <div className="text-sm text-gray-600">Carregando artigos…</div>
+            <div className="text-sm text-gray-600">{t('loading')}</div>
           ) : error ? (
             <div className="border border-red-200 bg-red-50 text-red-800 rounded-lg px-4 py-3 text-sm">{error}</div>
           ) : filtered.length === 0 ? (
-            <div className="text-sm text-gray-600">Nenhum artigo público encontrado.</div>
+            <div className="text-sm text-gray-600">{t('noPublicArticles')}</div>
           ) : (
             <div className="space-y-3">
               {filtered.map((a) => (
@@ -135,15 +153,15 @@ export default function JournalPage() {
                       const verified = Boolean(json?.data?.verified);
                       toast({
                         type: verified ? 'success' : 'error',
-                        title: verified ? 'Verificado' : 'Não verificado',
-                        message: String(json?.data?.message || (verified ? 'OK' : 'Falha')),
+                        title: verified ? t('verified') : t('notVerified'),
+                        message: String(json?.data?.message || (verified ? t('verification.ok') : t('verification.failed'))),
                         durationMs: 8000,
                       });
                     } catch (e: any) {
                       toast({
                         type: 'error',
-                        title: 'Verificação',
-                        message: e?.message || 'Falha ao verificar artigo.',
+                        title: t('verification.title'),
+                        message: e?.message || t('verification.verifyError'),
                         durationMs: 8000,
                       });
                     }
