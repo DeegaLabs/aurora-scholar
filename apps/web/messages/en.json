@@ -239,6 +239,12 @@
       "noSuggestions": "No suggestions yet",
       "askGuidance": "Ask AI Guidance",
       "chatPlaceholder": "Ask a question about your article..."
+    },
+    "errors": {
+      "walletRequired": "Please connect your wallet to continue",
+      "publishFailed": "Failed to publish article",
+      "networkError": "Network error. Please try again",
+      "invalidContent": "Please add content to your article"
     }
   },
   "publish": {
@@ -298,11 +304,5 @@
   "walletModal": {
     "title": "Connect Wallet",
     "description": "Connect your wallet to start writing."
-  },
-  "errors": {
-    "walletRequired": "Please connect your wallet to continue",
-    "publishFailed": "Failed to publish article",
-    "networkError": "Network error. Please try again",
-    "invalidContent": "Please add content to your article"
   }
 }
