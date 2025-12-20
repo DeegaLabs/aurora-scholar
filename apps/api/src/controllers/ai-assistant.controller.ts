@@ -238,13 +238,60 @@ function safeJsonParse(text: string) {
   try {
     return JSON.parse(text);
   } catch {
-    // Try to extract a JSON object if the model wrapped it with extra text.
+    // Try to extract JSON from markdown code blocks
+    const jsonBlockMatch = text.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/);
+    if (jsonBlockMatch) {
+      try {
+        return JSON.parse(jsonBlockMatch[1]);
+      } catch {
+        // Continue to next attempt
+      }
+    }
+    
+    // Try to extract a JSON object if the model wrapped it with extra text
     const start = text.indexOf('{');
     const end = text.lastIndexOf('}');
     if (start >= 0 && end > start) {
-      return JSON.parse(text.slice(start, end + 1));
+      const jsonCandidate = text.slice(start, end + 1);
+      try {
+        return JSON.parse(jsonCandidate);
+      } catch {
+        // Try to fix common JSON issues
+        // Remove trailing commas in arrays/objects
+        let fixed = jsonCandidate.replace(/,(\s*[}\]])/g, '$1');
+        try {
+          return JSON.parse(fixed);
+        } catch {
+          // Last resort: try to extract just the suggestions array
+          const suggestionsMatch = jsonCandidate.match(/"suggestions"\s*:\s*\[([\s\S]*?)\]/);
+          if (suggestionsMatch) {
+            try {
+              const suggestionsText = '[' + suggestionsMatch[1] + ']';
+              const suggestions = JSON.parse(suggestionsText);
+              return {
+                suggestions: suggestions || [],
+                corrections: [],
+                references: [],
+                warnings: [],
+                authenticityAlerts: [],
+              };
+            } catch {
+              // Fall through to error
+            }
+          }
+        }
+      }
     }
-    throw new Error('Invalid JSON');
+    
+    // If all parsing attempts fail, return a safe default structure
+    console.error('Failed to parse JSON from AI response:', text.substring(0, 500));
+    return {
+      suggestions: [],
+      corrections: [],
+      references: [],
+      warnings: ['Failed to parse AI response. Please try again.'],
+      authenticityAlerts: [],
+    };
   }
 }
 
