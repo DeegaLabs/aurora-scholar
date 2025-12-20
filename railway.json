@@ -1,13 +1,13 @@
 {
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
-    "builder": "NIXPACKS",
-    "watchPatterns": ["../../package.json", "../../pnpm-workspace.yaml", "../../pnpm-lock.yaml", "../../packages/**"]
+    "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "node dist/index.js",
+    "startCommand": "cd apps/api && node dist/index.js",
     "healthcheckPath": "/api/health",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
   }
 }
+

@@ -1,0 +1,16 @@
+[phases.setup]
+nixPkgs = ["nodejs_20"]
+
+[phases.install]
+cmds = [
+  "npm install -g pnpm@8.15.0",
+  "if [ -f ../../package.json ]; then cd ../.. && pnpm install --frozen-lockfile && cd apps/api && pnpm db:generate && cd ../.. && pnpm --filter @aurora-scholar/sdk build; else echo 'Monorepo root not found - building standalone'; npm install && npx prisma generate; fi"
+]
+
+[phases.build]
+cmds = [
+  "if [ -f ../../package.json ]; then cd ../.. && pnpm --filter api build; else echo 'Building standalone'; npx tsc; fi"
+]
+
+[start]
+cmd = "node dist/index.js"
