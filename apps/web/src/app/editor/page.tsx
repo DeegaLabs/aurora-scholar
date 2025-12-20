@@ -292,6 +292,7 @@ export default function EditorPage() {
           onClose={() => setIsPublishModalOpen(false)}
           content={content}
           declaredIntuition={declaredIntuition}
+          title={articleTitle}
           onSuccess={() => {
             // Clear localStorage on successful publish
             localStorage.removeItem('aurora-editor-content');

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { Transaction, TransactionMessage, VersionedTransaction } from '@solana/web3.js';
 import { buildPublishArticleIx, deriveArticlePda } from '@/lib/solana/auroraProgram';
@@ -59,6 +59,7 @@ interface PublishModalProps {
   onClose: () => void;
   content: string;
   declaredIntuition: string;
+  title?: string;
   onSuccess?: () => void;
 }
 
@@ -67,6 +68,7 @@ export function PublishModal({
   onClose,
   content,
   declaredIntuition,
+  title: initialTitle = '',
   onSuccess,
 }: PublishModalProps) {
   const { connection } = useConnection();
@@ -78,6 +80,13 @@ export function PublishModal({
   const [isPublishing, setIsPublishing] = useState(false);
   const [step, setStep] = useState<'form' | 'uploading' | 'publishing' | 'success'>('form');
   const [successInfo, setSuccessInfo] = useState<{ arweaveUrl: string; explorerUrl: string } | null>(null);
+
+  // Update title when modal opens or initialTitle changes
+  useEffect(() => {
+    if (isOpen && initialTitle) {
+      setTitle(initialTitle);
+    }
+  }, [isOpen, initialTitle]);
 
   if (!isOpen) return null;
 
