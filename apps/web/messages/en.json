@@ -23,12 +23,10 @@
   },
   "home": {
     "hero": {
-      "tag": "Ethical Academic Writing",
-      "title": "Assisted Monitoring of",
-      "titleHighlight": "Ethical Academic Writing",
-      "description": "Aurora Scholar is an academic writing platform that implements AI-assisted monitoring, ensuring that thinking is human, mediation is technical, and authorship is verifiable on-chain. The system does not write new content. It organizes, translates, and audits coherence of ideas previously declared by the student, preserving intellectual autonomy and ethical responsibility.",
-      "startWriting": "Start Writing",
-      "viewJournal": "View Journal"
+      "title": "Assisted Monitoring of\nEthical Academic Writing",
+      "description": "Aurora Scholar implements AI-assisted monitoring, ensuring human thinking, technical mediation, and verifiable on-chain authorship.",
+      "startWriting": "Start writing →",
+      "viewJournal": "View journal →"
     },
     "features": {
       "label": "Product Vision",

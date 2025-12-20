@@ -2,7 +2,6 @@
 
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import Image from 'next/image';
 import Header from '@/components/Header';
 import { BrainIcon, EditIcon, CheckCircleIcon } from '@/components/icons';
 
@@ -13,52 +12,58 @@ export default function Home() {
     <>
       <Header />
       
-      <main className="min-h-screen bg-white">
-        {/* Hero Section - Estilo minimalista acadêmico, refletindo o PRD */}
-        <section className="relative overflow-hidden border-b border-gray-200 py-24 sm:py-32 lg:py-40">
-          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+      <main className="min-h-screen">
+        {/* Hero Section - Com vídeo de fundo */}
+        <section className="relative overflow-hidden min-h-screen flex items-end">
+          {/* Vídeo de fundo - 16:9 HD */}
+          <div className="absolute inset-0 w-full h-full z-0 bg-black">
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="auto"
+              className="absolute inset-0 w-full h-full"
+              style={{ 
+                objectFit: 'cover',
+                objectPosition: 'center center',
+                width: '100%',
+                height: '100%'
+              }}
+            >
+              <source src="/logo-video.mp4" type="video/mp4" />
+            </video>
+          </div>
+          
+          {/* Overlay sutil para legibilidade do texto */}
+          <div className="absolute inset-0 bg-black/20 z-10"></div>
+          
+          {/* Overlay para esconder marca d'água "Veo" no canto inferior esquerdo */}
+          <div className="absolute bottom-0 left-0 w-32 h-16 bg-black/40 backdrop-blur-sm z-10"></div>
+          
+          {/* Conteúdo sobre o vídeo */}
+          <div className="relative z-20 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 w-full pb-20 sm:pb-24 lg:pb-32">
             <div className="text-center">
-              {/* Logo acima do texto */}
-              <div className="mb-8 flex justify-center animate-fade-in">
-                <Image
-                  src="/logo.png"
-                  alt="Aurora Scholar"
-                  width={200}
-                  height={200}
-                  className="object-contain"
-                  priority
-                />
-              </div>
-
-              <div className="mb-6 animate-fade-in-delay-1">
-                <span className="inline-block rounded-full bg-gray-100 px-4 py-1.5 text-xs font-medium uppercase tracking-wide text-gray-700 border border-gray-200">
-                  {t('hero.tag')}
-                </span>
-              </div>
-              
-              <h1 className="mx-auto max-w-4xl text-4xl font-display font-bold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl xl:text-7xl animate-fade-in-delay-2">
+              <h1 className="mx-auto max-w-3xl text-4xl sm:text-5xl lg:text-6xl font-display font-bold tracking-tight text-white leading-tight whitespace-pre-line drop-shadow-lg">
                 {t('hero.title')}
-                <br />
-                <span className="text-gray-600">{t('hero.titleHighlight')}</span>
               </h1>
               
-              <p className="mx-auto mt-6 sm:mt-8 max-w-2xl text-base sm:text-lg leading-relaxed text-gray-600 animate-fade-in-delay-3">
+              <p className="mx-auto mt-6 sm:mt-8 max-w-2xl text-base sm:text-lg leading-relaxed text-white/90 drop-shadow-md">
                 {t('hero.description')}
               </p>
               
-              <div className="mt-10 sm:mt-12 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-x-4">
+              <div className="mt-10 sm:mt-12 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
                 <Link
                   href="/editor"
-                  className="w-full sm:w-auto rounded-md bg-gray-900 px-8 py-3.5 text-base font-medium text-white hover:bg-gray-800 transition shadow-sm hover:shadow-md"
+                  className="w-full sm:w-auto rounded-md bg-white px-6 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 transition shadow-lg"
                 >
                   {t('hero.startWriting')}
                 </Link>
                 <Link
                   href="/journal"
-                  className="group w-full sm:w-auto inline-flex items-center justify-center text-base font-medium text-gray-900 hover:text-gray-600 transition"
+                  className="w-full sm:w-auto inline-flex items-center justify-center text-sm font-medium text-white hover:text-white/80 transition border border-white/50 rounded-md px-6 py-2.5 backdrop-blur-sm"
                 >
                   {t('hero.viewJournal')}
-                  <span className="ml-2 transition-transform group-hover:translate-x-1">→</span>
                 </Link>
               </div>
             </div>

@@ -23,12 +23,10 @@
   },
   "home": {
     "hero": {
-      "tag": "Escrita Acadêmica Ética",
-      "title": "Monitoria Assistida de",
-      "titleHighlight": "Escrita Acadêmica Ética",
-      "description": "Aurora Scholar é uma plataforma de escrita acadêmica que implementa monitoria assistida por IA, garantindo que o pensamento seja humano, a mediação seja técnica e a autoria seja verificável on-chain. O sistema não escreve conteúdo novo. Ele organiza, traduz e audita coerência de ideias previamente declaradas pelo estudante, preservando autonomia intelectual e responsabilidade ética.",
-      "startWriting": "Começar a Escrever",
-      "viewJournal": "Ver Revista"
+      "title": "Monitoria Assistida de\nEscrita Acadêmica Ética",
+      "description": "Aurora Scholar implementa monitoria assistida por IA, garantindo pensamento humano, mediação técnica e autoria verificável on-chain.",
+      "startWriting": "Começar a escrever →",
+      "viewJournal": "Ver revista →"
     },
     "features": {
       "label": "Visão do Produto",

@@ -14,22 +14,20 @@ body {
   min-height: 100vh;
 }
 
-/* Custom scrollbar - estilo minimalista */
+/* Scrollbar escondida mas funcional */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 0px;
+  background: transparent;
 }
 
-::-webkit-scrollbar-track {
-  background: #f5f5f5;
+/* Para Firefox */
+html {
+  scrollbar-width: none;
 }
 
-::-webkit-scrollbar-thumb {
-  background: #d1d5db;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
+/* Para garantir que o scroll funcione */
+body {
+  -ms-overflow-style: none; /* IE e Edge */
 }
 
 /* TipTap Editor Styles */

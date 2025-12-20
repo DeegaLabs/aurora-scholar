@@ -23,10 +23,10 @@
   },
   "home": {
     "hero": {
-      "title": "Sua Autoria, Permanente e Verificável",
-      "subtitle": "Escreva artigos acadêmicos com orientação ética de IA e registre-os na blockchain Solana",
-      "cta": "Criar Artigo",
-      "viewJournal": "Ver Revista"
+      "title": "Monitoria Assistida de\nEscrita Acadêmica Ética",
+      "description": "Aurora Scholar implementa monitoria assistida por IA, garantindo pensamento humano, mediação técnica e autoria verificável on-chain.",
+      "startWriting": "Começar a escrever →",
+      "viewJournal": "Ver revista →"
     },
     "features": {
       "title": "Por que Aurora Scholar?",
@@ -133,6 +133,12 @@
     "publishFailed": "Falha ao publicar artigo",
     "networkError": "Erro de rede. Por favor, tente novamente",
     "invalidContent": "Por favor, adicione conteúdo ao seu artigo"
+  },
+  "footer": {
+    "copyright": "© 2025 Aurora Scholar. Open source no GitHub.",
+    "github": "GitHub",
+    "solana": "Solana",
+    "documentation": "Documentação"
   }
 }
 
