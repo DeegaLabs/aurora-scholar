@@ -143,7 +143,9 @@
     "walletRequired": "Please connect your wallet to publish",
     "settings": {
       "title": "Settings",
-      "language": "Language"
+      "language": "Language",
+      "contract": "Solana Contract",
+      "viewContract": "View contract on Explorer"
     },
     "studio": {
       "title": "Studio",

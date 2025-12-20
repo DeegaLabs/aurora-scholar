@@ -143,7 +143,9 @@
     "walletRequired": "Por favor, conecte sua carteira para publicar",
     "settings": {
       "title": "Configurações",
-      "language": "Idioma"
+      "language": "Idioma",
+      "contract": "Contrato Solana",
+      "viewContract": "Ver contrato no Explorer"
     },
     "studio": {
       "title": "Estúdio",

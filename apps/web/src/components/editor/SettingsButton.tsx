@@ -73,6 +73,25 @@ export function SettingsButton() {
                 </button>
               </div>
             </div>
+            <div className="px-3 py-2 border-t border-gray-200 mt-2">
+              <label className="text-xs font-medium text-gray-700 mb-2 block">
+                {t('contract')}
+              </label>
+              <a
+                href="https://explorer.solana.com/address/HoRNS4q7T69m6YHYx8Qsg4kAffwNNu8R25XpReZnvWAe?cluster=devnet"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                </svg>
+                <span className="flex-1 text-left">{t('viewContract')}</span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+              </a>
+            </div>
           </div>
         </div>
       )}
