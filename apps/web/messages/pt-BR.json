@@ -156,16 +156,22 @@
       },
       "suggestStructure": {
         "title": "Sugerir Estrutura",
+        "modalTitle": "Sugerir Estrutura",
+        "analyzing": "Analisando estrutura...",
         "emptyContent": "Comece a escrever para receber sugestões de estrutura.",
         "noSuggestions": "Nenhuma sugestão encontrada.",
+        "close": "Fechar",
         "error": "Falha ao analisar estrutura."
       },
       "checkCoherence": {
         "title": "Verificar Coerência",
+        "modalTitle": "Checagem de Coerência",
+        "checking": "Checando coerência...",
         "noIntuition": "Nenhuma intenção declarada encontrada. Preencha o painel \"Camadas Éticas\".",
         "noContent": "Nenhum conteúdo encontrado. Comece a escrever para verificar coerência.",
-        "resultPrefix": "Verificação de coerência:",
-        "noAlerts": "Nenhum alerta encontrado. O conteúdo está alinhado com sua intenção declarada.",
+        "coherent": "Coerente",
+        "attentionNeeded": "Atenção necessária",
+        "close": "Fechar",
         "error": "Falha ao verificar coerência."
       },
       "ethicalLayers": {
@@ -240,7 +246,21 @@
       "suggestions": "Sugestões",
       "noSuggestions": "Nenhuma sugestão ainda",
       "askGuidance": "Pedir Orientação",
-      "chatPlaceholder": "Faça uma pergunta sobre seu artigo..."
+      "chatPlaceholder": "Faça uma pergunta sobre seu artigo...",
+      "chatModal": {
+        "title": "Chat com IA",
+        "welcome": "Olá! Sou seu assistente de IA ético. Posso ajudar com estrutura, referências, gramática e coerência. Nunca escrevo conteúdo por você — apenas guio e explico. Como posso ajudar?",
+        "inputPlaceholder": "Digite sua pergunta...",
+        "send": "Enviar",
+        "error": "Falha ao consultar a IA."
+      },
+      "helpWrite": {
+        "title": "Me ajude a escrever",
+        "descriptionPlaceholder": "Descreva o que você quer escrever...",
+        "create": "Criar",
+        "analyzing": "Analisando...",
+        "error": "Falha ao consultar a IA."
+      }
     },
     "errors": {
       "walletRequired": "Por favor, conecte sua carteira para continuar",
@@ -251,23 +271,35 @@
   },
   "publish": {
     "title": "Publicar Artigo",
-    "type": "Tipo de Publicação",
-    "public": "Público",
-    "publicDesc": "Visível na Revista On-Chain",
-    "private": "Privado",
-    "privateDesc": "Acessível apenas via link",
-    "expiration": "Expiração do Link",
-    "24h": "24 horas",
-    "7d": "7 dias",
-    "30d": "30 dias",
-    "unlimited": "Ilimitado",
-    "processing": "Processando...",
-    "uploadingArweave": "Enviando para Arweave...",
-    "registeringSolana": "Registrando na Solana...",
+    "titleLabel": "Título *",
+    "titlePlaceholder": "Digite o título do artigo",
+    "aiScope": "Escopo da IA",
+    "aiScopePlaceholder": "Descreva como a IA foi usada (ex: 'Apenas verificação gramatical')",
+    "aiScopeNote": "Isso será registrado on-chain para transparência.",
+    "visibility": "Visibilidade",
+    "public": "Público (aparece na revista)",
+    "private": "Privado (acessível via link)",
+    "cancel": "Cancelar",
+    "publishButton": "Publicar",
+    "uploading": "Enviando para Arweave...",
+    "publishing": "Publicando na blockchain Solana...",
     "success": "Artigo publicado com sucesso!",
     "viewExplorer": "Ver no Solana Explorer",
     "viewArweave": "Ver no Arweave",
-    "copyLink": "Copiar Link"
+    "redirecting": "Redirecionando...",
+    "errors": {
+      "walletRequired": "Conecte sua wallet para publicar.",
+      "walletNoTransaction": "Sua wallet não suporta envio de transações.",
+      "walletNoSignMessage": "Sua wallet não suporta assinatura de mensagem (signMessage).",
+      "titleRequired": "Informe um título para o artigo.",
+      "contentRequired": "Adicione conteúdo antes de publicar.",
+      "intuitionRequired": "Preencha a Declared Intuition antes de publicar.",
+      "publishFailed": "Falha ao publicar",
+      "insufficientBalance": "Saldo insuficiente (devnet)",
+      "balanceMessage": "Sua wallet tem {balance} SOL.\nEstimativa mínima: {estimated} SOL (rent + fee).\n\nFaça airdrop e tente novamente.",
+      "simulationFailed": "Simulação falhou",
+      "simulationError": "Erro: {error}\n\nLogs:\n{logs}"
+    }
   },
   "journal": {
     "title": "Revista On-Chain",
@@ -307,7 +339,13 @@
     "verifyAuthenticity": "Verificar Autenticidade",
     "authentic": "Este artigo é autêntico",
     "tampered": "Aviso: O conteúdo pode ter sido alterado",
-    "backToJournal": "Voltar para Revista"
+    "backToJournal": "Voltar para Revista",
+    "preview": {
+      "title": "Visualização do Artigo",
+      "declaredIntuition": "Intuição Declarada (Camada 1)",
+      "noContent": "Ainda não há conteúdo...",
+      "close": "Fechar"
+    }
   },
   "wallet": {
     "connect": "Conectar Carteira",

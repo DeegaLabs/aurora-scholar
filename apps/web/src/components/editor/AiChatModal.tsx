@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { aiAssistantChat } from '@/lib/api/aiAssistant';
 
 interface Message {
@@ -27,6 +27,7 @@ export function AiChatModal({
   sources,
 }: AiChatModalProps) {
   const locale = useLocale();
+  const t = useTranslations('editor.ai.chatModal');
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -39,12 +40,11 @@ export function AiChatModal({
       setMessages([{
         id: '1',
         role: 'assistant',
-        content:
-          'Olá! Sou seu assistente de IA ético. Posso ajudar com estrutura, referências, gramática e coerência. Nunca escrevo conteúdo por você — apenas guio e explico. Como posso ajudar?',
+        content: t('welcome'),
         timestamp: new Date(),
       }]);
     }
-  }, [isOpen, messages.length]);
+  }, [isOpen, messages.length, t]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -84,7 +84,7 @@ export function AiChatModal({
       };
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (e: any) {
-      setError(e?.message || 'Falha ao consultar a IA.');
+      setError(e?.message || t('error'));
     } finally {
       setIsLoading(false);
     }
@@ -110,7 +110,7 @@ export function AiChatModal({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900">Chat com IA</h3>
+            <h3 className="text-lg font-semibold text-gray-900">{t('title')}</h3>
           </div>
           <button
             onClick={onClose}
@@ -169,7 +169,7 @@ export function AiChatModal({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Digite sua pergunta..."
+              placeholder={t('inputPlaceholder')}
               className="flex-1 px-4 py-2 rounded-md focus:outline-none resize-none"
               rows={2}
             />
@@ -178,7 +178,7 @@ export function AiChatModal({
               disabled={!input.trim() || isLoading}
               className="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Enviar
+              {t('send')}
             </button>
           </div>
         </div>

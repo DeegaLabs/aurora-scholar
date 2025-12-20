@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { Transaction, TransactionMessage, VersionedTransaction } from '@solana/web3.js';
+import { useTranslations } from 'next-intl';
 import { buildPublishArticleIx, deriveArticlePda } from '@/lib/solana/auroraProgram';
 import { useToast } from '@/components/ui/toast';
 import { getAuthHeader } from '@/lib/auth/api';
@@ -10,9 +11,9 @@ import { aesGcmEncrypt, bytesToBase64 as bytesToBase64Local } from '@/lib/crypto
 import { getApiBaseUrl } from '@/lib/api/baseUrl';
 
 function formatUnknownError(err: any): string {
-  if (!err) return 'Erro desconhecido';
+  if (!err) return 'Unknown error';
   if (typeof err === 'string') return err;
-  if (err instanceof Error) return err.message || 'Erro';
+  if (err instanceof Error) return err.message || 'Error';
   if (typeof err?.message === 'string') return err.message;
   if (typeof err?.error?.message === 'string') return err.error.message;
   if (typeof err?.cause?.message === 'string') return err.cause.message;
@@ -71,6 +72,7 @@ export function PublishModal({
   title: initialTitle = '',
   onSuccess,
 }: PublishModalProps) {
+  const t = useTranslations('publish');
   const { connection } = useConnection();
   const { publicKey, wallet, signMessage, sendTransaction } = useWallet();
   const { toast } = useToast();
@@ -92,27 +94,27 @@ export function PublishModal({
 
   const handlePublish = async () => {
     if (!publicKey) {
-      toast({ type: 'error', title: 'Wallet', message: 'Conecte sua wallet para publicar.' });
+      toast({ type: 'error', title: 'Wallet', message: t('errors.walletRequired') });
       return;
     }
     if (!wallet || !sendTransaction) {
-      toast({ type: 'error', title: 'Wallet', message: 'Sua wallet não suporta envio de transações.' });
+      toast({ type: 'error', title: 'Wallet', message: t('errors.walletNoTransaction') });
       return;
     }
     if (!signMessage) {
-      toast({ type: 'error', title: 'Wallet', message: 'Sua wallet não suporta assinatura de mensagem (signMessage).' });
+      toast({ type: 'error', title: 'Wallet', message: t('errors.walletNoSignMessage') });
       return;
     }
     if (!title.trim()) {
-      toast({ type: 'error', title: 'Validação', message: 'Informe um título para o artigo.' });
+      toast({ type: 'error', title: 'Validation', message: t('errors.titleRequired') });
       return;
     }
     if (!content.trim()) {
-      toast({ type: 'error', title: 'Validação', message: 'Adicione conteúdo antes de publicar.' });
+      toast({ type: 'error', title: 'Validation', message: t('errors.contentRequired') });
       return;
     }
     if (!declaredIntuition.trim()) {
-      toast({ type: 'error', title: 'Validação', message: 'Preencha a Declared Intuition antes de publicar.' });
+      toast({ type: 'error', title: 'Validation', message: t('errors.intuitionRequired') });
       return;
     }
 
@@ -237,11 +239,11 @@ export function PublishModal({
         if (balance < estimatedNeed) {
           toast({
             type: 'error',
-            title: 'Saldo insuficiente (devnet)',
-            message:
-              `Sua wallet tem ${(balance / 1e9).toFixed(4)} SOL.\n` +
-              `Estimativa mínima: ${(estimatedNeed / 1e9).toFixed(4)} SOL (rent + fee).\n\n` +
-              `Faça airdrop e tente novamente.`,
+            title: t('errors.insufficientBalance'),
+            message: t('errors.balanceMessage', {
+              balance: (balance / 1e9).toFixed(4),
+              estimated: (estimatedNeed / 1e9).toFixed(4),
+            }),
             durationMs: 12000,
           });
           setIsPublishing(false);
@@ -258,10 +260,11 @@ export function PublishModal({
           console.error('Publish simulation failed', sim.value.err, sim.value.logs);
           toast({
             type: 'error',
-            title: 'Simulação falhou',
-            message:
-              `Erro: ${JSON.stringify(sim.value.err)}\n\n` +
-              `Logs:\n${(sim.value.logs || []).slice(-30).join('\n')}`,
+            title: t('errors.simulationFailed'),
+            message: t('errors.simulationError', {
+              error: JSON.stringify(sim.value.err),
+              logs: (sim.value.logs || []).slice(-30).join('\n'),
+            }),
             durationMs: 12000,
           });
           setIsPublishing(false);
@@ -294,7 +297,7 @@ export function PublishModal({
       const explorerUrl = `https://explorer.solana.com/tx/${sig}?cluster=devnet`;
       setSuccessInfo({ arweaveUrl: arweaveUrl || `https://arweave.net/${arweaveId}`, explorerUrl });
       setStep('success');
-      toast({ type: 'success', title: 'Publicado', message: 'Artigo publicado com sucesso.' });
+      toast({ type: 'success', title: t('success'), message: t('success') });
 
       // Clear localStorage
       localStorage.removeItem('aurora-editor-content');
@@ -316,7 +319,7 @@ export function PublishModal({
       console.error('Publish failed', error);
       toast({
         type: 'error',
-        title: 'Falha ao publicar',
+        title: t('errors.publishFailed'),
         message: formatUnknownError(error),
         durationMs: 8000,
       });
@@ -330,7 +333,7 @@ export function PublishModal({
       <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="border-b border-gray-200 px-6 py-4">
-          <h2 className="text-xl font-semibold text-gray-900">Publish Article</h2>
+          <h2 className="text-xl font-semibold text-gray-900">{t('title')}</h2>
         </div>
 
         {/* Content */}
@@ -340,13 +343,13 @@ export function PublishModal({
               {/* Title */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Title *
+                  {t('titleLabel')}
                 </label>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Enter article title"
+                  placeholder={t('titlePlaceholder')}
                   className="w-full px-4 py-2 rounded-md focus:outline-none"
                   maxLength={128}
                 />
@@ -355,24 +358,24 @@ export function PublishModal({
               {/* AI Scope */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  AI Scope
+                  {t('aiScope')}
                 </label>
                 <textarea
                   value={aiScope}
                   onChange={(e) => setAiScope(e.target.value)}
-                  placeholder="Describe how AI was used (e.g., 'Grammar checking only')"
+                  placeholder={t('aiScopePlaceholder')}
                   className="w-full px-4 py-2 rounded-md focus:outline-none min-h-[80px]"
                   maxLength={256}
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  This will be registered on-chain for transparency.
+                  {t('aiScopeNote')}
                 </p>
               </div>
 
               {/* Visibility */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Visibility
+                  {t('visibility')}
                 </label>
                 <div className="space-y-2">
                   <label className="flex items-center">
@@ -382,7 +385,7 @@ export function PublishModal({
                       onChange={() => setIsPublic(true)}
                       className="mr-2"
                     />
-                    <span className="text-sm text-gray-700">Public (appears in journal)</span>
+                    <span className="text-sm text-gray-700">{t('public')}</span>
                   </label>
                   <label className="flex items-center">
                     <input
@@ -391,7 +394,7 @@ export function PublishModal({
                       onChange={() => setIsPublic(false)}
                       className="mr-2"
                     />
-                    <span className="text-sm text-gray-700">Private (accessible via link)</span>
+                    <span className="text-sm text-gray-700">{t('private')}</span>
                   </label>
                 </div>
               </div>
@@ -401,14 +404,14 @@ export function PublishModal({
           {step === 'uploading' && (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
-              <p className="text-gray-700">Uploading to Arweave...</p>
+              <p className="text-gray-700">{t('uploading')}</p>
             </div>
           )}
 
           {step === 'publishing' && (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
-              <p className="text-gray-700">Publishing to Solana blockchain...</p>
+              <p className="text-gray-700">{t('publishing')}</p>
             </div>
           )}
 
@@ -429,22 +432,22 @@ export function PublishModal({
                   />
                 </svg>
               </div>
-              <p className="text-gray-700 font-medium">Article published successfully!</p>
+              <p className="text-gray-700 font-medium">{t('success')}</p>
               {successInfo?.explorerUrl ? (
                 <div className="mt-3 text-sm">
                   <a className="text-blue-600 hover:underline" href={successInfo.explorerUrl} target="_blank" rel="noreferrer">
-                    Ver no Solana Explorer
+                    {t('viewExplorer')}
                   </a>
                 </div>
               ) : null}
               {successInfo?.arweaveUrl ? (
                 <div className="mt-1 text-sm">
                   <a className="text-blue-600 hover:underline" href={successInfo.arweaveUrl} target="_blank" rel="noreferrer">
-                    Ver no Arweave
+                    {t('viewArweave')}
                   </a>
                 </div>
               ) : null}
-              <p className="text-sm text-gray-500 mt-2">Redirecting...</p>
+              <p className="text-sm text-gray-500 mt-2">{t('redirecting')}</p>
             </div>
           )}
         </div>
@@ -456,14 +459,14 @@ export function PublishModal({
               onClick={onClose}
               className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-md"
             >
-              Cancel
+              {t('cancel')}
             </button>
             <button
               onClick={handlePublish}
               disabled={!title.trim() || isPublishing}
               className="px-6 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Publish
+              {t('publishButton')}
             </button>
           </div>
         )}

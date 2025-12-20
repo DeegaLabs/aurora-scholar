@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { aiAssistantAnalyze } from '@/lib/api/aiAssistant';
 
 interface SuggestStructureModalProps {
@@ -11,6 +12,7 @@ interface SuggestStructureModalProps {
 }
 
 export function SuggestStructureModal({ isOpen, onClose, content, sources }: SuggestStructureModalProps) {
+  const t = useTranslations('editor.studio.suggestStructure');
   const [isLoading, setIsLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -20,7 +22,7 @@ export function SuggestStructureModal({ isOpen, onClose, content, sources }: Sug
 
     setError(null);
     if (!content.trim()) {
-      setSuggestions(['Comece a escrever para receber sugestões de estrutura.']);
+      setSuggestions([t('emptyContent')]);
       setIsLoading(false);
       return;
     }
@@ -32,9 +34,9 @@ export function SuggestStructureModal({ isOpen, onClose, content, sources }: Sug
       try {
         const data = await aiAssistantAnalyze({ text: content, sources });
         const s = (data.suggestions || []).map((x) => x.text).filter(Boolean);
-        if (!cancelled) setSuggestions(s.length ? s : ['Nenhuma sugestão encontrada.']);
+        if (!cancelled) setSuggestions(s.length ? s : [t('noSuggestions')]);
       } catch (e: any) {
-        if (!cancelled) setError(e?.message || 'Falha ao analisar estrutura.');
+        if (!cancelled) setError(e?.message || t('error'));
       } finally {
         if (!cancelled) setIsLoading(false);
       }
@@ -43,7 +45,7 @@ export function SuggestStructureModal({ isOpen, onClose, content, sources }: Sug
     return () => {
       cancelled = true;
     };
-  }, [isOpen, content]);
+  }, [isOpen, content, t]);
 
   if (!isOpen) return null;
 
@@ -52,7 +54,7 @@ export function SuggestStructureModal({ isOpen, onClose, content, sources }: Sug
       <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900">Sugerir Estrutura</h3>
+          <h3 className="text-lg font-semibold text-gray-900">{t('modalTitle')}</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -65,7 +67,7 @@ export function SuggestStructureModal({ isOpen, onClose, content, sources }: Sug
           {isLoading ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
-              <p className="text-sm text-gray-600">Analisando estrutura...</p>
+              <p className="text-sm text-gray-600">{t('analyzing')}</p>
             </div>
           ) : error ? (
             <div className="border border-red-200 bg-red-50 text-red-800 rounded-lg px-4 py-3 text-sm">
@@ -88,7 +90,7 @@ export function SuggestStructureModal({ isOpen, onClose, content, sources }: Sug
             onClick={onClose}
             className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-md"
           >
-            Fechar
+            {t('close')}
           </button>
         </div>
       </div>

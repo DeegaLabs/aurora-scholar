@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 interface PreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -15,6 +17,7 @@ export function PreviewModal({
   content,
   declaredIntuition,
 }: PreviewModalProps) {
+  const t = useTranslations('article.preview');
   if (!isOpen) return null;
 
   return (
@@ -22,7 +25,7 @@ export function PreviewModal({
       <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-gray-900">Article Preview</h2>
+          <h2 className="text-xl font-semibold text-gray-900">{t('title')}</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600"
@@ -44,7 +47,7 @@ export function PreviewModal({
           {declaredIntuition && (
             <div className="mb-8 p-4 bg-gray-50 border-l-4 border-gray-900 rounded">
               <h3 className="text-sm font-semibold text-gray-900 mb-2">
-                Declared Intuition (Layer 1)
+                {t('declaredIntuition')}
               </h3>
               <p className="text-sm text-gray-700">{declaredIntuition}</p>
             </div>
@@ -53,7 +56,7 @@ export function PreviewModal({
           {/* Article Content */}
           <div
             className="prose prose-lg max-w-none"
-            dangerouslySetInnerHTML={{ __html: content || '<p class="text-gray-400">No content yet...</p>' }}
+            dangerouslySetInnerHTML={{ __html: content || `<p class="text-gray-400">${t('noContent')}</p>` }}
           />
         </div>
 
@@ -63,7 +66,7 @@ export function PreviewModal({
             onClick={onClose}
             className="px-6 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-800"
           >
-            Close
+            {t('close')}
           </button>
         </div>
       </div>

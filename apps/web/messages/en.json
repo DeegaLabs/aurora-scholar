@@ -156,18 +156,24 @@
       },
       "suggestStructure": {
         "title": "Suggest Structure",
+        "modalTitle": "Suggest Structure",
+        "analyzing": "Analyzing structure...",
         "emptyContent": "Start writing to receive structure suggestions.",
         "noSuggestions": "No suggestions found.",
+        "close": "Close",
         "error": "Failed to analyze structure."
       },
-      "checkCoherence": {
-        "title": "Check Coherence",
-        "noIntuition": "No declared intention found. Fill in the \"Ethical Layers\" panel.",
-        "noContent": "No content found. Start writing to check coherence.",
-        "resultPrefix": "Coherence check:",
-        "noAlerts": "No alerts found. The content is aligned with your declared intention.",
-        "error": "Failed to check coherence."
-      },
+    "checkCoherence": {
+      "title": "Check Coherence",
+      "modalTitle": "Coherence Check",
+      "checking": "Checking coherence...",
+      "noIntuition": "No declared intention found. Fill in the \"Ethical Layers\" panel.",
+      "noContent": "No content found. Start writing to check coherence.",
+      "coherent": "Coherent",
+      "attentionNeeded": "Attention needed",
+      "close": "Close",
+      "error": "Failed to check coherence."
+    },
       "ethicalLayers": {
         "title": "Ethical Layers",
         "layer1": {
@@ -240,7 +246,21 @@
       "suggestions": "Suggestions",
       "noSuggestions": "No suggestions yet",
       "askGuidance": "Ask AI Guidance",
-      "chatPlaceholder": "Ask a question about your article..."
+      "chatPlaceholder": "Ask a question about your article...",
+      "chatModal": {
+        "title": "AI Chat",
+        "welcome": "Hello! I'm your ethical AI assistant. I can help with structure, references, grammar, and coherence. I never write content for you — I only guide and explain. How can I help?",
+        "inputPlaceholder": "Type your question...",
+        "send": "Send",
+        "error": "Failed to consult AI."
+      },
+      "helpWrite": {
+        "title": "Help me write",
+        "descriptionPlaceholder": "Describe what you want to write...",
+        "create": "Create",
+        "analyzing": "Analyzing...",
+        "error": "Failed to consult AI."
+      }
     },
     "errors": {
       "walletRequired": "Please connect your wallet to continue",
@@ -251,23 +271,35 @@
   },
   "publish": {
     "title": "Publish Article",
-    "type": "Publication Type",
-    "public": "Public",
-    "publicDesc": "Visible in On-Chain Journal",
-    "private": "Private",
-    "privateDesc": "Accessible via link only",
-    "expiration": "Link Expiration",
-    "24h": "24 hours",
-    "7d": "7 days",
-    "30d": "30 days",
-    "unlimited": "Unlimited",
-    "processing": "Processing...",
-    "uploadingArweave": "Uploading to Arweave...",
-    "registeringSolana": "Registering on Solana...",
+    "titleLabel": "Title *",
+    "titlePlaceholder": "Enter article title",
+    "aiScope": "AI Scope",
+    "aiScopePlaceholder": "Describe how AI was used (e.g., 'Grammar checking only')",
+    "aiScopeNote": "This will be registered on-chain for transparency.",
+    "visibility": "Visibility",
+    "public": "Public (appears in journal)",
+    "private": "Private (accessible via link)",
+    "cancel": "Cancel",
+    "publishButton": "Publish",
+    "uploading": "Uploading to Arweave...",
+    "publishing": "Publishing to Solana blockchain...",
     "success": "Article published successfully!",
     "viewExplorer": "View on Solana Explorer",
     "viewArweave": "View on Arweave",
-    "copyLink": "Copy Link"
+    "redirecting": "Redirecting...",
+    "errors": {
+      "walletRequired": "Connect your wallet to publish.",
+      "walletNoTransaction": "Your wallet does not support sending transactions.",
+      "walletNoSignMessage": "Your wallet does not support message signing (signMessage).",
+      "titleRequired": "Please provide a title for the article.",
+      "contentRequired": "Add content before publishing.",
+      "intuitionRequired": "Fill in the Declared Intuition before publishing.",
+      "publishFailed": "Failed to publish",
+      "insufficientBalance": "Insufficient balance (devnet)",
+      "balanceMessage": "Your wallet has {balance} SOL.\nMinimum estimate: {estimated} SOL (rent + fee).\n\nPlease request an airdrop and try again.",
+      "simulationFailed": "Simulation failed",
+      "simulationError": "Error: {error}\n\nLogs:\n{logs}"
+    }
   },
   "journal": {
     "title": "On-Chain Journal",
@@ -307,7 +339,13 @@
     "verifyAuthenticity": "Verify Authenticity",
     "authentic": "This article is authentic",
     "tampered": "Warning: Content may have been altered",
-    "backToJournal": "Back to Journal"
+    "backToJournal": "Back to Journal",
+    "preview": {
+      "title": "Article Preview",
+      "declaredIntuition": "Declared Intuition (Layer 1)",
+      "noContent": "No content yet...",
+      "close": "Close"
+    }
   },
   "wallet": {
     "connect": "Connect Wallet",
