@@ -235,64 +235,88 @@ function detectGhostwriting(answer: string): GhostwritingGate {
 }
 
 function safeJsonParse(text: string) {
-  try {
-    return JSON.parse(text);
-  } catch {
-    // Try to extract JSON from markdown code blocks
-    const jsonBlockMatch = text.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/);
-    if (jsonBlockMatch) {
-      try {
-        return JSON.parse(jsonBlockMatch[1]);
-      } catch {
-        // Continue to next attempt
-      }
-    }
-    
-    // Try to extract a JSON object if the model wrapped it with extra text
-    const start = text.indexOf('{');
-    const end = text.lastIndexOf('}');
-    if (start >= 0 && end > start) {
-      const jsonCandidate = text.slice(start, end + 1);
-      try {
-        return JSON.parse(jsonCandidate);
-      } catch {
-        // Try to fix common JSON issues
-        // Remove trailing commas in arrays/objects
-        let fixed = jsonCandidate.replace(/,(\s*[}\]])/g, '$1');
-        try {
-          return JSON.parse(fixed);
-        } catch {
-          // Last resort: try to extract just the suggestions array
-          const suggestionsMatch = jsonCandidate.match(/"suggestions"\s*:\s*\[([\s\S]*?)\]/);
-          if (suggestionsMatch) {
-            try {
-              const suggestionsText = '[' + suggestionsMatch[1] + ']';
-              const suggestions = JSON.parse(suggestionsText);
-              return {
-                suggestions: suggestions || [],
-                corrections: [],
-                references: [],
-                warnings: [],
-                authenticityAlerts: [],
-              };
-            } catch {
-              // Fall through to error
-            }
-          }
-        }
-      }
-    }
-    
-    // If all parsing attempts fail, return a safe default structure
-    console.error('Failed to parse JSON from AI response:', text.substring(0, 500));
+  if (!text || typeof text !== 'string') {
+    console.error('safeJsonParse: Invalid input', typeof text);
     return {
       suggestions: [],
       corrections: [],
       references: [],
-      warnings: ['Failed to parse AI response. Please try again.'],
+      warnings: ['Invalid response format.'],
       authenticityAlerts: [],
     };
   }
+
+  const trimmed = text.trim();
+  
+  // Direct JSON parse
+  try {
+    return JSON.parse(trimmed);
+  } catch (e) {
+    // Continue to fallback strategies
+  }
+
+  // Try to extract JSON from markdown code blocks
+  const jsonBlockMatch = trimmed.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/);
+  if (jsonBlockMatch) {
+    try {
+      return JSON.parse(jsonBlockMatch[1]);
+    } catch {
+      // Continue to next attempt
+    }
+  }
+  
+  // Try to extract a JSON object if the model wrapped it with extra text
+  const start = trimmed.indexOf('{');
+  const end = trimmed.lastIndexOf('}');
+  if (start >= 0 && end > start) {
+    const jsonCandidate = trimmed.slice(start, end + 1);
+    
+    // Try direct parse
+    try {
+      return JSON.parse(jsonCandidate);
+    } catch {
+      // Try to fix common JSON issues
+      // Remove trailing commas in arrays/objects
+      let fixed = jsonCandidate.replace(/,(\s*[}\]])/g, '$1');
+      // Fix unclosed strings (basic attempt)
+      fixed = fixed.replace(/("|')([^"']*?)$/gm, '$1$2"');
+      try {
+        return JSON.parse(fixed);
+      } catch {
+        // Try to extract just the suggestions array as last resort
+        const suggestionsMatch = jsonCandidate.match(/"suggestions"\s*:\s*\[([\s\S]*?)\]/);
+        if (suggestionsMatch) {
+          try {
+            // Try to parse just the array
+            let arrayText = suggestionsMatch[1].trim();
+            // Ensure it's a valid array
+            if (!arrayText.startsWith('[')) arrayText = '[' + arrayText;
+            if (!arrayText.endsWith(']')) arrayText = arrayText + ']';
+            const suggestions = JSON.parse(arrayText);
+            return {
+              suggestions: Array.isArray(suggestions) ? suggestions : [],
+              corrections: [],
+              references: [],
+              warnings: [],
+              authenticityAlerts: [],
+            };
+          } catch {
+            // Fall through
+          }
+        }
+      }
+    }
+  }
+  
+  // If all parsing attempts fail, return a safe default structure
+  console.error('Failed to parse JSON from AI response. First 1000 chars:', trimmed.substring(0, 1000));
+  return {
+    suggestions: [],
+    corrections: [],
+    references: [],
+    warnings: ['Failed to parse AI response. The response may be incomplete or malformed. Please try again.'],
+    authenticityAlerts: [],
+  };
 }
 
 export const analyzeText = asyncHandler(async (req: Request, res: Response) => {
@@ -370,20 +394,52 @@ FORMATO DE SAÍDA:
 - TODAS as respostas devem estar em PORTUGUÊS BRASILEIRO.`
     : ETHICAL_SYSTEM_PROMPT;
 
-  const raw = await geminiGenerateText({
-    system: systemPrompt,
-    user: userPrompt,
-    temperature: 0.2,
-    maxOutputTokens: 2048,
-    responseMimeType: 'application/json',
-  });
+  let raw: string;
+  try {
+    raw = await geminiGenerateText({
+      system: systemPrompt,
+      user: userPrompt,
+      temperature: 0.2,
+      maxOutputTokens: 4096, // Increased to handle longer responses
+      responseMimeType: 'application/json',
+    });
+  } catch (error: any) {
+    // Handle MAXTOKEN or other API errors
+    const errorMsg = error?.message || String(error);
+    if (errorMsg.includes('MAX_TOKENS') || errorMsg.includes('token')) {
+      throw createError('Response too long. Please try with shorter text or contact support.', 400);
+    }
+    throw error;
+  }
 
   const parsed = safeJsonParse(raw);
-  const data = AnalyzeResponseSchema.parse(parsed);
+  let data;
+  try {
+    data = AnalyzeResponseSchema.parse(parsed);
+  } catch (parseError: any) {
+    // If schema validation fails, log and return safe structure
+    console.error('Schema validation failed:', parseError.message);
+    console.error('Parsed data:', JSON.stringify(parsed).substring(0, 1000));
+    // Return parsed data with defaults for missing fields
+    data = {
+      suggestions: Array.isArray(parsed?.suggestions) 
+        ? parsed.suggestions.map((s: any) => ({
+            id: String(s?.id || Math.random().toString(36)),
+            type: s?.type || 'clarity',
+            text: String(s?.text || ''),
+            priority: s?.priority || 'medium',
+          }))
+        : [],
+      corrections: Array.isArray(parsed?.corrections) ? parsed.corrections : [],
+      references: Array.isArray(parsed?.references) ? parsed.references : [],
+      warnings: Array.isArray(parsed?.warnings) ? parsed.warnings : ['Response format may be incomplete.'],
+      authenticityAlerts: Array.isArray(parsed?.authenticityAlerts) ? parsed.authenticityAlerts : [],
+    };
+  }
   // Hardening: prevent extremely long suggestion texts.
   const safeData = {
     ...data,
-    suggestions: (data.suggestions || []).map((s) => ({
+    suggestions: (data.suggestions || []).map((s: any) => ({
       ...s,
       text: truncate(String(s.text), 500),
     })),

@@ -75,10 +75,21 @@ export async function geminiGenerateText(params: {
 
   if (!res.ok) {
     const msg = json?.error?.message || `Gemini API error (HTTP ${res.status})`;
+    // Check for MAX_TOKENS error specifically
+    if (msg.includes('MAX_TOKENS') || msg.includes('token') || msg.includes('length')) {
+      throw createError('Response exceeds maximum length. Please try with shorter input or reduce maxOutputTokens.', 400);
+    }
     throw createError(msg, 502);
   }
 
   const candidate0 = json?.candidates?.[0];
+  const finishReason = candidate0?.finishReason;
+  
+  // Check if response was truncated due to MAX_TOKENS
+  if (finishReason === 'MAX_TOKENS' || finishReason === 'OTHER') {
+    console.warn('[gemini] Response may be truncated:', finishReason);
+  }
+
   const text = candidate0?.content?.parts?.map((p) => p.text || '').join('') || '';
 
   if (!text.trim()) {
@@ -90,13 +101,13 @@ export async function geminiGenerateText(params: {
           model,
           promptFeedback: json?.promptFeedback,
           candidate0: json?.candidates?.[0],
+          finishReason,
         },
         null,
         2
       ).slice(0, 4000)
     );
     const blockReason = json?.promptFeedback?.blockReason;
-    const finishReason = candidate0?.finishReason;
     const msgParts = [
       'Gemini returned no text',
       blockReason ? `blockReason=${blockReason}` : null,
