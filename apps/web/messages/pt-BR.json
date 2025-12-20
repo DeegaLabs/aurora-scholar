@@ -274,6 +274,7 @@
     "titleLabel": "Título *",
     "titlePlaceholder": "Digite o título do artigo",
     "aiScope": "Escopo da IA",
+    "aiScopeDefault": "Apenas verificação gramatical e sugestões de estilo",
     "aiScopePlaceholder": "Descreva como a IA foi usada (ex: 'Apenas verificação gramatical')",
     "aiScopeNote": "Isso será registrado on-chain para transparência.",
     "visibility": "Visibilidade",

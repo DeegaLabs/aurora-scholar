@@ -78,17 +78,25 @@ export function PublishModal({
   const { toast } = useToast();
   const [title, setTitle] = useState('');
   const [isPublic, setIsPublic] = useState(true);
-  const [aiScope, setAiScope] = useState('Grammar checking and style suggestions only');
+  const [aiScope, setAiScope] = useState('');
   const [isPublishing, setIsPublishing] = useState(false);
   const [step, setStep] = useState<'form' | 'uploading' | 'publishing' | 'success'>('form');
   const [successInfo, setSuccessInfo] = useState<{ arweaveUrl: string; explorerUrl: string } | null>(null);
 
-  // Update title when modal opens or initialTitle changes
+  // Update title and aiScope when modal opens or initialTitle changes
   useEffect(() => {
-    if (isOpen && initialTitle) {
-      setTitle(initialTitle);
+    if (isOpen) {
+      if (initialTitle) {
+        setTitle(initialTitle);
+      }
+      // Set default AI scope based on current language
+      setAiScope(t('aiScopeDefault'));
+    } else {
+      // Reset when modal closes
+      setTitle('');
+      setAiScope('');
     }
-  }, [isOpen, initialTitle]);
+  }, [isOpen, initialTitle, t]);
 
   if (!isOpen) return null;
 

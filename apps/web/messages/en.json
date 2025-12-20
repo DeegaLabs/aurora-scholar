@@ -274,6 +274,7 @@
     "titleLabel": "Title *",
     "titlePlaceholder": "Enter article title",
     "aiScope": "AI Scope",
+    "aiScopeDefault": "Grammar checking and style suggestions only",
     "aiScopePlaceholder": "Describe how AI was used (e.g., 'Grammar checking only')",
     "aiScopeNote": "This will be registered on-chain for transparency.",
     "visibility": "Visibility",
