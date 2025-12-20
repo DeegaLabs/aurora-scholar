@@ -5,6 +5,38 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Solana](https://img.shields.io/badge/Built%20on-Solana-14F213)](https://solana.com)
 
+## 🎥 Demo Video
+
+Watch the full demo and walkthrough of Aurora Scholar:
+
+<div align="center">
+
+[![Aurora Scholar Demo](https://img.youtube.com/vi/YOUR_VIDEO_ID/maxresdefault.jpg)](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)
+
+*Click the image above or [watch on YouTube](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)*
+
+</div>
+
+> **Note:** Replace `YOUR_VIDEO_ID` with your actual YouTube video ID in the README.md file.
+
+## 🔗 Smart Contract (Devnet)
+
+**Program ID:** `HoRNS4q7T69m6YHYx8Qsg4kAffwNNu8R25XpReZnvWAe`
+
+- **Solana Explorer (Devnet):** [View on Explorer](https://explorer.solana.com/address/HoRNS4q7T69m6YHYx8Qsg4kAffwNNu8R25XpReZnvWAe?cluster=devnet)
+- **Network:** Solana Devnet
+- **Status:** ✅ Deployed and Active
+- **Cluster:** Devnet
+
+### Contract Details
+
+The Aurora Scholar smart contract is deployed on Solana Devnet and handles:
+- Article registration with content and intuition hashes
+- Timestamp recording for immutable proof of authorship
+- AI scope declaration (transparency about AI assistance level)
+- Public/private article visibility control
+- On-chain verification of article authenticity
+
 ## 🎯 Vision
 
 **Assisted Academic Writing Monitoring** - A platform where users write their own academic texts with ethical AI guidance (never substitution), ensuring authenticity, transparency, and immutable authorship through blockchain. The AI acts as a **monitor** that guides, explains, and validates - never writes for the user.
@@ -144,8 +176,10 @@ Contributions are welcome! Please open an issue or pull request.
 ## 🔗 Links
 
 - [Complete Documentation](./docs/README.md)
+- [Smart Contract (Devnet)](https://explorer.solana.com/address/HoRNS4q7T69m6YHYx8Qsg4kAffwNNu8R25XpReZnvWAe?cluster=devnet)
 - [Solana Explorer](https://explorer.solana.com)
 - [Arweave](https://www.arweave.org)
+- [Demo Video](https://www.youtube.com/watch?v=YOUR_VIDEO_ID) (YouTube)
 
 ---
 
