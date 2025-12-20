@@ -32,6 +32,10 @@ export function requireAuth(req: Request, _res: Response, next: NextFunction) {
   if (req.method === 'GET' && req.path === '/articles') {
     return next();
   }
+  // Public article content from Arweave (no wallet required for public articles).
+  if (req.method === 'GET' && /^\/articles\/[^/]+\/content$/.test(req.path)) {
+    return next();
+  }
   // Public verification for journal cards (no wallet required).
   if (req.method === 'POST' && /^\/articles\/[^/]+\/verify$/.test(req.path)) {
     return next();
