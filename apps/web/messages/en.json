@@ -171,6 +171,8 @@
       "noContent": "No content found. Start writing to check coherence.",
       "coherent": "Coherent",
       "attentionNeeded": "Attention needed",
+      "resultPrefix": "Coherence Analysis:",
+      "noAlerts": "No coherence issues found. Your content appears to align well with your declared intuition.",
       "close": "Close",
       "error": "Failed to check coherence."
     },

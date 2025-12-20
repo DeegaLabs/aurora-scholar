@@ -171,6 +171,8 @@
         "noContent": "Nenhum conteúdo encontrado. Comece a escrever para verificar coerência.",
         "coherent": "Coerente",
         "attentionNeeded": "Atenção necessária",
+        "resultPrefix": "Análise de Coerência:",
+        "noAlerts": "Nenhum problema de coerência encontrado. Seu conteúdo parece estar bem alinhado com sua intuição declarada.",
         "close": "Fechar",
         "error": "Falha ao verificar coerência."
       },
