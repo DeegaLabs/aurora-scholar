@@ -14,10 +14,17 @@
 - **Academic Editor** with Ethical AI Assistant (always-active agent)
 - **Three-Layer Ethical System** (Declared Intuition, Linguistic Mediation, Coherence Monitoring)
 - **Declared Sources** - User uploads PDFs, links, etc. - AI uses only these as reference
+- **Internationalization (i18n)** - Full support for Portuguese (PT-BR) and English (EN)
+- **AI Features**:
+  - Structure suggestions based on content
+  - Coherence checking against declared intuition
+  - Interactive chat for specific questions
+  - Language-aware responses (respects user's selected language)
+- **Dashboard** - Manage your articles (public and private) with access control
 - **On-Chain Publishing** on Solana (immutable hash + timestamp)
 - **Permanent Storage** on Arweave
-- **Access Control** (Public/Private with expiration)
-- **On-Chain Journal** (public article listing)
+- **Access Control** (Public/Private with expiration and wallet-based grants)
+- **On-Chain Journal** (public article listing with search and filters)
 - **Evaluation Board System** (Phase 2)
 
 ## 🌐 Aurora Scholar Ecosystem
@@ -73,8 +80,11 @@ pnpm install
 # 1. Create apps/api/.env with required variables (see docs/ENV_SETUP.md)
 # 2. Create apps/web/.env.local (optional for dev, required for prod)
 
-# Start the database
-pnpm db:setup
+# Start the database (using Docker Compose)
+docker compose up -d postgres
+
+# Run database migrations
+cd apps/api && npx prisma migrate dev
 
 # Start development (runs both web and api)
 pnpm dev
@@ -99,12 +109,13 @@ aurora-scholar/
 
 ## 🛠️ Technical Stack
 
-- **Frontend:** Next.js 16.0.10, React, Tailwind CSS, TipTap
+- **Frontend:** Next.js 16.1.0, React, Tailwind CSS, TipTap, next-intl (i18n)
 - **Backend:** Express, TypeScript, Prisma
 - **Blockchain:** Solana (Anchor framework)
 - **Storage:** Arweave via Irys
 - **Database:** PostgreSQL
-- **AI:** OpenAI/Anthropic API
+- **AI:** Google Gemini API (with language-aware responses)
+- **Authentication:** JWT with Solana wallet signature
 
 ## 📚 Documentation
 
@@ -138,4 +149,12 @@ Contributions are welcome! Please open an issue or pull request.
 
 ---
 
-**Status:** In development for hackathon
+**Status:** MVP completed - Hackathon submission ready
+
+**Recent Updates:**
+- ✅ Full internationalization (PT-BR / EN)
+- ✅ Dashboard with access control management
+- ✅ Enhanced Journal with search and filters
+- ✅ AI structure suggestions and coherence checking
+- ✅ Language-aware AI responses
+- ✅ Consistent navigation menu across all pages

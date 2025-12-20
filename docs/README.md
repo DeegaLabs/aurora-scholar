@@ -21,6 +21,7 @@ Democratize scientific publishing through blockchain, ensuring that academic tex
 
 **Core Features:**
 - ✅ Academic editor with TipTap (Google Docs style)
+- ✅ **Internationalization (i18n)** - Full support for Portuguese (PT-BR) and English (EN)
 - ✅ **Three-Layer Ethical System**
   - Layer 1: Declared Intuition (user states initial idea)
   - Layer 2: Linguistic Mediation (AI guides, never writes)
@@ -31,24 +32,30 @@ Democratize scientific publishing through blockchain, ensuring that academic tex
   - Alerts about authenticity (detects too automated text)
   - Monitors coherence between intuition, sources, and text
   - Chat for specific questions
+  - Structure suggestions based on content
+  - Coherence checking against declared intuition
+  - Language-aware responses (respects user's selected language)
 - ✅ **Declared Sources**
   - User uploads PDFs, links, videos, audios
   - AI uses **only** these declared sources as reference
   - Vectorization and embedding for AI processing
   - Never generates content beyond declared sources
+- ✅ **Dashboard** - Manage articles (public and private) with access control
 - ✅ Wallet Connect (Phantom/Solflare)
 - ✅ On-chain publication (Arweave + Solana)
   - Hash of content + declared intuition + AI scope
-- ✅ Access control (Public/Private with expiration)
-- ✅ On-Chain Journal (public article listing)
+- ✅ Access control (Public/Private with expiration and wallet-based grants)
+- ✅ On-Chain Journal (public article listing with search and filters)
 
 **Technical Stack:**
-- Frontend: Next.js 16.0.10 + Tailwind CSS
+- Frontend: Next.js 16.1.0 + Tailwind CSS + next-intl (i18n)
 - Backend: Express + TypeScript
 - Database: PostgreSQL
 - Blockchain: Solana (Anchor)
 - Storage: Arweave via Irys
 - Editor: TipTap
+- AI: Google Gemini API (with language-aware responses)
+- Authentication: JWT with Solana wallet signature
 
 ### 2. ARCHITECTURE.md - Technical Decisions
 **Structure:** Monorepo with pnpm workspaces

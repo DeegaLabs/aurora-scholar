@@ -21,12 +21,14 @@ All in a simple, functional application that can be demonstrated in a 3-minute v
 
 | Layer | Technology | Version |
 |-------|------------|---------|
-| Frontend | Next.js + Tailwind CSS | 16.0.10 / 3.x |
+| Frontend | Next.js + Tailwind CSS + next-intl | 16.1.0 / 3.x |
 | Backend | Express + TypeScript | latest |
 | Database | PostgreSQL | latest |
 | Blockchain | Solana (Anchor) | latest |
 | Storage | Arweave via Irys | latest |
 | Editor | TipTap | latest |
+| AI | Google Gemini API | latest |
+| Authentication | JWT with Solana wallet | latest |
 
 ## MVP Features (Hackathon)
 
@@ -42,13 +44,18 @@ All in a simple, functional application that can be demonstrated in a 3-minute v
 - Sidebar for source management
 
 **Interface:**
+- **Internationalization** - Language switcher (PT-BR / EN) in settings
 - **Declared Intuition field** - User states their initial idea/declaration
 - Main text box (rich text)
-- Sidebar with AI suggestions (continuous updates)
+- **Studio Panel** with AI features:
+  - Structure suggestions
+  - Coherence checking
+  - Interactive chat for specific questions
 - AI agent status indicator (connected/disconnected)
 - "Ask AI Guidance" button (opens chat for specific questions)
 - "Register on Blockchain" button
 - "Preview Article" button
+- Consistent navigation menu (Editor, Dashboard, Journal, Settings)
 
 #### 2. Three-Layer Ethical System
 
@@ -111,10 +118,11 @@ Aurora Scholar implements a **Three-Layer Ethical System** that ensures authenti
 - Coherence validation between all three layers
 
 **Technologies:**
-- WebSocket for real-time communication
-- OpenAI API or other LLM via backend
+- REST API for AI communication
+- Google Gemini API via backend
 - Debounce to optimize requests
 - Vectorization for declared sources processing
+- Language-aware AI responses (respects user's selected language)
 
 **Customizable Agents (Phase 2 - Future):**
 - User will be able to configure specific agents:
@@ -196,15 +204,42 @@ Aurora Scholar implements a **Three-Layer Ethical System** that ensures authenti
 - Appears for everyone
 - Visible in public listing
 
-#### 7. On-Chain Journal (Display Page)
+#### 7. Dashboard
+
+**Features:**
+- List of user's articles (public and private)
+- Private article management:
+  - Generate private links
+  - Wallet-based access grants
+  - Expiration management (24h, 7d, 30d, unlimited)
+  - Grant/revoke access to specific wallets
+- Public articles listing
+- Search and filter functionality
+- Full internationalization support
+
+#### 8. On-Chain Journal (Display Page)
 
 **Features:**
 - List of public articles
 - Displays: title, author, date, on-chain hash
 - Link to view PDF/HTML on Arweave
 - Link to verify hash on Solana Explorer
-- Basic filters (date, author)
+- Advanced filters (date, author, sort by newest/oldest)
 - Search by title/author
+- Article verification functionality
+- Full internationalization support
+- Consistent navigation menu
+
+### Implemented Features (Beyond MVP)
+
+- ✅ **Internationalization (i18n)** - Full support for Portuguese (PT-BR) and English (EN)
+- ✅ **Dashboard** - Complete article management with access control
+- ✅ **Enhanced Journal** - Search, filters, and verification
+- ✅ **AI Structure Suggestions** - Based on content and declared intuition
+- ✅ **Coherence Checking** - Validates alignment with declared intuition
+- ✅ **Language-aware AI** - AI responses respect user's selected language
+- ✅ **Consistent Navigation** - Menu across all pages (Editor, Dashboard, Journal, Settings)
+- ✅ **JWT Authentication** - Automatic token refresh for long sessions
 
 ### Nice to Have (if time permits)
 
@@ -213,7 +248,6 @@ Aurora Scholar implements a **Three-Layer Ethical System** that ensures authenti
 - [ ] Formatted PDF export
 - [ ] QR Code sharing
 - [ ] Access notifications (when someone views private article)
-- [ ] Dashboard with published article statistics
 
 ## Economic Model
 

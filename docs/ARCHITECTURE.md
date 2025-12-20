@@ -39,7 +39,7 @@
 ```
 aurora-scholar/
 ├── apps/
-│   ├── web/                      # Next.js 16.0.10 frontend
+│   ├── web/                      # Next.js 16.1.0 frontend with i18n
 │   │   ├── src/
 │   │   │   ├── app/              # App Router
 │   │   │   │   ├── page.tsx      # Home/Landing
@@ -900,6 +900,58 @@ JWT_SECRET="your-jwt-secret"
 - Loading states during publication
 - Wallet error handling
 
+## Internationalization (i18n)
+
+### Implementation
+
+**Technology:** `next-intl` for Next.js App Router
+
+**Structure:**
+```
+apps/web/
+├── messages/
+│   ├── en.json          # English translations
+│   ├── pt-BR.json       # Portuguese (Brazil) translations
+│   └── pt.json          # Portuguese (maps to pt-BR)
+├── src/
+│   ├── i18n.ts          # i18n configuration
+│   └── middleware.ts    # Locale detection middleware
+```
+
+**Supported Languages:**
+- English (EN) - Default
+- Portuguese (PT-BR) - Full support
+
+**Features:**
+- Language switcher in settings (gear icon)
+- Language preference stored in cookies (`NEXT_LOCALE`)
+- All UI components use translations
+- AI responses respect selected language
+- Automatic locale detection from browser/cookie
+
+**Translation Namespaces:**
+- `common` - Common UI elements
+- `editor` - Editor interface and features
+- `dashboard` - Dashboard page
+- `journal` - Journal page
+- `publish` - Publication modals
+- `wallet` - Wallet connection
+- `errors` - Error messages
+
+**AI Language Awareness:**
+- Backend detects locale from `Accept-Language` header or request body
+- AI system prompts adjusted based on locale
+- Responses generated in user's selected language
+- Portuguese (PT) triggers Brazilian Portuguese responses
+
+**Usage Example:**
+```typescript
+import { useTranslations } from 'next-intl';
+
+const t = useTranslations('editor');
+return <button>{t('publish')}</button>;
+```
+
 ## Security
 
 ### Data Validation
@@ -924,8 +976,11 @@ JWT_SECRET="your-jwt-secret"
 
 1. ✅ MVP.md defined
 2. ✅ ARCHITECTURE.md defined
-3. ⏳ Initialize monorepo with pnpm
-4. ⏳ Setup Next.js + Tailwind
-5. ⏳ Setup Express + Prisma
-6. ⏳ Setup Anchor project
-7. ⏳ Implement MVP features
+3. ✅ Monorepo initialized with pnpm
+4. ✅ Next.js + Tailwind setup
+5. ✅ Express + Prisma setup
+6. ✅ Anchor project setup
+7. ✅ MVP features implemented
+8. ✅ Internationalization (i18n) implemented
+9. ✅ Dashboard and Journal pages completed
+10. ⏳ Phase 2 features (Evaluation Boards, Custom Agents)

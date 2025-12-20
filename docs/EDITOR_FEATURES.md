@@ -122,6 +122,10 @@ This document lists all possible features for the Aurora Scholar editor, organiz
 ### Word/Character Counter
 **Status:** ✅ Implemented (word counter)
 
+**Current Implementation:**
+- Word counter displayed in editor footer
+- Updates in real-time as user types
+
 **Improvements:**
 - Add character counter
 - Counter per section
@@ -367,22 +371,24 @@ This document lists all possible features for the Aurora Scholar editor, organiz
 ## 🤖 AI Assisted (Ethical)
 
 ### Structure Suggestions
-**Status:** ⏳ Pending
+**Status:** ✅ Implemented
 
 **Implementation:**
 - Analyze current content
-- Suggest next sections
-- Check for missing sections (based on template)
-- Guide academic structure
+- Suggest next sections based on declared intuition
+- AI provides structure recommendations
+- Language-aware responses (respects user's selected language)
+- Integrated in Studio panel
 
 ### Coherence Verification
-**Status:** ⏳ Pending
+**Status:** ✅ Implemented
 
 **Implementation:**
 - Compare content with Declared Intuition
-- Divergence alerts
+- Divergence alerts when content doesn't align
 - Alignment suggestions
-- Visual coherence score
+- Integrated in Studio panel
+- Language-aware responses
 
 ### Clarity Improvement Suggestions
 **Status:** ⏳ Pending
@@ -491,5 +497,28 @@ This document lists all possible features for the Aurora Scholar editor, organiz
 
 ---
 
-**Last updated:** 2025-01-XX
-**Overall status:** MVP implemented, advanced features in roadmap
+## 🌐 Internationalization (i18n)
+
+### Multi-language Support
+**Status:** ✅ Implemented
+
+**Implementation:**
+- Full support for Portuguese (PT-BR) and English (EN)
+- Language switcher in settings (gear icon)
+- All UI texts translated
+- AI responses respect selected language
+- Language preference stored in cookies
+- Uses `next-intl` for translations
+
+**Translated Sections:**
+- Editor interface
+- Dashboard
+- Journal
+- AI assistant messages
+- Error messages
+- Settings and modals
+
+---
+
+**Last updated:** 2024-12-20
+**Overall status:** MVP implemented with i18n, advanced features in roadmap
