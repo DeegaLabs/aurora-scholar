@@ -331,19 +331,33 @@ export const getArticleContent = asyncHandler(
     try {
       // Fetch article JSON from Arweave
       const ar = await storageService.getContent(id);
-      if (!ar || typeof ar !== 'object') throw createError('Invalid Arweave payload', 400);
+      
+      // Handle case where Arweave returns a string that might be JSON
+      let articleData: any = ar;
+      if (typeof ar === 'string') {
+        try {
+          articleData = JSON.parse(ar);
+        } catch {
+          // If it's not JSON, treat as plain text content
+          articleData = { content: ar };
+        }
+      }
+      
+      if (!articleData || typeof articleData !== 'object') {
+        throw createError('Invalid Arweave payload: expected JSON object', 400);
+      }
 
       // Expected payload shape from our uploader:
       // { content, title, declaredIntuition, timestamp, version, author, contentHash, intuitionHash, aiScope, isPublic, encrypted }
-      const content = String((ar as any).content || '');
-      const declaredIntuition = String((ar as any).declaredIntuition || '');
-      const title = String((ar as any).title || '');
-      const author = String((ar as any).author || '');
-      const aiScope = String((ar as any).aiScope || '');
-      const isPublic = Boolean((ar as any).isPublic ?? true);
-      const timestamp = (ar as any).timestamp ? Number((ar as any).timestamp) : null;
-      const contentHash = (ar as any).contentHash ? String((ar as any).contentHash) : null;
-      const intuitionHash = (ar as any).intuitionHash ? String((ar as any).intuitionHash) : null;
+      const content = String((articleData as any).content || '');
+      const declaredIntuition = String((articleData as any).declaredIntuition || '');
+      const title = String((articleData as any).title || '');
+      const author = String((articleData as any).author || '');
+      const aiScope = String((articleData as any).aiScope || '');
+      const isPublic = Boolean((articleData as any).isPublic ?? true);
+      const timestamp = (articleData as any).timestamp ? Number((articleData as any).timestamp) : null;
+      const contentHash = (articleData as any).contentHash ? String((articleData as any).contentHash) : null;
+      const intuitionHash = (articleData as any).intuitionHash ? String((articleData as any).intuitionHash) : null;
 
       res.json({
         success: true,
@@ -361,10 +375,14 @@ export const getArticleContent = asyncHandler(
         },
       });
     } catch (error: any) {
-      if (error.message?.includes('Failed to fetch content')) {
-        throw createError('Article not found on Arweave. It may still be processing.', 404);
+      // Better error handling
+      if (error.message?.includes('not found') || error.message?.includes('404') || error.message?.includes('processing')) {
+        throw createError(error.message || 'Article not found on Arweave. It may still be processing.', 404);
       }
-      throw error;
+      if (error.statusCode === 400) {
+        throw error; // Re-throw 400 errors as-is
+      }
+      throw createError(`Failed to load article content: ${error.message}`, 500);
     }
   }
 );

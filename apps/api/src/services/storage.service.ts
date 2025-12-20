@@ -201,12 +201,14 @@ export class StorageService {
             if (text.trim().startsWith('{') || text.trim().startsWith('[')) {
               try {
                 return JSON.parse(text);
-              } catch {
-                // If parsing fails, return as text
+              } catch (parseError) {
+                // If parsing fails but it looks like JSON, return as object with content
+                return { content: text, raw: text };
               }
             }
 
-            return text;
+            // If it's not JSON, return as object with content field
+            return { content: text };
           } catch (fetchError: any) {
             clearTimeout(timeoutId);
             throw fetchError;
