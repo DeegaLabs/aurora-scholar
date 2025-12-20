@@ -1,12 +1,40 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useWallet } from '@solana/wallet-adapter-react';
+import dynamic from 'next/dynamic';
 import Header from '@/components/Header';
 import { BrainIcon, EditIcon, CheckCircleIcon } from '@/components/icons';
 
+const WalletMultiButton = dynamic(
+  () => import('@solana/wallet-adapter-react-ui').then((m) => m.WalletMultiButton),
+  { ssr: false }
+);
+
 export default function Home() {
   const t = useTranslations('home');
+  const router = useRouter();
+  const { connected, publicKey } = useWallet();
+  const [showWalletModal, setShowWalletModal] = useState(false);
+
+  const handleStartWriting = () => {
+    if (connected && publicKey) {
+      router.push('/editor');
+    } else {
+      setShowWalletModal(true);
+    }
+  };
+
+  // Redirect to editor when wallet connects
+  useEffect(() => {
+    if (connected && publicKey && showWalletModal) {
+      setShowWalletModal(false);
+      router.push('/editor');
+    }
+  }, [connected, publicKey, showWalletModal, router]);
 
   return (
     <>
@@ -53,12 +81,12 @@ export default function Home() {
               </p>
               
               <div className="mt-10 sm:mt-12 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
-                <Link
-                  href="/editor"
+                <button
+                  onClick={handleStartWriting}
                   className="w-full sm:w-auto rounded-md bg-white px-6 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 transition shadow-lg"
                 >
                   {t('hero.startWriting')}
-                </Link>
+                </button>
                 <Link
                   href="/journal"
                   className="w-full sm:w-auto inline-flex items-center justify-center text-sm font-medium text-white hover:text-white/80 transition border border-white/50 rounded-md px-6 py-2.5 backdrop-blur-sm"
@@ -66,6 +94,30 @@ export default function Home() {
                   {t('hero.viewJournal')}
                 </Link>
               </div>
+              
+              {/* Wallet Modal */}
+              {showWalletModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                  <div className="relative bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+                    <button
+                      onClick={() => setShowWalletModal(false)}
+                      className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition"
+                      aria-label="Fechar"
+                    >
+                      ✕
+                    </button>
+                    <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                      {t('walletModal.title')}
+                    </h2>
+                    <p className="text-sm text-gray-600 mb-6">
+                      {t('walletModal.description')}
+                    </p>
+                    <div className="flex justify-center">
+                      <WalletMultiButton />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </section>

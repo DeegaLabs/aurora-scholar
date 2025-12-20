@@ -46,6 +46,10 @@
         "title": "Controle de Acesso",
         "description": "Publique publicamente ou compartilhe privativamente com expiração"
       }
+    },
+    "walletModal": {
+      "title": "Conectar Wallet",
+      "description": "Conecte sua wallet para começar a escrever."
     }
   },
   "editor": {

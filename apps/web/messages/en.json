@@ -112,6 +112,10 @@
       "github": "GitHub",
       "solana": "Solana",
       "documentation": "Documentation"
+    },
+    "walletModal": {
+      "title": "Connect Wallet",
+      "description": "Connect your wallet to start writing."
     }
   },
   "editor": {
@@ -198,6 +202,10 @@
     "selectWallet": "Select Wallet",
     "noWallet": "No wallet found",
     "installPhantom": "Install Phantom"
+  },
+  "walletModal": {
+    "title": "Connect Wallet",
+    "description": "Connect your wallet to start writing."
   },
   "errors": {
     "walletRequired": "Please connect your wallet to continue",

@@ -112,6 +112,10 @@
       "github": "GitHub",
       "solana": "Solana",
       "documentation": "Documentação"
+    },
+    "walletModal": {
+      "title": "Conectar Wallet",
+      "description": "Conecte sua wallet para começar a escrever."
     }
   },
   "editor": {
