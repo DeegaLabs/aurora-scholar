@@ -5,19 +5,17 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Solana](https://img.shields.io/badge/Built%20on-Solana-14F213)](https://solana.com)
 
-## 🎥 Demo Video
+## 🎥 Demo Video & Pitch
 
-Watch the full demo and walkthrough of Aurora Scholar:
+Watch the 3-minute demo and pitch of Aurora Scholar:
 
 <div align="center">
 
-[![Aurora Scholar Demo](https://img.youtube.com/vi/YOUR_VIDEO_ID/maxresdefault.jpg)](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)
+[![Aurora Scholar Demo & Pitch](https://img.youtube.com/vi/YLHVdJ19MwY/maxresdefault.jpg)](https://youtu.be/YLHVdJ19MwY)
 
-*Click the image above or [watch on YouTube](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)*
+*Click the image above or [watch on YouTube](https://youtu.be/YLHVdJ19MwY)*
 
 </div>
-
-> **Note:** Replace `YOUR_VIDEO_ID` with your actual YouTube video ID in the README.md file.
 
 ## 🔗 Smart Contract (Devnet)
 
@@ -179,7 +177,7 @@ Contributions are welcome! Please open an issue or pull request.
 - [Smart Contract (Devnet)](https://explorer.solana.com/address/HoRNS4q7T69m6YHYx8Qsg4kAffwNNu8R25XpReZnvWAe?cluster=devnet)
 - [Solana Explorer](https://explorer.solana.com)
 - [Arweave](https://www.arweave.org)
-- [Demo Video](https://www.youtube.com/watch?v=YOUR_VIDEO_ID) (YouTube)
+- [Demo Video & Pitch](https://youtu.be/YLHVdJ19MwY) (YouTube - 3 minutes)
 
 ---
 
