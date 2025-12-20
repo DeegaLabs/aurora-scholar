@@ -274,7 +274,12 @@
     "filters": {
       "all": "All",
       "date": "Date",
-      "author": "Author"
+      "author": "Author",
+      "search": "Search",
+      "searchPlaceholder": "Title or author…",
+      "sort": "Sort",
+      "newest": "Newest",
+      "oldest": "Oldest"
     },
     "noArticles": "No articles found",
     "viewArticle": "View Article",
@@ -304,5 +309,54 @@
   "walletModal": {
     "title": "Connect Wallet",
     "description": "Connect your wallet to start writing."
+  },
+  "dashboard": {
+    "title": "My Dashboard",
+    "subtitle": "Your public articles (on-chain) and privacy controls",
+    "status": "Status",
+    "created": "Created",
+    "id": "ID",
+    "open": "Open",
+    "openAsViewer": "Open as viewer",
+    "manageAccess": "Manage Access",
+    "loading": "Loading your articles…",
+    "noPublicArticles": "No public articles found for your wallet.",
+    "linkCopied": "Link copied.",
+    "copyLinkManually": "Copy the link manually.",
+    "loadError": "Failed to load your articles.",
+    "grants": {
+      "title": "Grants",
+      "loadError": "Failed to load grants.",
+      "invalidArticle": "Invalid article.",
+      "viewerWalletRequired": "Please provide the viewer wallet.",
+      "granted": "Access granted.",
+      "grantError": "Failed to grant access.",
+      "revoked": "Access revoked.",
+      "revokeError": "Failed to revoke."
+    },
+    "accessModal": {
+      "title": "Private (access control)",
+      "close": "Close",
+      "privateLink": "Private link (viewer)",
+      "copy": "Copy",
+      "viewerWallet": "Viewer wallet",
+      "viewerWalletPlaceholder": "Base58 (e.g.: 4U8U3o...)",
+      "duration": "Duration",
+      "duration7d": "7 days",
+      "duration30d": "30 days",
+      "durationUnlimited": "Unlimited",
+      "refresh": "Refresh",
+      "grant": "Grant",
+      "grantedAccess": "Granted access",
+      "noGrants": "No grants for this article.",
+      "revoked": "revoked",
+      "expires": "expires",
+      "unlimited": "unlimited",
+      "revoke": "Revoke"
+    },
+    "verification": {
+      "title": "Verification",
+      "placeholder": "Verification is still a placeholder in the backend."
+    }
   }
 }

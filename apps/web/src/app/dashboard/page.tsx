@@ -2,10 +2,13 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useWallet } from '@solana/wallet-adapter-react';
+import { useTranslations } from 'next-intl';
 import { ArticleCard } from '@/components/journal/ArticleCard';
 import { SearchFilter, type JournalFilters } from '@/components/journal/SearchFilter';
 import { WalletInfo } from '@/components/wallet/WalletInfo';
+import { SettingsButton } from '@/components/editor/SettingsButton';
 import { useToast } from '@/components/ui/toast';
 import { getAuthHeader } from '@/lib/auth/api';
 
@@ -40,6 +43,8 @@ import { getApiBaseUrl } from '@/lib/api/baseUrl';
 export default function DashboardPage() {
   const { publicKey } = useWallet();
   const { toast } = useToast();
+  const t = useTranslations('dashboard');
+  const tEditor = useTranslations('editor');
 
   const [data, setData] = useState<ApiListResponse | null>(null);
   const [dbArticles, setDbArticles] = useState<MyDbArticle[]>([]);
@@ -57,11 +62,11 @@ export default function DashboardPage() {
     const url = `${window.location.origin}/private/${articleId}`;
     try {
       await navigator.clipboard.writeText(url);
-      toast({ type: 'success', title: 'Link', message: 'Link copiado.' });
+      toast({ type: 'success', title: t('accessModal.privateLink'), message: t('linkCopied') });
     } catch {
       // Fallback
-      const ok = window.prompt('Copie o link:', url);
-      if (ok !== null) toast({ type: 'info', title: 'Link', message: 'Copie o link manualmente.' });
+      const ok = window.prompt(`${t('accessModal.copy')}:`, url);
+      if (ok !== null) toast({ type: 'info', title: t('accessModal.privateLink'), message: t('copyLinkManually') });
     }
   }
 
@@ -95,7 +100,7 @@ export default function DashboardPage() {
           setDbArticles(items);
         }
       } catch (e: any) {
-        if (!cancelled) setError(e?.message || 'Falha ao carregar seus artigos.');
+        if (!cancelled) setError(e?.message || t('loadError'));
       } finally {
         if (!cancelled) setIsLoading(false);
       }
@@ -116,7 +121,7 @@ export default function DashboardPage() {
       if (!res.ok) throw new Error(json?.message || json?.error || `HTTP ${res.status}`);
       setGrants(json?.data?.items || []);
     } catch (e: any) {
-      toast({ type: 'error', title: 'Grants', message: e?.message || 'Falha ao carregar grants.' });
+      toast({ type: 'error', title: t('grants.title'), message: e?.message || t('grants.loadError') });
     }
   }
 
@@ -127,8 +132,8 @@ export default function DashboardPage() {
   }, [accessModalArticle?.id]);
 
   async function handleCreateGrant(articleId: string) {
-    if (!articleId) return toast({ type: 'error', title: 'Grants', message: 'Artigo inválido.' });
-    if (!viewerWallet.trim()) return toast({ type: 'error', title: 'Grants', message: 'Informe a wallet do viewer.' });
+    if (!articleId) return toast({ type: 'error', title: t('grants.title'), message: t('grants.invalidArticle') });
+    if (!viewerWallet.trim()) return toast({ type: 'error', title: t('grants.title'), message: t('grants.viewerWalletRequired') });
     try {
       setIsGrantBusy(true);
       const res = await fetch(`${getApiBaseUrl()}/api/access-control/grants`, {
@@ -138,11 +143,11 @@ export default function DashboardPage() {
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.message || json?.error || `HTTP ${res.status}`);
-      toast({ type: 'success', title: 'Grants', message: 'Acesso concedido.' });
+      toast({ type: 'success', title: t('grants.title'), message: t('grants.granted') });
       setViewerWallet('');
       await refreshGrants(articleId);
     } catch (e: any) {
-      toast({ type: 'error', title: 'Grants', message: e?.message || 'Falha ao conceder acesso.' });
+      toast({ type: 'error', title: t('grants.title'), message: e?.message || t('grants.grantError') });
     } finally {
       setIsGrantBusy(false);
     }
@@ -158,10 +163,10 @@ export default function DashboardPage() {
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.message || json?.error || `HTTP ${res.status}`);
-      toast({ type: 'success', title: 'Grants', message: 'Acesso revogado.' });
+      toast({ type: 'success', title: t('grants.title'), message: t('grants.revoked') });
       await refreshGrants(articleId);
     } catch (e: any) {
-      toast({ type: 'error', title: 'Grants', message: e?.message || 'Falha ao revogar.' });
+      toast({ type: 'error', title: t('grants.title'), message: e?.message || t('grants.revokeError') });
     } finally {
       setIsGrantBusy(false);
     }
@@ -195,11 +200,24 @@ export default function DashboardPage() {
                 className="object-contain flex-shrink-0"
               />
               <div>
-                <h1 className="text-sm font-semibold text-gray-900">Meu Dashboard</h1>
-                <p className="text-xs text-gray-500">Seus artigos públicos (on-chain) e controles de privacidade</p>
+                <h1 className="text-sm font-semibold text-gray-900">{t('title')}</h1>
+                <p className="text-xs text-gray-500">{t('subtitle')}</p>
               </div>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 flex-shrink-0">
+              <Link
+                href="/editor"
+                className="px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition"
+              >
+                {tEditor('title')}
+              </Link>
+              <Link
+                href="/journal"
+                className="px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition"
+              >
+                {tEditor('journal')}
+              </Link>
+              <SettingsButton />
               <WalletInfo />
             </div>
           </div>
@@ -216,10 +234,10 @@ export default function DashboardPage() {
                     <div className="min-w-0">
                       <h3 className="text-sm font-semibold text-gray-900 truncate">{a.title || 'Untitled'}</h3>
                       <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500">
-                        <span>Status: {a.status}</span>
-                        <span>Criado: {new Date(a.createdAt).toLocaleDateString()}</span>
+                        <span>{t('status')}: {a.status}</span>
+                        <span>{t('created')}: {new Date(a.createdAt).toLocaleDateString()}</span>
                         <span className="font-mono">
-                          ID: {a.id.slice(0, 6)}…{a.id.slice(-6)}
+                          {t('id')}: {a.id.slice(0, 6)}…{a.id.slice(-6)}
                         </span>
                       </div>
                     </div>
@@ -228,9 +246,9 @@ export default function DashboardPage() {
                       <a
                         href={`/private/${a.id}`}
                         className="px-3 py-1.5 text-xs font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-white"
-                        title="Abrir como viewer"
+                        title={t('openAsViewer')}
                       >
-                        Abrir
+                        {t('open')}
                       </a>
                       <button
                         onClick={() => {
@@ -241,7 +259,7 @@ export default function DashboardPage() {
                         }}
                         className="px-3 py-1.5 text-xs font-medium text-white bg-gray-900 rounded-md hover:bg-gray-800"
                       >
-                        Gerenciar acesso
+                        {t('manageAccess')}
                       </button>
                     </div>
                   </div>
@@ -253,11 +271,11 @@ export default function DashboardPage() {
           <SearchFilter value={filters} onChange={setFilters} authors={[]} />
 
           {isLoading ? (
-            <div className="text-sm text-gray-600">Carregando seus artigos…</div>
+            <div className="text-sm text-gray-600">{t('loading')}</div>
           ) : error ? (
             <div className="border border-red-200 bg-red-50 text-red-800 rounded-lg px-4 py-3 text-sm">{error}</div>
           ) : filtered.length === 0 ? (
-            <div className="text-sm text-gray-600">Nenhum artigo público encontrado para sua wallet.</div>
+            <div className="text-sm text-gray-600">{t('noPublicArticles')}</div>
           ) : (
             <div className="space-y-3">
               {filtered.map((a) => (
@@ -268,7 +286,7 @@ export default function DashboardPage() {
                   timestamp={a.timestamp}
                   contentHash={a.contentHash}
                   arweaveId={a.arweaveId}
-                  onVerify={() => toast({ type: 'info', title: 'Verificação', message: 'Verificação ainda é placeholder no backend.' })}
+                  onVerify={() => toast({ type: 'info', title: t('verification.title'), message: t('verification.placeholder') })}
                 />
               ))}
             </div>
@@ -281,21 +299,21 @@ export default function DashboardPage() {
           <div className="w-full max-w-2xl bg-white rounded-lg shadow-xl max-h-[90vh] overflow-y-auto">
             <div className="border-b border-gray-200 px-6 py-4 flex items-start justify-between gap-4">
               <div className="min-w-0">
-                <h2 className="text-sm font-semibold text-gray-900 truncate">Privado (controle de acesso)</h2>
+                <h2 className="text-sm font-semibold text-gray-900 truncate">{t('accessModal.title')}</h2>
                 <p className="mt-1 text-xs text-gray-600 truncate">{accessModalArticle.title || 'Untitled'}</p>
               </div>
               <button
                 onClick={() => setAccessModalArticle(null)}
                 className="px-3 py-1.5 text-xs font-medium border border-gray-300 rounded-md hover:bg-gray-50"
               >
-                Fechar
+                {t('accessModal.close')}
               </button>
             </div>
 
             <div className="px-6 py-4 space-y-4">
               <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <div className="text-xs font-semibold text-gray-700">Link privado (viewer)</div>
+                  <div className="text-xs font-semibold text-gray-700">{t('accessModal.privateLink')}</div>
                   <div className="mt-0.5 text-xs text-gray-600 font-mono truncate">
                     {typeof window !== 'undefined'
                       ? `${window.location.origin}/private/${accessModalArticle.id}`
@@ -306,31 +324,31 @@ export default function DashboardPage() {
                   onClick={() => copyPrivateLink(accessModalArticle.id)}
                   className="px-3 py-1.5 text-xs font-medium border border-gray-300 rounded-md hover:bg-white"
                 >
-                  Copiar
+                  {t('accessModal.copy')}
                 </button>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Viewer wallet</label>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">{t('accessModal.viewerWallet')}</label>
                   <input
                     className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                     value={viewerWallet}
                     onChange={(e) => setViewerWallet(e.target.value)}
-                    placeholder="Base58 (ex: 4U8U3o...)"
+                    placeholder={t('accessModal.viewerWalletPlaceholder')}
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Duração</label>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">{t('accessModal.duration')}</label>
                   <select
                     className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white"
                     value={expiresIn}
                     onChange={(e) => setExpiresIn(e.target.value as any)}
                   >
                     <option value="24h">24h</option>
-                    <option value="7d">7 dias</option>
-                    <option value="30d">30 dias</option>
-                    <option value="unlimited">Ilimitado</option>
+                    <option value="7d">{t('accessModal.duration7d')}</option>
+                    <option value="30d">{t('accessModal.duration30d')}</option>
+                    <option value="unlimited">{t('accessModal.durationUnlimited')}</option>
                   </select>
                 </div>
               </div>
@@ -341,21 +359,21 @@ export default function DashboardPage() {
                   className="px-3 py-2 text-sm font-medium border border-gray-300 rounded-md hover:bg-gray-50"
                   disabled={isGrantBusy}
                 >
-                  Atualizar
+                  {t('accessModal.refresh')}
                 </button>
                 <button
                   onClick={() => handleCreateGrant(accessModalArticle.id)}
                   className="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={isGrantBusy}
                 >
-                  Conceder
+                  {t('accessModal.grant')}
                 </button>
               </div>
 
               <div className="border-t border-gray-200 pt-3">
-                <div className="text-xs font-semibold text-gray-700 mb-2">Acessos concedidos</div>
+                <div className="text-xs font-semibold text-gray-700 mb-2">{t('accessModal.grantedAccess')}</div>
                 {grants.length === 0 ? (
-                  <div className="text-sm text-gray-600">Nenhum grant para este artigo.</div>
+                  <div className="text-sm text-gray-600">{t('accessModal.noGrants')}</div>
                 ) : (
                   <div className="space-y-2">
                     {grants.map((g) => (
@@ -364,10 +382,10 @@ export default function DashboardPage() {
                           <div className="font-mono text-xs">{g.viewerWallet}</div>
                           <div className="text-xs text-gray-500">
                             {g.revokedAt
-                              ? 'revogado'
+                              ? t('accessModal.revoked')
                               : g.expiresAt
-                                ? `expira: ${new Date(g.expiresAt).toLocaleString()}`
-                                : 'ilimitado'}
+                                ? `${t('accessModal.expires')}: ${new Date(g.expiresAt).toLocaleString()}`
+                                : t('accessModal.unlimited')}
                           </div>
                         </div>
                         {!g.revokedAt ? (
@@ -376,7 +394,7 @@ export default function DashboardPage() {
                             className="px-3 py-1.5 text-xs font-medium border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                             disabled={isGrantBusy}
                           >
-                            Revogar
+                            {t('accessModal.revoke')}
                           </button>
                         ) : null}
                       </div>

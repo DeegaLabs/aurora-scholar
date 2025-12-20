@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 
 export interface JournalFilters {
   query: string;
@@ -19,41 +20,42 @@ function uniq(xs: string[]) {
 }
 
 export function SearchFilter({ value, onChange, authors = [] }: SearchFilterProps) {
+  const t = useTranslations('journal.filters');
   const authorOptions = useMemo(() => uniq(authors).sort(), [authors]);
 
   return (
     <div className="border border-gray-200 rounded-lg bg-white p-4">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div className="md:col-span-2">
-          <label className="block text-xs font-medium text-gray-700 mb-1">Buscar</label>
+          <label className="block text-xs font-medium text-gray-700 mb-1">{t('search')}</label>
           <input
             value={value.query}
             onChange={(e) => onChange({ ...value, query: e.target.value })}
-            placeholder="Título ou autor…"
+            placeholder={t('searchPlaceholder')}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">Ordenação</label>
+          <label className="block text-xs font-medium text-gray-700 mb-1">{t('sort')}</label>
           <select
             value={value.sort}
             onChange={(e) => onChange({ ...value, sort: e.target.value as JournalFilters['sort'] })}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white"
           >
-            <option value="newest">Mais recentes</option>
-            <option value="oldest">Mais antigos</option>
+            <option value="newest">{t('newest')}</option>
+            <option value="oldest">{t('oldest')}</option>
           </select>
         </div>
 
         <div className="md:col-span-3">
-          <label className="block text-xs font-medium text-gray-700 mb-1">Autor</label>
+          <label className="block text-xs font-medium text-gray-700 mb-1">{t('author')}</label>
           <select
             value={value.author}
             onChange={(e) => onChange({ ...value, author: e.target.value })}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white"
           >
-            <option value="">Todos</option>
+            <option value="">{t('all')}</option>
             {authorOptions.map((a) => (
               <option key={a} value={a}>
                 {a}

@@ -274,7 +274,12 @@
     "filters": {
       "all": "Todos",
       "date": "Data",
-      "author": "Autor"
+      "author": "Autor",
+      "search": "Buscar",
+      "searchPlaceholder": "Título ou autor…",
+      "sort": "Ordenação",
+      "newest": "Mais recentes",
+      "oldest": "Mais antigos"
     },
     "noArticles": "Nenhum artigo encontrado",
     "viewArticle": "Ver Artigo",
@@ -300,6 +305,59 @@
     "selectWallet": "Selecionar Carteira",
     "noWallet": "Nenhuma carteira encontrada",
     "installPhantom": "Instalar Phantom"
+  },
+  "walletModal": {
+    "title": "Conectar Carteira",
+    "description": "Conecte sua carteira para começar a escrever."
+  },
+  "dashboard": {
+    "title": "Meu Dashboard",
+    "subtitle": "Seus artigos públicos (on-chain) e controles de privacidade",
+    "status": "Status",
+    "created": "Criado",
+    "id": "ID",
+    "open": "Abrir",
+    "openAsViewer": "Abrir como viewer",
+    "manageAccess": "Gerenciar acesso",
+    "loading": "Carregando seus artigos…",
+    "noPublicArticles": "Nenhum artigo público encontrado para sua wallet.",
+    "linkCopied": "Link copiado.",
+    "copyLinkManually": "Copie o link manualmente.",
+    "loadError": "Falha ao carregar seus artigos.",
+    "grants": {
+      "title": "Grants",
+      "loadError": "Falha ao carregar grants.",
+      "invalidArticle": "Artigo inválido.",
+      "viewerWalletRequired": "Informe a wallet do viewer.",
+      "granted": "Acesso concedido.",
+      "grantError": "Falha ao conceder acesso.",
+      "revoked": "Acesso revogado.",
+      "revokeError": "Falha ao revogar."
+    },
+    "accessModal": {
+      "title": "Privado (controle de acesso)",
+      "close": "Fechar",
+      "privateLink": "Link privado (viewer)",
+      "copy": "Copiar",
+      "viewerWallet": "Viewer wallet",
+      "viewerWalletPlaceholder": "Base58 (ex: 4U8U3o...)",
+      "duration": "Duração",
+      "duration7d": "7 dias",
+      "duration30d": "30 dias",
+      "durationUnlimited": "Ilimitado",
+      "refresh": "Atualizar",
+      "grant": "Conceder",
+      "grantedAccess": "Acessos concedidos",
+      "noGrants": "Nenhum grant para este artigo.",
+      "revoked": "revogado",
+      "expires": "expira",
+      "unlimited": "ilimitado",
+      "revoke": "Revogar"
+    },
+    "verification": {
+      "title": "Verificação",
+      "placeholder": "Verificação ainda é placeholder no backend."
+    }
   },
   "errors": {
     "walletRequired": "Por favor conecte sua carteira para continuar",
