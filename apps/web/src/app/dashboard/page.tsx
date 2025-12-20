@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useTranslations } from 'next-intl';
 import { ArticleCard } from '@/components/journal/ArticleCard';
+import { ArticleViewModal } from '@/components/journal/ArticleViewModal';
 import { SearchFilter, type JournalFilters } from '@/components/journal/SearchFilter';
 import { WalletInfo } from '@/components/wallet/WalletInfo';
 import { SettingsButton } from '@/components/editor/SettingsButton';
@@ -56,6 +57,7 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<JournalFilters>({ query: '', author: '', sort: 'newest' });
+  const [viewingArticle, setViewingArticle] = useState<typeof filtered[0] | null>(null);
 
   async function copyPrivateLink(articleId: string) {
     if (!articleId) return;
@@ -408,6 +410,20 @@ export default function DashboardPage() {
           </div>
         </div>
       ) : null}
+
+      {/* Article View Modal */}
+      {viewingArticle && (
+        <ArticleViewModal
+          isOpen={!!viewingArticle}
+          onClose={() => setViewingArticle(null)}
+          arweaveId={viewingArticle.arweaveId}
+          title={viewingArticle.title}
+          author={viewingArticle.author}
+          timestamp={viewingArticle.timestamp}
+          contentHash={viewingArticle.contentHash}
+          onVerify={() => toast({ type: 'info', title: t('verification.title'), message: t('verification.placeholder') })}
+        />
+      )}
     </div>
   );
 }

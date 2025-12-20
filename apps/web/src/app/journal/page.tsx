@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { SearchFilter, type JournalFilters } from '@/components/journal/SearchFilter';
 import { ArticleCard } from '@/components/journal/ArticleCard';
+import { ArticleViewModal } from '@/components/journal/ArticleViewModal';
 import { WalletInfo } from '@/components/wallet/WalletInfo';
 import { SettingsButton } from '@/components/editor/SettingsButton';
 import { useWallet } from '@solana/wallet-adapter-react';
@@ -37,6 +38,7 @@ export default function JournalPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<JournalFilters>({ query: '', author: '', sort: 'newest' });
+  const [viewingArticle, setViewingArticle] = useState<typeof filtered[0] | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -145,6 +147,7 @@ export default function JournalPage() {
                   timestamp={a.timestamp}
                   contentHash={a.contentHash}
                   arweaveId={a.arweaveId}
+                  onView={() => setViewingArticle(a)}
                   onVerify={async () => {
                     try {
                       const res = await fetch(`${getApiBaseUrl()}/api/articles/${encodeURIComponent(a.arweaveId)}/verify`, {
@@ -174,6 +177,40 @@ export default function JournalPage() {
           )}
         </div>
       </main>
+
+      {/* Article View Modal */}
+      {viewingArticle && (
+        <ArticleViewModal
+          isOpen={!!viewingArticle}
+          onClose={() => setViewingArticle(null)}
+          arweaveId={viewingArticle.arweaveId}
+          title={viewingArticle.title}
+          author={viewingArticle.author}
+          timestamp={viewingArticle.timestamp}
+          contentHash={viewingArticle.contentHash}
+          onVerify={async () => {
+            try {
+              const res = await fetch(`${getApiBaseUrl()}/api/articles/${encodeURIComponent(viewingArticle.arweaveId)}/verify`, {
+                method: 'POST',
+              });
+              const json = await res.json();
+              if (!res.ok) throw new Error(json?.message || json?.error || `HTTP ${res.status}`);
+              const verified = Boolean(json?.data?.verified);
+              toast({
+                type: verified ? 'success' : 'error',
+                title: verified ? t('verified') : t('notVerified'),
+                message: String(json?.data?.message || (verified ? t('verification.ok') : t('verification.failed'))),
+              });
+            } catch (e: any) {
+              toast({
+                type: 'error',
+                title: t('verification.title'),
+                message: e?.message || t('verification.verifyError'),
+              });
+            }
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -148,10 +148,17 @@ export class StorageService {
   async getContent(transactionId: string): Promise<any> {
     try {
       // Fetch data from Arweave gateway
-      const response = await fetch(`${this.getGatewayUrl()}/${transactionId}`);
+      const response = await fetch(`${this.getGatewayUrl()}/${transactionId}`, {
+        headers: {
+          'Accept': 'application/json, text/plain, */*',
+        },
+      });
       
       if (!response.ok) {
-        throw new Error(`Failed to fetch content: ${response.statusText}`);
+        if (response.status === 404) {
+          throw new Error(`Article not found on Arweave. It may still be processing. Transaction ID: ${transactionId}`);
+        }
+        throw new Error(`Failed to fetch content: ${response.status} ${response.statusText}`);
       }
 
       const contentType = response.headers.get('content-type');
@@ -160,8 +167,21 @@ export class StorageService {
         return await response.json();
       }
 
-      return await response.text();
+      const text = await response.text();
+      // Try to parse as JSON if it looks like JSON
+      if (text.trim().startsWith('{') || text.trim().startsWith('[')) {
+        try {
+          return JSON.parse(text);
+        } catch {
+          // If parsing fails, return as text
+        }
+      }
+
+      return text;
     } catch (error: any) {
+      if (error.message?.includes('not found') || error.message?.includes('404')) {
+        throw error; // Re-throw with original message
+      }
       throw new Error(`Failed to get content: ${error.message}`);
     }
   }

@@ -326,6 +326,16 @@
     "notVerified": "Not verified",
     "author": "Author",
     "publishedAt": "Published",
+    "card": {
+      "untitled": "Untitled",
+      "author": "Author",
+      "date": "Date",
+      "hash": "Hash",
+      "download": "Download",
+      "downloadTitle": "Download from Arweave",
+      "verify": "Verify",
+      "verifyTitle": "Verify authenticity"
+    },
     "verification": {
       "title": "Verification",
       "ok": "OK",
@@ -345,6 +355,22 @@
       "title": "Article Preview",
       "declaredIntuition": "Declared Intuition (Layer 1)",
       "noContent": "No content yet...",
+      "close": "Close"
+    },
+    "view": {
+      "title": "Article Details",
+      "loading": "Loading article...",
+      "loadError": "Failed to load article content.",
+      "author": "Author",
+      "publishedAt": "Published",
+      "contentHash": "Content Hash",
+      "intuitionHash": "Intuition Hash",
+      "aiScope": "AI Scope",
+      "arweaveId": "Arweave ID",
+      "declaredIntuition": "Declared Intuition (Layer 1)",
+      "content": "Content",
+      "download": "Download",
+      "verify": "Verify",
       "close": "Close"
     }
   },

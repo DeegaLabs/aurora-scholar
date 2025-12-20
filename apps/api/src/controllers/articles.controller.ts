@@ -321,6 +321,54 @@ export const publishArticle = asyncHandler(
   }
 );
 
+// Get article content from Arweave (public endpoint)
+export const getArticleContent = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { id } = req.params; // arweaveId
+
+    if (!id) throw createError('Arweave ID is required', 400);
+
+    try {
+      // Fetch article JSON from Arweave
+      const ar = await storageService.getContent(id);
+      if (!ar || typeof ar !== 'object') throw createError('Invalid Arweave payload', 400);
+
+      // Expected payload shape from our uploader:
+      // { content, title, declaredIntuition, timestamp, version, author, contentHash, intuitionHash, aiScope, isPublic, encrypted }
+      const content = String((ar as any).content || '');
+      const declaredIntuition = String((ar as any).declaredIntuition || '');
+      const title = String((ar as any).title || '');
+      const author = String((ar as any).author || '');
+      const aiScope = String((ar as any).aiScope || '');
+      const isPublic = Boolean((ar as any).isPublic ?? true);
+      const timestamp = (ar as any).timestamp ? Number((ar as any).timestamp) : null;
+      const contentHash = (ar as any).contentHash ? String((ar as any).contentHash) : null;
+      const intuitionHash = (ar as any).intuitionHash ? String((ar as any).intuitionHash) : null;
+
+      res.json({
+        success: true,
+        data: {
+          title,
+          content,
+          declaredIntuition,
+          author,
+          aiScope,
+          isPublic,
+          timestamp,
+          contentHash,
+          intuitionHash,
+          arweaveId: id,
+        },
+      });
+    } catch (error: any) {
+      if (error.message?.includes('Failed to fetch content')) {
+        throw createError('Article not found on Arweave. It may still be processing.', 404);
+      }
+      throw error;
+    }
+  }
+);
+
 export const verifyArticle = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params; // arweaveId (journal) OR DB id (fallback)

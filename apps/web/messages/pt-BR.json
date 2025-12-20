@@ -326,6 +326,16 @@
     "notVerified": "Não verificado",
     "author": "Autor",
     "publishedAt": "Publicado",
+    "card": {
+      "untitled": "Sem título",
+      "author": "Autor",
+      "date": "Data",
+      "hash": "Hash",
+      "download": "Download",
+      "downloadTitle": "Baixar do Arweave",
+      "verify": "Verificar",
+      "verifyTitle": "Verificar autenticidade"
+    },
     "verification": {
       "title": "Verificação",
       "ok": "OK",
@@ -345,6 +355,22 @@
       "title": "Visualização do Artigo",
       "declaredIntuition": "Intuição Declarada (Camada 1)",
       "noContent": "Ainda não há conteúdo...",
+      "close": "Fechar"
+    },
+    "view": {
+      "title": "Detalhes do Artigo",
+      "loading": "Carregando artigo...",
+      "loadError": "Falha ao carregar conteúdo do artigo.",
+      "author": "Autor",
+      "publishedAt": "Publicado",
+      "contentHash": "Hash do Conteúdo",
+      "intuitionHash": "Hash da Intuição",
+      "aiScope": "Escopo da IA",
+      "arweaveId": "ID do Arweave",
+      "declaredIntuition": "Intuição Declarada (Camada 1)",
+      "content": "Conteúdo",
+      "download": "Download",
+      "verify": "Verificar",
       "close": "Fechar"
     }
   },

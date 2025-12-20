@@ -7,6 +7,7 @@ import {
   publishArticle,
   verifyArticle,
   preparePublish,
+  getArticleContent,
 } from '../controllers/articles.controller';
 
 export const articlesRouter: Router = Router();
@@ -66,6 +67,26 @@ articlesRouter.get('/', getArticles);
  *         description: Article not found
  */
 articlesRouter.get('/:id', getArticleById);
+
+/**
+ * @swagger
+ * /api/articles/{arweaveId}/content:
+ *   get:
+ *     summary: Get article content from Arweave
+ *     tags: [Articles]
+ *     parameters:
+ *       - in: path
+ *         name: arweaveId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Article content
+ *       404:
+ *         description: Article not found
+ */
+articlesRouter.get('/:id/content', getArticleContent);
 
 /**
  * @swagger
