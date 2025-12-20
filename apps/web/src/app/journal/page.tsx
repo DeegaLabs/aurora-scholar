@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import Image from 'next/image';
 import { SearchFilter, type JournalFilters } from '@/components/journal/SearchFilter';
 import { ArticleCard } from '@/components/journal/ArticleCard';
-import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { WalletInfo } from '@/components/wallet/WalletInfo';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useToast } from '@/components/ui/toast';
 
@@ -80,29 +81,25 @@ export default function JournalPage() {
   }, [items, filters]);
 
   return (
-    <div className="min-h-screen bg-white">
-      <header className="border-b border-gray-200 bg-white sticky top-0 z-40">
+    <div className="min-h-screen bg-white flex flex-col">
+      <header className="border-b border-gray-200 bg-white sticky top-0 z-40 flex-shrink-0">
         <div className="w-full px-4 sm:px-6 lg:px-8">
-          <div className="h-16 flex items-center justify-between">
+          <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-white border border-gray-300 flex items-center justify-center">
-                <span className="text-xs font-semibold text-gray-700">AS</span>
-              </div>
+              <Image
+                src="/logo-mini.png"
+                alt="Aurora Scholar"
+                width={32}
+                height={32}
+                className="object-contain flex-shrink-0"
+              />
               <div>
                 <h1 className="text-sm font-semibold text-gray-900">On-Chain Journal</h1>
                 <p className="text-xs text-gray-500">Artigos públicos publicados no Solana + Arweave</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
-              {connected ? (
-                <a href="/dashboard" className="text-sm text-gray-700 hover:text-gray-900">
-                  Meu dashboard
-                </a>
-              ) : null}
-              <a href="/editor" className="text-sm text-gray-700 hover:text-gray-900">
-                Editor
-              </a>
-              <LanguageSwitcher />
+              <WalletInfo />
             </div>
           </div>
         </div>

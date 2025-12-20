@@ -1,26 +1,22 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
-import dynamic from 'next/dynamic';
+import Image from 'next/image';
+import Link from 'next/link';
 import { Editor } from '@/components/editor/Editor';
 import { AiGuidancePanel } from '@/components/editor/AiGuidancePanel';
 import { PublishModal } from '@/components/editor/PublishModal';
 import { PreviewModal } from '@/components/editor/PreviewModal';
 import { AiChatModal } from '@/components/editor/AiChatModal';
 import { DeclaredSources, Source } from '@/components/editor/DeclaredSources';
-import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { ExpandableSideCard } from '@/components/editor/ExpandableSideCard';
+import { WalletInfo } from '@/components/wallet/WalletInfo';
 import { HelpWriteModal } from '@/components/editor/HelpWriteModal';
 import { SuggestStructureModal } from '@/components/editor/SuggestStructureModal';
 import { CheckCoherenceModal } from '@/components/editor/CheckCoherenceModal';
 import { RefinementMenu } from '@/components/editor/RefinementMenu';
 import { useWallet } from '@solana/wallet-adapter-react';
-
-// wallet-adapter-react-ui is not SSR-safe (its markup differs server vs client), so render it client-only.
-const WalletMultiButton = dynamic(
-  () => import('@solana/wallet-adapter-react-ui').then((m) => m.WalletMultiButton),
-  { ssr: false }
-);
 
 export default function EditorPage() {
   const t = useTranslations('editor');
@@ -39,6 +35,11 @@ export default function EditorPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [floatingButtonsEnabled, setFloatingButtonsEnabled] = useState(true);
+  const [sourcesExpanded, setSourcesExpanded] = useState(true);
+  const [studioExpanded, setStudioExpanded] = useState(true);
+  const titleInputRef = useRef<HTMLInputElement>(null);
+  const titleMeasureRef = useRef<HTMLSpanElement>(null);
+  const [titleWidth, setTitleWidth] = useState(200);
 
   // Auto-save to localStorage with debounce
   useEffect(() => {
@@ -98,6 +99,14 @@ export default function EditorPage() {
     localStorage.setItem('aurora-editor-floating-buttons', String(floatingButtonsEnabled));
   }, [floatingButtonsEnabled]);
 
+  // Measure title width
+  useEffect(() => {
+    if (titleMeasureRef.current) {
+      const width = titleMeasureRef.current.offsetWidth;
+      setTitleWidth(Math.max(200, width + 20));
+    }
+  }, [articleTitle]);
+
   const handleAddSource = (source: Source) => {
     setSources((prev) => [...prev, source]);
   };
@@ -128,117 +137,155 @@ export default function EditorPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-gray-100 flex flex-col">
       {/* Header */}
       <header className="border-b border-gray-200 bg-white sticky top-0 z-40 flex-shrink-0">
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
-              {/* Logo/Icon */}
-              <div className="w-8 h-8 rounded-full bg-white border border-gray-300 flex items-center justify-center flex-shrink-0">
-                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              {/* Title Input */}
-              <input
-                type="text"
-                value={articleTitle || ''}
-                onChange={(e) => setArticleTitle(e.target.value)}
-                placeholder="Untitled article"
-                className="w-64 px-2 py-1 text-lg font-medium text-gray-900 bg-transparent border-none outline-none focus:bg-gray-50 rounded focus:ring-1 focus:ring-gray-300"
-                maxLength={128}
+              {/* Logo */}
+              <Image
+                src="/logo-mini.png"
+                alt="Aurora Scholar"
+                width={32}
+                height={32}
+                className="object-contain flex-shrink-0"
               />
+              {/* Title Input - Expands with text */}
+              <div className="relative inline-block">
+                <span
+                  ref={titleMeasureRef}
+                  className="invisible absolute whitespace-pre text-lg font-medium px-2 py-1 pointer-events-none"
+                  aria-hidden="true"
+                >
+                  {articleTitle || 'Untitled article'}
+                </span>
+                <input
+                  ref={titleInputRef}
+                  type="text"
+                  value={articleTitle || ''}
+                  onChange={(e) => setArticleTitle(e.target.value)}
+                  placeholder="Untitled article"
+                  className="px-2 py-1 text-lg font-medium text-gray-900 bg-transparent border-none outline-none focus:bg-gray-50 rounded focus:ring-1 focus:ring-gray-300"
+                  style={{
+                    width: `${titleWidth}px`,
+                  }}
+                  maxLength={128}
+                />
+              </div>
             </div>
-            <div className="flex items-center gap-4">
-              <WalletMultiButton />
-              <LanguageSwitcher />
+            <div className="flex items-center gap-4 flex-shrink-0">
+              <Link
+                href="/dashboard"
+                className="px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition"
+              >
+                Dashboard
+              </Link>
+              <Link
+                href="/journal"
+                className="px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition"
+              >
+                Journal
+              </Link>
+              <WalletInfo />
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main Content - 3 Columns */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Left Column - Sources */}
-        <div className="w-80 border-r border-gray-200 bg-white flex flex-col overflow-hidden">
-          <div className="flex-1 overflow-y-auto p-4">
-            <div className="mb-4">
-              <div className="flex items-center gap-2 mb-2">
-                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <h2 className="text-sm font-semibold text-gray-900">Sources</h2>
-              </div>
-            </div>
+      {/* Main Content - 3 Suspended Cards */}
+      <div className="flex-1 flex gap-4 p-4 overflow-hidden">
+        {/* Left Card - Sources */}
+        <ExpandableSideCard
+          title="Fontes"
+          icon={
+            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          }
+          isExpanded={sourcesExpanded}
+          onToggle={() => setSourcesExpanded(!sourcesExpanded)}
+          position="left"
+        >
+          <div className="p-4">
             <DeclaredSources
               sources={sources}
               onAddSource={handleAddSource}
               onRemoveSource={handleRemoveSource}
             />
           </div>
-        </div>
+        </ExpandableSideCard>
 
-        {/* Center Column - Editor */}
-        <div className="flex-1 flex flex-col overflow-hidden bg-gray-50">
+        {/* Center Card - Editor */}
+        <div className="flex-1 flex flex-col overflow-hidden">
           <div className="flex-1 overflow-y-auto p-6">
-            {/* Main Editor */}
-            <div className="border border-gray-200 rounded-lg bg-white shadow-sm relative overflow-visible">
-              <Editor
-                content={content}
-                onChange={setContent}
-                placeholder={t('editorPlaceholder')}
-                floatingButtonsEnabled={floatingButtonsEnabled}
-                onHelpWrite={() => setIsHelpWriteModalOpen(true)}
-                onSuggestStructure={() => setIsSuggestStructureModalOpen(true)}
-                onCheckCoherence={() => setIsCheckCoherenceModalOpen(true)}
-                onMoreOptions={() => setIsRefinementMenuOpen(true)}
-              />
+            <div className="bg-white rounded-lg shadow-lg border border-gray-200 relative overflow-visible min-h-full flex flex-col">
+              <div className="flex-1">
+                <Editor
+                  content={content}
+                  onChange={setContent}
+                  placeholder={t('editorPlaceholder')}
+                  floatingButtonsEnabled={floatingButtonsEnabled}
+                  onHelpWrite={() => setIsHelpWriteModalOpen(true)}
+                  onSuggestStructure={() => setIsSuggestStructureModalOpen(true)}
+                  onCheckCoherence={() => setIsCheckCoherenceModalOpen(true)}
+                  onMoreOptions={() => setIsRefinementMenuOpen(true)}
+                />
+              </div>
               {/* Word count */}
               {content && (
                 <div className="border-t border-gray-200 px-6 py-2 text-xs text-gray-500">
                   {getWordCount(content)} words
                 </div>
               )}
+              {/* Footer - Save status and actions */}
+              <div className="border-t border-gray-200 px-6 py-3 flex items-center justify-end gap-4">
+                {/* Save indicator */}
+                <div className="flex items-center gap-2 text-xs text-gray-500">
+                  {isSaving ? (
+                    <>
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                      <span>Saving...</span>
+                    </>
+                  ) : lastSaved ? (
+                    <>
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span>Saved {lastSaved.toLocaleTimeString()}</span>
+                    </>
+                  ) : null}
+                </div>
+                <button
+                  onClick={handlePreview}
+                  disabled={!content.trim()}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {t('preview')}
+                </button>
+                <button
+                  onClick={handlePublish}
+                  disabled={!connected || !content.trim()}
+                  className="px-6 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                  title={!content.trim() ? 'Add content to publish' : !connected ? t('walletRequired') : ''}
+                >
+                  {t('publish')}
+                </button>
+              </div>
             </div>
-          </div>
-          
-          {/* Footer - Save status and actions */}
-          <div className="border-t border-gray-200 bg-white px-6 py-3 flex items-center justify-end gap-4">
-            {/* Save indicator */}
-            <div className="flex items-center gap-2 text-xs text-gray-500">
-              {isSaving ? (
-                <>
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                  <span>Saving...</span>
-                </>
-              ) : lastSaved ? (
-                <>
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span>Saved {lastSaved.toLocaleTimeString()}</span>
-                </>
-              ) : null}
-            </div>
-            <button
-              onClick={handlePreview}
-              disabled={!content.trim()}
-              className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {t('preview')}
-            </button>
-            <button
-              onClick={handlePublish}
-              disabled={!connected || !content.trim()}
-              className="px-6 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
-              title={!content.trim() ? 'Add content to publish' : !connected ? t('walletRequired') : ''}
-            >
-              {t('publish')}
-            </button>
           </div>
         </div>
 
-        {/* Right Column - AI Guidance */}
-        <div className="w-80 border-l border-gray-200 bg-white flex flex-col overflow-hidden">
+        {/* Right Card - Estúdio */}
+        <ExpandableSideCard
+          title="Estúdio"
+          icon={
+            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+          }
+          isExpanded={studioExpanded}
+          onToggle={() => setStudioExpanded(!studioExpanded)}
+          position="right"
+        >
           <AiGuidancePanel
             content={content}
             declaredIntuition={declaredIntuition}
@@ -247,7 +294,7 @@ export default function EditorPage() {
             floatingButtonsEnabled={floatingButtonsEnabled}
             onFloatingButtonsEnabledChange={setFloatingButtonsEnabled}
           />
-        </div>
+        </ExpandableSideCard>
       </div>
 
       {/* Publish Modal */}
