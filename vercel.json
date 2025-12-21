@@ -1,0 +1,7 @@
+{
+  "framework": "nextjs",
+  "installCommand": "corepack enable && corepack prepare pnpm@8.15.1 --activate && pnpm install --frozen-lockfile && pnpm --filter @aurora-scholar/sdk build",
+  "buildCommand": "pnpm --filter web build",
+  "outputDirectory": "apps/web/.next"
+}
+

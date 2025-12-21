@@ -88,3 +88,5 @@ temp/
 
 
 
+.vercel
+.env*.local

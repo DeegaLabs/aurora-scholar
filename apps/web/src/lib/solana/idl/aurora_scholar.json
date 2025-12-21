@@ -1,0 +1,299 @@
+{
+  "accounts": [
+    {
+      "discriminator": [
+        190,
+        223,
+        81,
+        111,
+        130,
+        251,
+        187,
+        202
+      ],
+      "name": "Article"
+    }
+  ],
+  "address": "HoRNS4q7T69m6YHYx8Qsg4kAffwNNu8R25XpReZnvWAe",
+  "errors": [
+    {
+      "code": 6000,
+      "msg": "You are not authorized to perform this action",
+      "name": "Unauthorized"
+    },
+    {
+      "code": 6001,
+      "msg": "Invalid content hash",
+      "name": "InvalidContentHash"
+    },
+    {
+      "code": 6002,
+      "msg": "Arweave ID too long (max 64 chars)",
+      "name": "ArweaveIdTooLong"
+    },
+    {
+      "code": 6003,
+      "msg": "Title too long (max 128 chars)",
+      "name": "TitleTooLong"
+    },
+    {
+      "code": 6004,
+      "msg": "AI scope too long (max 256 chars)",
+      "name": "AiScopeTooLong"
+    }
+  ],
+  "events": [
+    {
+      "discriminator": [
+        238,
+        179,
+        87,
+        158,
+        6,
+        100,
+        27,
+        216
+      ],
+      "name": "ArticlePublished"
+    },
+    {
+      "discriminator": [
+        67,
+        74,
+        163,
+        161,
+        188,
+        229,
+        136,
+        114
+      ],
+      "name": "VisibilityUpdated"
+    }
+  ],
+  "instructions": [
+    {
+      "accounts": [
+        {
+          "name": "article",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  114,
+                  116,
+                  105,
+                  99,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "author"
+              },
+              {
+                "kind": "arg",
+                "path": "content_hash"
+              }
+            ]
+          },
+          "writable": true
+        },
+        {
+          "name": "author",
+          "signer": true,
+          "writable": true
+        },
+        {
+          "address": "11111111111111111111111111111111",
+          "name": "system_program"
+        }
+      ],
+      "args": [
+        {
+          "name": "content_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "intuition_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "arweave_id",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "type": "string"
+        },
+        {
+          "name": "ai_scope",
+          "type": "string"
+        },
+        {
+          "name": "is_public",
+          "type": "bool"
+        }
+      ],
+      "discriminator": [
+        151,
+        40,
+        172,
+        108,
+        86,
+        138,
+        159,
+        171
+      ],
+      "name": "publish_article"
+    },
+    {
+      "accounts": [
+        {
+          "name": "article",
+          "writable": true
+        },
+        {
+          "name": "author",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "is_public",
+          "type": "bool"
+        }
+      ],
+      "discriminator": [
+        164,
+        181,
+        36,
+        151,
+        250,
+        65,
+        206,
+        17
+      ],
+      "name": "update_visibility"
+    }
+  ],
+  "metadata": {
+    "description": "Decentralized academic publishing on Solana",
+    "name": "aurora_scholar",
+    "spec": "0.1.0",
+    "version": "0.1.0"
+  },
+  "types": [
+    {
+      "name": "Article",
+      "type": {
+        "fields": [
+          {
+            "name": "author",
+            "type": "pubkey"
+          },
+          {
+            "name": "content_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "intuition_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "arweave_id",
+            "type": "string"
+          },
+          {
+            "name": "title",
+            "type": "string"
+          },
+          {
+            "name": "ai_scope",
+            "type": "string"
+          },
+          {
+            "name": "is_public",
+            "type": "bool"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ],
+        "kind": "struct"
+      }
+    },
+    {
+      "name": "ArticlePublished",
+      "type": {
+        "fields": [
+          {
+            "name": "author",
+            "type": "pubkey"
+          },
+          {
+            "name": "content_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          },
+          {
+            "name": "is_public",
+            "type": "bool"
+          }
+        ],
+        "kind": "struct"
+      }
+    },
+    {
+      "name": "VisibilityUpdated",
+      "type": {
+        "fields": [
+          {
+            "name": "article",
+            "type": "pubkey"
+          },
+          {
+            "name": "is_public",
+            "type": "bool"
+          }
+        ],
+        "kind": "struct"
+      }
+    }
+  ]
+}

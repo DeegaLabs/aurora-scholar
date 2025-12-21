@@ -1,8 +1,8 @@
 import { PublicKey, SystemProgram, TransactionInstruction } from '@solana/web3.js';
 
-import idl from '../../../../api/src/idl/aurora_scholar.json';
-
-export const AURORA_PROGRAM_ID = new PublicKey((idl as any).address);
+// Program ID hardcoded to avoid filesystem access during build
+// This is safe because the program ID is constant and public
+export const AURORA_PROGRAM_ID = new PublicKey('HoRNS4q7T69m6YHYx8Qsg4kAffwNNu8R25XpReZnvWAe');
 
 export function deriveArticlePda(author: PublicKey, contentHashBytes: Uint8Array) {
   return PublicKey.findProgramAddressSync(

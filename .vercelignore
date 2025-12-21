@@ -1,0 +1,12 @@
+test-ledger/
+node_modules/
+.next/
+dist/
+*.log
+.env.local
+.vercel/
+.git/
+packages/contracts/target/
+packages/contracts/.anchor/
+apps/api/
+packages/contracts/
